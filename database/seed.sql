@@ -1,0 +1,3 @@
+-- ErgoIntelligence | Dados de demonstração (fictícios) para a feira
+-- A implementar: cadastros mestres (empresa, setor, cargo, função, ambiente, posto,
+-- atividade, perguntas, opções, riscos, classificações, regras e recomendações).

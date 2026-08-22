@@ -1,0 +1,3 @@
+-- ErgoIntelligence | Modelo Físico do Banco de Dados
+-- Baseline: docs/modelo-logico/ErgoIntelligence_Modelo_Logico_Fundacao_MVP.pdf (v2.0)
+-- A implementar: CREATE TABLE, PK, FK, CHECK, UNIQUE e índices conforme o modelo lógico aprovado.
