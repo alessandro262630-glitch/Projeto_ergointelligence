@@ -6,8 +6,10 @@ Plataforma de Inteligência Ergonômica.
 
 Validar, por meio de uma aplicação funcional e interativa em feira, a hipótese central do produto: transformar respostas estruturadas de uma avaliação ergonômica em um resultado compreensível, rastreável e acionável, com classificação de riscos e recomendações vinculadas a regras determinísticas do sistema.
 
-## Tecnologias utilizadas
 
+
+
+## Tecnologias utilizadas
 - HTML, CSS e JavaScript puro (sem frameworks)
 - Supabase (PostgreSQL) como infraestrutura de persistência do MVP
 
