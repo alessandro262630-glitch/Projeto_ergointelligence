@@ -1,0 +1,31 @@
+/* ErgoIntelligence - Ajustes especificos da tela de Colaboradores.
+   Estrutura geral (cabecalho, tabela, modal, botoes) vem de global.css e
+   components.css; aqui ficam apenas particularidades desta pagina. */
+
+.colaboradores__filtros {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.colaboradores__filtro {
+  padding: 8px 14px;
+  border-radius: var(--raio-pequeno);
+  border: 1px solid var(--cor-borda);
+  background-color: var(--cor-superficie);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.colaboradores__filtro[aria-pressed="true"] {
+  background-color: var(--cor-navy);
+  border-color: var(--cor-navy);
+  color: var(--cor-texto-inverso);
+}
+
+.colaboradores__coluna-acoes {
+  width: 1%;
+  white-space: nowrap;
+}

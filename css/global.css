@@ -1,0 +1,148 @@
+/* ErgoIntelligence - Base visual do MVP.
+   Identidade: fundo claro, azul-marinho e verde/emerald, visual corporativo
+   B2B clean (ver docs/mvp/ErgoIntelligence_Consolidacao_MVP_Feira.docx). */
+
+:root {
+    --cor-fundo: #F5F7FA;
+    --cor-superficie: #FFFFFF;
+    --cor-borda: #E2E8F0;
+
+    --cor-navy: #0F2A4A;
+    --cor-navy-escuro: #0A1E36;
+    --cor-emerald: #10B981;
+    --cor-emerald-escuro: #0E9A6E;
+
+    --cor-texto: #1F2937;
+    --cor-texto-suave: #64748B;
+    --cor-texto-inverso: #FFFFFF;
+
+    --cor-perigo: #DC2626;
+    --cor-perigo-fundo: #FEE2E2;
+    --cor-sucesso: #0E9A6E;
+    --cor-sucesso-fundo: #D1FAE5;
+
+    --raio: 8px;
+    --raio-pequeno: 6px;
+    --sombra: 0 1px 3px rgba(15, 42, 74, 0.08), 0 1px 2px rgba(15, 42, 74, 0.06);
+    --sombra-elevada: 0 10px 30px rgba(10, 30, 54, 0.18);
+
+    --fonte: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+
+    --espaco-1: 4px;
+    --espaco-2: 8px;
+    --espaco-3: 12px;
+    --espaco-4: 16px;
+    --espaco-5: 24px;
+    --espaco-6: 32px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: var(--fonte);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+a {
+    color: var(--cor-navy);
+}
+
+button,
+input,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+/* Cabecalho corporativo, comum a todas as paginas internas do MVP. */
+.cabecalho {
+    background-color: var(--cor-navy);
+    color: var(--cor-texto-inverso);
+    padding: var(--espaco-4) var(--espaco-5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-4);
+    flex-wrap: wrap;
+}
+
+.cabecalho__marca {
+    display: flex;
+    align-items: baseline;
+    gap: var(--espaco-2);
+}
+
+.cabecalho__nome {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.cabecalho__subtitulo {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.cabecalho__nav a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.cabecalho__nav a:hover {
+    color: var(--cor-texto-inverso);
+}
+
+.conteudo {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: var(--espaco-5);
+}
+
+.conteudo__cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--espaco-5);
+}
+
+.conteudo__titulo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cor-navy);
+}
+
+.conteudo__descricao {
+    color: var(--cor-texto-suave);
+    font-size: 0.9rem;
+    margin-top: var(--espaco-1);
+}
+
+@media (max-width: 640px) {
+    .conteudo {
+        padding: var(--espaco-4);
+    }
+}

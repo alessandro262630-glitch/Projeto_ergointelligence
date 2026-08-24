@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Colaboradores - ErgoIntelligence</title>
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/colaboradores.css" />
+  </head>
+  <body>
+    <header class="cabecalho">
+      <div class="cabecalho__marca">
+        <span class="cabecalho__nome">ErgoIntelligence</span>
+        <span class="cabecalho__subtitulo">MVP de demonstração</span>
+      </div>
+      <nav class="cabecalho__nav">
+        <a href="index.html">Início</a>
+      </nav>
+    </header>
+
+    <main class="conteudo">
+      <div class="conteudo__cabecalho">
+        <div>
+          <h1 class="conteudo__titulo">Colaboradores</h1>
+          <p class="conteudo__descricao">
+            Cadastro dos colaboradores da empresa de demonstração.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="botao botao--primario"
+          id="botao-novo-colaborador"
+        >
+          + Novo colaborador
+        </button>
+      </div>
+
+      <section class="cartao" style="padding: 20px">
+        <div class="barra-ferramentas">
+          <div class="barra-ferramentas__busca">
+            <input
+              type="search"
+              id="campo-busca"
+              class="campo-busca"
+              placeholder="Buscar por nome, matrícula ou e-mail"
+              aria-label="Buscar colaborador"
+            />
+          </div>
+          <div
+            class="colaboradores__filtros"
+            role="group"
+            aria-label="Filtrar por status"
+          >
+            <button
+              type="button"
+              class="colaboradores__filtro"
+              data-filtro-status="ativos"
+              aria-pressed="true"
+            >
+              Ativos
+            </button>
+            <button
+              type="button"
+              class="colaboradores__filtro"
+              data-filtro-status="inativos"
+              aria-pressed="false"
+            >
+              Inativos
+            </button>
+            <button
+              type="button"
+              class="colaboradores__filtro"
+              data-filtro-status="todos"
+              aria-pressed="false"
+            >
+              Todos
+            </button>
+          </div>
+        </div>
+
+        <div id="area-estado" class="estado" hidden></div>
+
+        <div id="area-tabela" class="tabela-scroll" hidden>
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Data de admissão</th>
+                <th>Status</th>
+                <th class="colaboradores__coluna-acoes">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal de cadastro/edicao -->
+    <div class="modal-fundo" id="modal-formulario" hidden>
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-formulario-titulo"
+      >
+        <div class="modal__cabecalho">
+          <h2 class="modal__titulo" id="modal-formulario-titulo">
+            Novo colaborador
+          </h2>
+          <button
+            type="button"
+            class="modal__fechar"
+            id="botao-fechar-formulario"
+            aria-label="Fechar"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="formulario-colaborador" novalidate>
+          <input type="hidden" id="campo-id-colaborador" />
+
+          <div class="formulario__grupo">
+            <label for="campo-matricula">Matrícula</label>
+            <input
+              type="text"
+              id="campo-matricula"
+              class="campo-texto"
+              maxlength="50"
+              required
+            />
+            <span class="formulario__erro" id="erro-matricula"></span>
+          </div>
+
+          <div class="formulario__grupo">
+            <label for="campo-nome">Nome</label>
+            <input
+              type="text"
+              id="campo-nome"
+              class="campo-texto"
+              maxlength="160"
+              required
+            />
+            <span class="formulario__erro" id="erro-nome"></span>
+          </div>
+
+          <div class="formulario__grupo">
+            <label for="campo-email">E-mail</label>
+            <input
+              type="email"
+              id="campo-email"
+              class="campo-texto"
+              maxlength="254"
+            />
+            <span class="formulario__erro" id="erro-email"></span>
+          </div>
+
+          <div class="formulario__grupo">
+            <label for="campo-data-admissao">Data de admissão</label>
+            <input
+              type="date"
+              id="campo-data-admissao"
+              class="campo-texto"
+              required
+            />
+            <span class="formulario__erro" id="erro-data-admissao"></span>
+          </div>
+
+          <div class="formulario__acoes">
+            <button
+              type="button"
+              class="botao botao--secundario"
+              id="botao-cancelar-formulario"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="botao botao--primario"
+              id="botao-salvar-colaborador"
+            >
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de visualizacao (somente leitura) -->
+    <div class="modal-fundo" id="modal-detalhes" hidden>
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-detalhes-titulo"
+      >
+        <div class="modal__cabecalho">
+          <h2 class="modal__titulo" id="modal-detalhes-titulo">
+            Detalhes do colaborador
+          </h2>
+          <button
+            type="button"
+            class="modal__fechar"
+            id="botao-fechar-detalhes"
+            aria-label="Fechar"
+          >
+            &times;
+          </button>
+        </div>
+        <dl class="lista-detalhes">
+          <div class="lista-detalhes__item">
+            <dt>Matrícula</dt>
+            <dd id="detalhe-matricula"></dd>
+          </div>
+          <div class="lista-detalhes__item">
+            <dt>Nome</dt>
+            <dd id="detalhe-nome"></dd>
+          </div>
+          <div class="lista-detalhes__item">
+            <dt>E-mail</dt>
+            <dd id="detalhe-email"></dd>
+          </div>
+          <div class="lista-detalhes__item">
+            <dt>Data de admissão</dt>
+            <dd id="detalhe-data-admissao"></dd>
+          </div>
+          <div class="lista-detalhes__item">
+            <dt>Status</dt>
+            <dd id="detalhe-status"></dd>
+          </div>
+        </dl>
+        <div class="formulario__acoes">
+          <button
+            type="button"
+            class="botao botao--secundario"
+            id="botao-fechar-detalhes-rodape"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notificacoes" id="area-notificacoes" aria-live="polite"></div>
+
+    <script type="module" src="js/pages/colaboradores.js"></script>
+  </body>
+</html>
