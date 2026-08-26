@@ -1,0 +1,54 @@
+/* ErgoIntelligence - Badges de status e de risco.
+   Badges de status (ativo/inativo/vigente/encerrado) sao usados hoje por
+   Colaboradores e Vinculos. Badges de risco ficam preparados para as telas
+   de Avaliacao/Resultado, ainda nao implementadas nesta etapa. */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* Status genericos (ativo/vigente vs. inativo/encerrado) */
+.badge--ativo {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.badge--inativo {
+    background-color: #F1F5F5;
+    color: var(--color-text-secondary);
+}
+
+/* Estado raro: vinculo com ativo=false mas sem data_fim preenchida -
+   ver js/services/vinculoService.js. Nao deve ser confundido com
+   "Encerrado" (badge--inativo). */
+.badge--vinculo-inativo {
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+}
+
+/* Badges de risco (baixo/moderado/alto/critico) */
+.badge--risco-baixo {
+    background-color: var(--color-risk-low-bg);
+    color: var(--color-risk-low);
+}
+
+.badge--risco-moderado {
+    background-color: var(--color-risk-medium-bg);
+    color: var(--color-risk-medium);
+}
+
+.badge--risco-alto {
+    background-color: var(--color-risk-high-bg);
+    color: var(--color-risk-high);
+}
+
+.badge--risco-critico {
+    background-color: var(--color-risk-critical-bg);
+    color: var(--color-risk-critical);
+}

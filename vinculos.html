@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colaboradores - ErgoIntelligence</title>
+    <title>Vínculos do colaborador - ErgoIntelligence</title>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/forms.css">
     <link rel="stylesheet" href="css/tables.css">
     <link rel="stylesheet" href="css/badges.css">
-    <link rel="stylesheet" href="css/colaboradores.css">
+    <link rel="stylesheet" href="css/vinculos.css">
 </head>
 <body>
     <div class="app-shell">
@@ -69,7 +69,7 @@
                 <button type="button" class="topbar__menu" id="botao-menu" aria-label="Abrir menu">
                     <span></span><span></span><span></span>
                 </button>
-                <h1 class="topbar__titulo">Colaboradores</h1>
+                <h1 class="topbar__titulo">Vínculos do Colaborador</h1>
                 <div class="topbar__espacador"></div>
                 <div class="topbar__usuario">
                     <div class="topbar__usuario-texto">
@@ -80,30 +80,29 @@
                 </div>
             </header>
 
-            <main class="conteudo conteudo--largo">
-                <div class="conteudo__cabecalho conteudo__cabecalho--somente-acao">
-                    <button type="button" class="botao botao--primario" id="botao-novo-colaborador">
-                        + Novo colaborador
+            <main class="conteudo">
+                <div class="conteudo__cabecalho">
+                    <p class="conteudo__descricao">Gerencie o histórico organizacional do colaborador.</p>
+                    <button type="button" class="botao botao--primario" id="botao-novo-vinculo">
+                        + Novo vínculo
                     </button>
                 </div>
 
-                <section class="cartao">
-                    <div class="barra-ferramentas">
-                        <div class="barra-ferramentas__busca">
-                            <input
-                                type="search"
-                                id="campo-busca"
-                                class="campo-busca"
-                                placeholder="Buscar por nome, matrícula ou e-mail"
-                                aria-label="Buscar colaborador"
-                            >
-                        </div>
-                        <div class="colaboradores__filtros" role="group" aria-label="Filtrar por status">
-                            <button type="button" class="colaboradores__filtro" data-filtro-status="ativos" aria-pressed="true">Ativos</button>
-                            <button type="button" class="colaboradores__filtro" data-filtro-status="inativos" aria-pressed="false">Inativos</button>
-                            <button type="button" class="colaboradores__filtro" data-filtro-status="todos" aria-pressed="false">Todos</button>
-                        </div>
+                <div class="vinculos__contexto">
+                    <div>
+                        <span class="vinculos__contexto-nome" id="contexto-nome">Carregando colaborador...</span>
+                        <span class="vinculos__contexto-matricula" id="contexto-matricula"></span>
                     </div>
+                    <a href="colaboradores.html" class="vinculos__contexto-voltar">&larr; Voltar para Colaboradores</a>
+                </div>
+
+                <section class="cartao" style="margin-bottom: 20px;">
+                    <h2 class="cartao__titulo">Vínculo atual</h2>
+                    <div id="area-vinculo-atual"></div>
+                </section>
+
+                <section class="cartao">
+                    <h2 class="cartao__titulo">Histórico de vínculos</h2>
 
                     <div id="area-estado" class="estado" hidden></div>
 
@@ -111,12 +110,13 @@
                         <table class="tabela">
                             <thead>
                                 <tr>
-                                    <th>Matrícula</th>
-                                    <th>Nome</th>
-                                    <th>E-mail</th>
-                                    <th>Data de admissão</th>
+                                    <th>Setor</th>
+                                    <th>Cargo</th>
+                                    <th>Início</th>
+                                    <th>Fim</th>
+                                    <th>Principal</th>
                                     <th>Status</th>
-                                    <th class="colaboradores__coluna-acoes">Ações</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="corpo-tabela"></tbody>
@@ -132,85 +132,83 @@
         </div>
     </div>
 
-    <!-- Modal de cadastro/edicao -->
+    <!-- Modal de novo/edicao de vinculo -->
     <div class="modal-fundo" id="modal-formulario" hidden>
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-formulario-titulo">
             <div class="modal__cabecalho">
-                <h2 class="modal__titulo" id="modal-formulario-titulo">Novo colaborador</h2>
+                <h2 class="modal__titulo" id="modal-formulario-titulo">Novo vínculo</h2>
                 <button type="button" class="modal__fechar" id="botao-fechar-formulario" aria-label="Fechar">&times;</button>
             </div>
-            <form id="formulario-colaborador" novalidate>
-                <input type="hidden" id="campo-id-colaborador">
+            <form id="formulario-vinculo" novalidate>
+                <input type="hidden" id="campo-id-vinculo">
 
                 <div class="formulario__grupo">
-                    <label for="campo-matricula">Matrícula</label>
-                    <input type="text" id="campo-matricula" class="campo-texto" maxlength="50" required>
-                    <span class="formulario__erro" id="erro-matricula"></span>
+                    <label for="campo-setor">Setor</label>
+                    <select id="campo-setor" class="campo-selecao" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                    <span class="formulario__erro" id="erro-setor"></span>
                 </div>
 
                 <div class="formulario__grupo">
-                    <label for="campo-nome">Nome</label>
-                    <input type="text" id="campo-nome" class="campo-texto" maxlength="160" required>
-                    <span class="formulario__erro" id="erro-nome"></span>
+                    <label for="campo-cargo">Cargo</label>
+                    <select id="campo-cargo" class="campo-selecao" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                    <span class="formulario__erro" id="erro-cargo"></span>
                 </div>
 
                 <div class="formulario__grupo">
-                    <label for="campo-email">E-mail</label>
-                    <input type="email" id="campo-email" class="campo-texto" maxlength="254">
-                    <span class="formulario__erro" id="erro-email"></span>
+                    <label for="campo-data-inicio">Data de início</label>
+                    <input type="date" id="campo-data-inicio" class="campo-texto" required>
+                    <span class="formulario__erro" id="erro-data-inicio"></span>
                 </div>
 
                 <div class="formulario__grupo">
-                    <label for="campo-data-admissao">Data de admissão</label>
-                    <input type="date" id="campo-data-admissao" class="campo-texto" required>
-                    <span class="formulario__erro" id="erro-data-admissao"></span>
+                    <label>
+                        <input type="checkbox" id="campo-principal">
+                        Vínculo principal
+                    </label>
+                    <span class="formulario__erro" id="erro-principal"></span>
                 </div>
 
                 <div class="formulario__acoes">
                     <button type="button" class="botao botao--secundario" id="botao-cancelar-formulario">Cancelar</button>
-                    <button type="submit" class="botao botao--primario" id="botao-salvar-colaborador">Salvar</button>
+                    <button type="submit" class="botao botao--primario" id="botao-salvar-vinculo">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal de visualizacao (somente leitura) -->
-    <div class="modal-fundo" id="modal-detalhes" hidden>
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-detalhes-titulo">
+    <!-- Modal de encerramento de vinculo -->
+    <div class="modal-fundo" id="modal-encerrar" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-encerrar-titulo">
             <div class="modal__cabecalho">
-                <h2 class="modal__titulo" id="modal-detalhes-titulo">Detalhes do colaborador</h2>
-                <button type="button" class="modal__fechar" id="botao-fechar-detalhes" aria-label="Fechar">&times;</button>
+                <h2 class="modal__titulo" id="modal-encerrar-titulo">Encerrar vínculo</h2>
+                <button type="button" class="modal__fechar" id="botao-fechar-encerrar" aria-label="Fechar">&times;</button>
             </div>
-            <dl class="lista-detalhes">
-                <div class="lista-detalhes__item">
-                    <dt>Matrícula</dt>
-                    <dd id="detalhe-matricula"></dd>
+            <p class="conteudo__descricao" style="margin-bottom: 16px;">
+                O vínculo não será excluído: ele passará a constar como encerrado no histórico.
+            </p>
+            <form id="formulario-encerrar" novalidate>
+                <input type="hidden" id="campo-id-vinculo-encerrar">
+
+                <div class="formulario__grupo">
+                    <label for="campo-data-fim">Data de encerramento</label>
+                    <input type="date" id="campo-data-fim" class="campo-texto" required>
+                    <span class="formulario__erro" id="erro-data-fim"></span>
                 </div>
-                <div class="lista-detalhes__item">
-                    <dt>Nome</dt>
-                    <dd id="detalhe-nome"></dd>
+
+                <div class="formulario__acoes">
+                    <button type="button" class="botao botao--secundario" id="botao-cancelar-encerrar">Cancelar</button>
+                    <button type="submit" class="botao botao--perigo" id="botao-confirmar-encerrar">Confirmar encerramento</button>
                 </div>
-                <div class="lista-detalhes__item">
-                    <dt>E-mail</dt>
-                    <dd id="detalhe-email"></dd>
-                </div>
-                <div class="lista-detalhes__item">
-                    <dt>Data de admissão</dt>
-                    <dd id="detalhe-data-admissao"></dd>
-                </div>
-                <div class="lista-detalhes__item">
-                    <dt>Status</dt>
-                    <dd id="detalhe-status"></dd>
-                </div>
-            </dl>
-            <div class="formulario__acoes">
-                <button type="button" class="botao botao--secundario" id="botao-fechar-detalhes-rodape">Fechar</button>
-            </div>
+            </form>
         </div>
     </div>
 
     <div class="notificacoes" id="area-notificacoes" aria-live="polite"></div>
 
-    <script type="module" src="js/pages/colaboradores.js"></script>
+    <script type="module" src="js/pages/vinculos.js"></script>
 </body>
 </html>

@@ -1,39 +1,58 @@
-/* ErgoIntelligence - Base visual do MVP.
-   Identidade: fundo claro, azul-marinho e verde/emerald, visual corporativo
-   B2B clean (ver docs/mvp/ErgoIntelligence_Consolidacao_MVP_Feira.docx). */
+/* ErgoIntelligence - Reset, design tokens e tipografia base.
+   Cores extraidas da logo oficial (assets/logo/logo do projeto.png) para
+   garantir consistencia de marca. Demais arquivos (layout/components/
+   forms/tables/badges) dependem destas variaveis; carregar global.css
+   sempre primeiro. */
 
 :root {
-    --cor-fundo: #F5F7FA;
-    --cor-superficie: #FFFFFF;
-    --cor-borda: #E2E8F0;
+    /* --- Cor --- */
+    --color-primary: #0EA394;
+    --color-primary-dark: #0B8276;
+    --color-navy: #10263B;
+    --color-navy-dark: #0A1B2B;
 
-    --cor-navy: #0F2A4A;
-    --cor-navy-escuro: #0A1E36;
-    --cor-emerald: #10B981;
-    --cor-emerald-escuro: #0E9A6E;
+    --color-background: #F5F7F8;
+    --color-surface: #FFFFFF;
+    --color-border: #E4E9EB;
 
-    --cor-texto: #1F2937;
-    --cor-texto-suave: #64748B;
-    --cor-texto-inverso: #FFFFFF;
+    --color-text: #1F2A33;
+    --color-text-secondary: #66757C;
+    --color-text-inverse: #FFFFFF;
 
-    --cor-perigo: #DC2626;
-    --cor-perigo-fundo: #FEE2E2;
-    --cor-sucesso: #0E9A6E;
-    --cor-sucesso-fundo: #D1FAE5;
+    --color-danger: #DC2626;
+    --color-danger-bg: #FEE2E2;
+    --color-success: #0E9A6E;
+    --color-success-bg: #D1FAE5;
 
-    --raio: 8px;
-    --raio-pequeno: 6px;
-    --sombra: 0 1px 3px rgba(15, 42, 74, 0.08), 0 1px 2px rgba(15, 42, 74, 0.06);
-    --sombra-elevada: 0 10px 30px rgba(10, 30, 54, 0.18);
+    /* Escala de risco (reservada para avaliacao/resultado - ainda nao
+       implementadas nesta etapa; ver css/badges.css). */
+    --color-risk-low: #16A34A;
+    --color-risk-low-bg: #DCFCE7;
+    --color-risk-medium: #B45309;
+    --color-risk-medium-bg: #FEF3C7;
+    --color-risk-high: #C2410C;
+    --color-risk-high-bg: #FFEDD5;
+    --color-risk-critical: #B91C1C;
+    --color-risk-critical-bg: #FEE2E2;
 
-    --fonte: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    /* --- Raio, sombra --- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
 
-    --espaco-1: 4px;
-    --espaco-2: 8px;
-    --espaco-3: 12px;
-    --espaco-4: 16px;
-    --espaco-5: 24px;
-    --espaco-6: 32px;
+    --shadow-card: 0 1px 2px rgba(16, 38, 59, 0.06), 0 1px 3px rgba(16, 38, 59, 0.04);
+    --shadow-modal: 0 16px 40px rgba(16, 38, 59, 0.18);
+
+    /* --- Tipografia --- */
+    --font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+
+    /* --- Espacamento --- */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
 }
 
 *,
@@ -49,10 +68,10 @@ body {
 
 body {
     margin: 0;
-    font-family: var(--fonte);
-    background-color: var(--cor-fundo);
-    color: var(--cor-texto);
-    font-size: 15px;
+    font-family: var(--font-family);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
@@ -60,89 +79,20 @@ body {
 h1,
 h2,
 h3,
-p {
+p,
+dl,
+dd {
     margin: 0;
 }
 
 a {
-    color: var(--cor-navy);
+    color: var(--color-primary-dark);
 }
 
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
     color: inherit;
-}
-
-/* Cabecalho corporativo, comum a todas as paginas internas do MVP. */
-.cabecalho {
-    background-color: var(--cor-navy);
-    color: var(--cor-texto-inverso);
-    padding: var(--espaco-4) var(--espaco-5);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--espaco-4);
-    flex-wrap: wrap;
-}
-
-.cabecalho__marca {
-    display: flex;
-    align-items: baseline;
-    gap: var(--espaco-2);
-}
-
-.cabecalho__nome {
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-
-.cabecalho__subtitulo {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.cabecalho__nav a {
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.cabecalho__nav a:hover {
-    color: var(--cor-texto-inverso);
-}
-
-.conteudo {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: var(--espaco-5);
-}
-
-.conteudo__cabecalho {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--espaco-4);
-    flex-wrap: wrap;
-    margin-bottom: var(--espaco-5);
-}
-
-.conteudo__titulo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--cor-navy);
-}
-
-.conteudo__descricao {
-    color: var(--cor-texto-suave);
-    font-size: 0.9rem;
-    margin-top: var(--espaco-1);
-}
-
-@media (max-width: 640px) {
-    .conteudo {
-        padding: var(--espaco-4);
-    }
 }

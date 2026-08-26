@@ -1,19 +1,21 @@
-/* ErgoIntelligence - Componentes reutilizaveis (botoes, badges, tabela,
-   formulario, modal, toast). Compartilhado por todas as paginas internas. */
+/* ErgoIntelligence - Componentes reutilizaveis: botoes, cards, KPI card,
+   modal, toast e estados (carregando/vazio/erro). Campos de formulario
+   estao em forms.css, tabelas em tables.css e badges em badges.css. */
 
-/* --- Botoes -------------------------------------------------------- */
+/* --- Botoes ------------------------------------------------------------
+   Compactos: altura menor, radius pequeno (secao 12 do briefing visual). */
 .botao {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--espaco-2);
-    padding: 10px 18px;
-    border-radius: var(--raio-pequeno);
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md);
+    height: 36px;
+    border-radius: var(--radius-sm);
     border: 1px solid transparent;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    min-height: 40px;
     transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 
@@ -23,214 +25,161 @@
 }
 
 .botao--primario {
-    background-color: var(--cor-emerald);
-    color: var(--cor-texto-inverso);
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
 }
 
 .botao--primario:hover:not(:disabled) {
-    background-color: var(--cor-emerald-escuro);
+    background-color: var(--color-primary-dark);
 }
 
 .botao--secundario {
-    background-color: var(--cor-superficie);
-    color: var(--cor-navy);
-    border-color: var(--cor-borda);
+    background-color: var(--color-surface);
+    color: var(--color-navy);
+    border-color: var(--color-border);
 }
 
 .botao--secundario:hover:not(:disabled) {
-    background-color: #F1F5F9;
+    background-color: var(--color-background);
 }
 
 .botao--perigo {
-    background-color: var(--cor-superficie);
-    color: var(--cor-perigo);
-    border-color: #FCA5A5;
+    background-color: var(--color-surface);
+    color: var(--color-danger);
+    border-color: #F3B7B7;
 }
 
 .botao--perigo:hover:not(:disabled) {
-    background-color: var(--cor-perigo-fundo);
+    background-color: var(--color-danger-bg);
 }
 
 .botao--texto {
     background: none;
     border-color: transparent;
-    color: var(--cor-navy);
-    padding: 6px 10px;
-    min-height: 32px;
-    font-size: 0.85rem;
+    color: var(--color-primary-dark);
+    padding: 0 var(--spacing-sm);
+    height: 30px;
+    font-size: 0.82rem;
 }
 
 .botao--texto:hover:not(:disabled) {
-    background-color: #F1F5F9;
+    background-color: var(--color-background);
 }
 
-/* --- Badge de status ------------------------------------------------ */
-.badge {
+/* Botao apenas com icone (acoes compactas em tabela - ver secao 11). */
+.botao-icone {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0;
 }
 
-.badge--ativo {
-    background-color: var(--cor-sucesso-fundo);
-    color: var(--cor-sucesso-escuro, #0E9A6E);
+.botao-icone svg {
+    width: 16px;
+    height: 16px;
 }
 
-.badge--inativo {
-    background-color: #F1F5F9;
-    color: var(--cor-texto-suave);
+.botao-icone:hover {
+    background-color: var(--color-background);
+    color: var(--color-navy);
 }
 
-/* --- Barra de ferramentas (busca + filtro + acao principal) -------- */
-.barra-ferramentas {
-    display: flex;
-    align-items: center;
-    gap: var(--espaco-3);
-    flex-wrap: wrap;
-    margin-bottom: var(--espaco-4);
+.botao-icone--perigo {
+    color: var(--color-danger);
 }
 
-.barra-ferramentas__busca {
-    flex: 1 1 240px;
-}
-
-.campo-busca,
-.campo-selecao,
-.campo-texto {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--raio-pequeno);
-    background-color: var(--cor-superficie);
-    min-height: 40px;
-}
-
-.campo-busca:focus,
-.campo-selecao:focus,
-.campo-texto:focus {
-    outline: 2px solid var(--cor-emerald);
-    outline-offset: 1px;
+.botao-icone--perigo:hover {
+    background-color: var(--color-danger-bg);
+    border-color: #F3B7B7;
 }
 
 /* --- Cartao / superficie -------------------------------------------- */
 .cartao {
-    background-color: var(--cor-superficie);
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--raio);
-    box-shadow: var(--sombra);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: var(--spacing-lg);
 }
 
-/* --- Tabela ---------------------------------------------------------- */
-.tabela-scroll {
-    overflow-x: auto;
-    border-radius: var(--raio);
-}
-
-.tabela {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 640px;
-}
-
-.tabela th,
-.tabela td {
-    text-align: left;
-    padding: var(--espaco-3) var(--espaco-4);
-    border-bottom: 1px solid var(--cor-borda);
-    font-size: 0.9rem;
-}
-
-.tabela th {
-    color: var(--cor-texto-suave);
+.cartao__titulo {
+    font-size: 0.95rem;
     font-weight: 600;
-    font-size: 0.78rem;
+    color: var(--color-navy);
+    margin-bottom: var(--spacing-md);
+}
+
+/* --- KPI card (reservado para o Dashboard, ainda nao implementado) -- */
+.kpi-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: var(--spacing-lg);
+}
+
+.kpi-card__rotulo {
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    background-color: #FAFBFC;
+    color: var(--color-text-secondary);
 }
 
-.tabela tbody tr:hover {
-    background-color: #FAFBFC;
-}
-
-.tabela__acoes {
-    display: flex;
-    gap: var(--espaco-2);
-    white-space: nowrap;
+.kpi-card__valor {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-top: 4px;
 }
 
 /* --- Estados (carregando / vazio / erro) ---------------------------- */
 .estado {
-    padding: var(--espaco-6) var(--espaco-4);
+    padding: var(--spacing-2xl) var(--spacing-lg);
     text-align: center;
-    color: var(--cor-texto-suave);
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
 }
 
 .estado--erro {
-    color: var(--cor-perigo);
+    color: var(--color-danger);
 }
 
-/* --- Formulario -------------------------------------------------------- */
-.formulario__grupo {
-    margin-bottom: var(--espaco-4);
-}
-
-.formulario__grupo label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: var(--espaco-2);
-    color: var(--cor-texto);
-}
-
-.formulario__erro {
-    display: block;
-    color: var(--cor-perigo);
-    font-size: 0.8rem;
-    margin-top: var(--espaco-1);
-    min-height: 1em;
-}
-
-.formulario__acoes {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--espaco-3);
-    margin-top: var(--espaco-5);
-}
-
-/* --- Lista de detalhes (visualizacao) -------------------------------- */
+/* --- Lista de detalhes (visualizacao somente-leitura) ----------------- */
 .lista-detalhes {
     display: grid;
-    gap: var(--espaco-4);
+    gap: var(--spacing-lg);
 }
 
 .lista-detalhes__item dt {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--cor-texto-suave);
+    color: var(--color-text-secondary);
     margin-bottom: 2px;
 }
 
 .lista-detalhes__item dd {
-    margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    color: var(--color-text);
 }
 
 /* --- Modal ------------------------------------------------------------ */
 .modal-fundo {
     position: fixed;
     inset: 0;
-    background-color: rgba(10, 30, 54, 0.45);
+    background-color: rgba(16, 38, 59, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--espaco-4);
-    z-index: 100;
+    padding: var(--spacing-lg);
+    z-index: 400;
 }
 
 .modal-fundo[hidden] {
@@ -238,27 +187,27 @@
 }
 
 .modal {
-    background-color: var(--cor-superficie);
-    border-radius: var(--raio);
-    box-shadow: var(--sombra-elevada);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-modal);
     width: 100%;
-    max-width: 480px;
+    max-width: 460px;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
-    padding: var(--espaco-5);
+    padding: var(--spacing-xl);
 }
 
 .modal__cabecalho {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--espaco-4);
+    margin-bottom: var(--spacing-lg);
 }
 
 .modal__titulo {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--cor-navy);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-navy);
 }
 
 .modal__fechar {
@@ -267,46 +216,39 @@
     font-size: 1.2rem;
     line-height: 1;
     cursor: pointer;
-    color: var(--cor-texto-suave);
-    padding: var(--espaco-1) var(--espaco-2);
+    color: var(--color-text-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .modal__fechar:hover {
-    color: var(--cor-texto);
+    color: var(--color-text);
 }
 
 /* --- Notificacoes (toast) --------------------------------------------- */
 .notificacoes {
     position: fixed;
-    bottom: var(--espaco-4);
-    right: var(--espaco-4);
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--espaco-2);
-    z-index: 200;
+    gap: var(--spacing-sm);
+    z-index: 500;
     max-width: min(360px, calc(100vw - 32px));
 }
 
 .notificacao {
-    padding: var(--espaco-3) var(--espaco-4);
-    border-radius: var(--raio-pequeno);
-    box-shadow: var(--sombra-elevada);
-    font-size: 0.88rem;
-    color: var(--cor-texto-inverso);
-    background-color: var(--cor-navy);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-modal);
+    font-size: 0.85rem;
+    color: var(--color-text-inverse);
+    background-color: var(--color-navy);
 }
 
 .notificacao--sucesso {
-    background-color: var(--cor-sucesso);
+    background-color: var(--color-success);
 }
 
 .notificacao--erro {
-    background-color: var(--cor-perigo);
-}
-
-@media (max-width: 640px) {
-    .barra-ferramentas {
-        flex-direction: column;
-        align-items: stretch;
-    }
+    background-color: var(--color-danger);
 }

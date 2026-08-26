@@ -11,6 +11,10 @@ import {
   emailValido,
   dataNaoFutura,
 } from "../utils/validacoes.js";
+import { mostrarNotificacao as mostrarNotificacaoBase } from "../utils/notificacoes.js";
+import { iniciarSidebar } from "../utils/sidebar.js";
+
+iniciarSidebar();
 
 // --- Referencias de DOM --------------------------------------------------
 const areaEstado = document.getElementById("area-estado");
@@ -144,7 +148,12 @@ function criarLinhaColaborador(colaborador) {
   botaoEditar.dataset.acao = "editar";
   botaoEditar.dataset.id = colaborador.id_colaborador;
 
-  celulaAcoes.append(botaoVisualizar, botaoEditar);
+  const linkVinculos = document.createElement("a");
+  linkVinculos.className = "botao botao--texto";
+  linkVinculos.textContent = "Vínculos";
+  linkVinculos.href = `vinculos.html?id_colaborador=${colaborador.id_colaborador}`;
+
+  celulaAcoes.append(botaoVisualizar, botaoEditar, linkVinculos);
 
   // Colaborador ja inativo nao deve oferecer "Desativar" novamente
   // (reativacao fica para uma proxima etapa).
@@ -394,13 +403,9 @@ function mensagemErroAmigavel(error) {
   return "Não foi possível salvar o colaborador. Tente novamente.";
 }
 
-// --- Notificacoes (toast simples, sem biblioteca externa) ---------------
+// --- Notificacoes (toast simples, compartilhado via utils/notificacoes.js) --
 function mostrarNotificacao(texto, tipo = "info") {
-  const item = document.createElement("div");
-  item.className = `notificacao notificacao--${tipo}`;
-  item.textContent = texto;
-  areaNotificacoes.appendChild(item);
-  setTimeout(() => item.remove(), 4000);
+  mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
 }
 
 // --- Busca e filtro de status ---------------------------------------------

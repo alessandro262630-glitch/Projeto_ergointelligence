@@ -1,0 +1,67 @@
+/* ErgoIntelligence - Ajustes especificos da tela de Vinculos do colaborador.
+   Estrutura geral (sidebar, topbar, tabela, modal, botoes, badges) vem de
+   layout.css, components.css, forms.css, tables.css e badges.css; aqui
+   ficam apenas particularidades desta pagina. */
+
+/* Contexto do colaborador: uma linha discreta, nao um card grande so para
+   nome/matricula (secao 9 do briefing visual). */
+.vinculos__contexto {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-xl);
+}
+
+.vinculos__contexto-nome {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-navy);
+}
+
+.vinculos__contexto-matricula {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    margin-left: var(--spacing-sm);
+}
+
+.vinculos__contexto-voltar {
+    font-size: 0.82rem;
+    color: var(--color-primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.vinculos__contexto-voltar:hover {
+    text-decoration: underline;
+}
+
+.vinculos__secao-titulo {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-navy);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Card compacto do vinculo atual: grade de rotulo/valor, sem alturas
+   excessivas (secao 10 do briefing visual). */
+.vinculos__atual {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.vinculos__atual-item dt {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    margin-bottom: 3px;
+}
+
+.vinculos__atual-item dd {
+    font-size: 0.88rem;
+    color: var(--color-text);
+    font-weight: 500;
+}
