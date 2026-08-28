@@ -1,4 +1,4 @@
-import { buscarAvaliacaoPorId } from '../services/avaliacaoService.js';
+import { buscarAvaliacaoPorId, validarAvaliacaoParaFinalizacao, finalizarAvaliacao } from '../services/avaliacaoService.js';
 import { carregarQuestionario } from '../services/perguntaService.js';
 import { carregarRespostasDaAvaliacao, salvarResposta } from '../services/respostaService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
@@ -6,8 +6,11 @@ import { formatarCategoria } from '../utils/formatadores.js';
 // AVA-03 - Carrega o questionario ergonomico dinamicamente.
 // AVA-04 - Evolui a mesma pagina/estado para persistir as respostas em
 // resposta_avaliacao/resposta_opcao (ver js/services/respostaService.js).
-// Nao calcula risco, nao finaliza avaliacao e nao decide se uma resposta e
-// "boa" ou "ruim" - apenas registra fielmente o que foi respondido.
+// AVA-05 - Acao explicita "Finalizar avaliacao": valida tudo de novo no
+// servidor (nunca confia so no estado acumulado aqui) e muda o status para
+// FINALIZADA (ver js/services/avaliacaoService.js). Nao calcula risco, nao
+// gera classificacao/recomendacao - isso e responsabilidade do Motor de
+// Risco, em uma proxima fase.
 
 // --- Identificacao da avaliacao, sempre via URL (mesmo padrao das demais
 // paginas do fluxo: nova-avaliacao.html, contexto-avaliacao.html) ----------
@@ -28,6 +31,16 @@ const botaoAnterior = document.getElementById('botao-anterior');
 const botaoProxima = document.getElementById('botao-proxima');
 const textoStatusSalvamento = document.getElementById('texto-status-salvamento');
 
+const cardFinalizacao = document.getElementById('card-finalizacao');
+const botaoFinalizarAvaliacao = document.getElementById('botao-finalizar-avaliacao');
+const alertaValidacaoFinalizacao = document.getElementById('alerta-validacao-finalizacao');
+const textoValidacaoFinalizacao = document.getElementById('texto-validacao-finalizacao');
+const listaErrosFinalizacao = document.getElementById('lista-erros-finalizacao');
+const botaoRevisarQuestionario = document.getElementById('botao-revisar-questionario');
+const modalConfirmarFinalizacaoEl = document.getElementById('modal-confirmar-finalizacao');
+const botaoConfirmarFinalizacao = document.getElementById('botao-confirmar-finalizacao');
+const instanciaModalConfirmarFinalizacao = new bootstrap.Modal(modalConfirmarFinalizacaoEl);
+
 // --- Estado local da pagina (mesmo modelo desenhado na AVA-03; a AVA-04 so
 // passa a persistir estadoQuestionario.respostas em vez de mante-lo somente
 // em memoria) ----------------------------------------------------------------
@@ -39,6 +52,10 @@ const estadoQuestionario = {
 };
 
 let somenteLeitura = false;
+// Preenchido quando validarAvaliacaoParaFinalizacao aponta uma pergunta
+// faltante/inconsistente, para o botao "Revisar questionário" saber para
+// onde pular (secao 30 do prompt AVA-05).
+let idPerguntaParaRevisar = null;
 
 // --- Estados de carregamento / vazio / erro / pronto ------------------------
 function definirEstado(tipo, mensagem) {
@@ -101,9 +118,13 @@ async function carregarPagina() {
 
         if (somenteLeitura) {
             alertaSomenteLeitura.hidden = false;
+            alertaSomenteLeitura.classList.remove('alert-success');
+            alertaSomenteLeitura.classList.add('alert-warning');
             alertaSomenteLeitura.textContent = 'Esta avaliação já foi finalizada e não pode ser respondida novamente.';
+            cardFinalizacao.hidden = true;
         } else {
             alertaSomenteLeitura.hidden = true;
+            cardFinalizacao.hidden = false;
         }
 
         renderizarPergunta();
@@ -457,6 +478,148 @@ botaoProxima.addEventListener('click', async () => {
         renderizarPergunta();
     } else if (!somenteLeitura) {
         definirStatusSalvamento('Questionário preenchido com sucesso.');
+    }
+});
+
+// --- Finalizar avaliação (AVA-05) --------------------------------------------
+// Acao explicita, separada de "Proxima" (secao 5): a ultima resposta salva
+// nunca finaliza sozinha. O botao fica disponivel a qualquer momento (nao
+// so na ultima pergunta) - a propria validacao do servidor e quem diz o que
+// falta, funcionando como a "revisao" antes de finalizar.
+
+function limparValidacaoFinalizacao() {
+    alertaValidacaoFinalizacao.hidden = true;
+    listaErrosFinalizacao.innerHTML = '';
+    botaoRevisarQuestionario.hidden = true;
+    idPerguntaParaRevisar = null;
+}
+
+// `validacao` segue o retorno de validarAvaliacaoParaFinalizacao/o erro
+// lancado por finalizarAvaliacao - em ambos os casos so precisamos de
+// `erros` (array de mensagens amigaveis) e, opcionalmente, de `perguntas`
+// (faltantes/inconsistencias) para oferecer "Revisar questionário".
+function exibirValidacaoFinalizacao(validacao) {
+    const erros = validacao.erros && validacao.erros.length > 0
+        ? validacao.erros
+        : ['Não foi possível finalizar a avaliação.'];
+
+    alertaValidacaoFinalizacao.hidden = false;
+    textoValidacaoFinalizacao.textContent =
+        erros.length === 1 ? erros[0] : 'Existem pendências que impedem a finalização:';
+
+    listaErrosFinalizacao.innerHTML = '';
+    if (erros.length > 1) {
+        erros.forEach((mensagem) => {
+            const item = document.createElement('li');
+            item.textContent = mensagem;
+            listaErrosFinalizacao.appendChild(item);
+        });
+    }
+
+    const alvo = validacao.perguntas?.faltantes?.[0] || validacao.perguntas?.inconsistencias?.[0];
+    if (alvo) {
+        idPerguntaParaRevisar = alvo.id_pergunta;
+        botaoRevisarQuestionario.hidden = false;
+    } else {
+        idPerguntaParaRevisar = null;
+        botaoRevisarQuestionario.hidden = true;
+    }
+}
+
+botaoRevisarQuestionario.addEventListener('click', () => {
+    if (idPerguntaParaRevisar === null) {
+        return;
+    }
+    const indice = estadoQuestionario.perguntas.findIndex((pergunta) => pergunta.id_pergunta === idPerguntaParaRevisar);
+    if (indice === -1) {
+        return;
+    }
+    estadoQuestionario.indiceAtual = indice;
+    renderizarPergunta();
+    limparValidacaoFinalizacao();
+});
+
+// Transicao definitiva para o modo somente-leitura, usada tanto no sucesso
+// da propria finalizacao quanto na descoberta de que outra sessao ja
+// finalizou entre a validacao e a confirmacao (secao 25 - concorrencia).
+function ativarModoSomenteLeitura(mensagem, tipoAlerta) {
+    somenteLeitura = true;
+    cardFinalizacao.hidden = true;
+    alertaSomenteLeitura.hidden = false;
+    alertaSomenteLeitura.classList.remove('alert-warning', 'alert-success');
+    alertaSomenteLeitura.classList.add(`alert-${tipoAlerta}`);
+    alertaSomenteLeitura.textContent = mensagem;
+    renderizarPergunta();
+}
+
+function mensagemErroFinalizacao(error) {
+    const codigo = error?.code;
+    if (codigo === 'AVALIACAO_JA_FINALIZADA') {
+        return 'Esta avaliação já foi finalizada.';
+    }
+    if (['VALIDACAO_FINALIZACAO_FALHOU', 'FINALIZACAO_FALHOU', 'FINALIZACAO_NAO_CONFIRMADA'].includes(codigo)) {
+        return error.message;
+    }
+    return 'Não foi possível finalizar a avaliação. Tente novamente.';
+}
+
+// 1o clique: so valida (secao 22) - se houver pendencia, mostra o que falta
+// e nunca chega a perguntar "tem certeza?" para uma finalizacao que ja se
+// sabe impossivel. Só quando esta tudo certo e que a confirmacao aparece
+// (secao 29).
+botaoFinalizarAvaliacao.addEventListener('click', async () => {
+    limparValidacaoFinalizacao();
+
+    const textoOriginal = botaoFinalizarAvaliacao.textContent;
+    botaoFinalizarAvaliacao.disabled = true;
+    botaoFinalizarAvaliacao.textContent = 'Verificando...';
+
+    try {
+        const validacao = await validarAvaliacaoParaFinalizacao(idAvaliacao);
+        if (validacao.jaFinalizada) {
+            ativarModoSomenteLeitura('Esta avaliação já foi finalizada.', 'warning');
+            return;
+        }
+        if (!validacao.valida) {
+            exibirValidacaoFinalizacao(validacao);
+            return;
+        }
+        instanciaModalConfirmarFinalizacao.show();
+    } catch (error) {
+        console.error('Erro ao validar avaliação para finalização:', error);
+        exibirValidacaoFinalizacao({ erros: ['Não foi possível verificar a avaliação. Tente novamente.'] });
+    } finally {
+        botaoFinalizarAvaliacao.disabled = false;
+        botaoFinalizarAvaliacao.textContent = textoOriginal;
+    }
+});
+
+// 2o clique (dentro do modal): a acao definitiva. Desabilita o botao
+// imediatamente para proteger contra duplo clique (secao 24) - o proprio
+// service tambem protege contra concorrencia no UPDATE (secao 25).
+botaoConfirmarFinalizacao.addEventListener('click', async () => {
+    const textoOriginal = botaoConfirmarFinalizacao.textContent;
+    botaoConfirmarFinalizacao.disabled = true;
+    botaoFinalizarAvaliacao.disabled = true;
+    botaoConfirmarFinalizacao.textContent = 'Finalizando avaliação...';
+
+    try {
+        await finalizarAvaliacao(idAvaliacao);
+        instanciaModalConfirmarFinalizacao.hide();
+        limparValidacaoFinalizacao();
+        ativarModoSomenteLeitura('Avaliação finalizada com sucesso.', 'success');
+    } catch (error) {
+        console.error('Erro ao finalizar avaliação:', error);
+        instanciaModalConfirmarFinalizacao.hide();
+        if (error?.code === 'AVALIACAO_JA_FINALIZADA') {
+            ativarModoSomenteLeitura('Esta avaliação já foi finalizada.', 'warning');
+        } else {
+            exibirValidacaoFinalizacao({ erros: [mensagemErroFinalizacao(error)] });
+        }
+    } finally {
+        botaoConfirmarFinalizacao.disabled = false;
+        botaoConfirmarFinalizacao.textContent = textoOriginal;
+        botaoFinalizarAvaliacao.disabled = false;
     }
 });
 

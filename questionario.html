@@ -100,6 +100,21 @@
                             <button type="button" class="btn btn-outline-secondary btn-lg" id="botao-anterior">&larr; Anterior</button>
                             <button type="button" class="btn btn-primary btn-lg" id="botao-proxima">Próxima &rarr;</button>
                         </div>
+
+                        <hr class="my-4">
+
+                        <div id="card-finalizacao">
+                            <div id="alerta-validacao-finalizacao" class="alert alert-danger" hidden>
+                                <p class="mb-2 fw-semibold" id="texto-validacao-finalizacao"></p>
+                                <ul class="mb-2" id="lista-erros-finalizacao"></ul>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="botao-revisar-questionario" hidden>
+                                    Revisar questionário
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-success btn-lg w-100" id="botao-finalizar-avaliacao">
+                                Finalizar avaliação
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -108,6 +123,27 @@
                 <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
                 <span>MVP de demonstração &middot; dados fictícios</span>
             </footer>
+        </div>
+    </div>
+
+    <!-- Confirmacao antes da finalizacao definitiva (secao 29 do prompt AVA-05) -->
+    <div class="modal fade" id="modal-confirmar-finalizacao" tabindex="-1" aria-labelledby="modal-confirmar-finalizacao-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-confirmar-finalizacao-titulo">Finalizar avaliação?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        Após a finalização, as respostas não poderão mais ser alteradas pelo fluxo normal.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="botao-confirmar-finalizacao">Finalizar avaliação</button>
+                </div>
+            </div>
         </div>
     </div>
 

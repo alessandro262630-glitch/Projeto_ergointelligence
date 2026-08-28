@@ -3,13 +3,18 @@ import { buscarVinculoPorId, listarFuncoesPorVinculo } from './vinculoService.js
 import { buscarColaboradorPorId } from './colaboradorService.js';
 import { buscarAmbientePorId, buscarPostoPorId, listarAmbientesPorSetor, listarPostosPorAmbiente as listarPostosDoAmbiente } from './ambienteService.js';
 import { buscarPerfilPorId, listarPerfisPorColaborador } from './perfilAntropometricoService.js';
+import { verificarPerguntasObrigatoriasRespondidas } from './respostaService.js';
 
 // AVA-01 - Criar nova avaliacao ergonomica.
 // AVA-02 - Selecionar e completar o contexto (funcao/ambiente/posto/perfil +
 // atividades) de uma avaliacao ja existente.
-// Escopo combinado: registro inicial + contexto + atividades executadas.
-// Questionario, calculo de risco, classificacao, recomendacoes e
-// finalizacao pertencem a features futuras e nao sao implementados aqui.
+// AVA-05 - Validar e finalizar uma avaliacao ja existente (status ->
+// FINALIZADA). Depende de respostaService.js para a validacao por tipo das
+// respostas - respostaService.js tambem importa deste arquivo
+// (garantirAvaliacaoEditavel), formando uma dependencia circular segura:
+// nenhum dos dois modulos chama a funcao importada durante a propria
+// avaliacao do modulo, so depois, quando a pagina invoca alguma funcao.
+// Calculo de risco, classificacao e recomendacoes continuam fora de escopo.
 
 const COLUNAS_AVALIACAO = 'id_avaliacao, id_empresa, id_vinculo, id_vinculo_funcao, id_ambiente, id_posto, id_perfil_antropometrico, id_avaliador, tipo_avaliacao, status, data_avaliacao, data_finalizacao, pontuacao_total, id_classificacao_geral, versao_motor_regras, observacoes, criado_em, atualizado_em';
 const COLUNAS_ATIVIDADE_AVALIACAO = 'id_avaliacao_atividade, id_avaliacao, id_atividade, principal, tempo_exposicao_minutos, frequencia_diaria, observacao, criado_em, atividade(nome, descricao, postura_predominante)';
@@ -496,4 +501,136 @@ export async function removerAtividadeAvaliacao(idAvaliacaoAtividade) {
     if (error) {
         throw error;
     }
+}
+
+// =====================================================================
+// AVA-05 - Validar e finalizar a avaliacao.
+// =====================================================================
+// So altera status/data_finalizacao. pontuacao_total, id_classificacao_geral
+// e versao_motor_regras pertencem ao Motor de Risco (fora de escopo aqui).
+
+// Campos de contexto que o schema exige desde a criacao (AVA-01). Nunca
+// deveriam estar ausentes numa avaliacao existente; a checagem aqui e uma
+// camada extra de seguranca, nao uma nova regra de negocio (secao 6).
+const CAMPOS_CONTEXTO_OBRIGATORIOS = [
+    'id_empresa',
+    'id_vinculo',
+    'id_ambiente',
+    'id_avaliador',
+    'tipo_avaliacao',
+    'data_avaliacao',
+];
+
+// Roda todas as verificacoes da secao 22 do prompt AVA-05 e retorna um
+// veredito completo, sem alterar nada no banco. finalizarAvaliacao reusa
+// esta funcao antes do UPDATE; a pagina tambem pode chama-la sozinha (ex.:
+// para desenhar uma tela de revisao antes do botao "Finalizar avaliacao").
+export async function validarAvaliacaoParaFinalizacao(idAvaliacao) {
+    let avaliacao;
+    try {
+        avaliacao = await buscarAvaliacaoPorId(idAvaliacao);
+    } catch (error) {
+        console.error('Erro ao carregar avaliação para validação de finalização:', error);
+        return { valida: false, erros: ['Avaliação não encontrada.'], avisos: [] };
+    }
+
+    if (avaliacao.status === 'FINALIZADA') {
+        return { valida: false, jaFinalizada: true, erros: ['Esta avaliação já foi finalizada.'], avisos: [] };
+    }
+    if (avaliacao.status === 'CANCELADA') {
+        return { valida: false, erros: ['Uma avaliação cancelada não pode ser finalizada.'], avisos: [] };
+    }
+    if (!STATUS_EDITAVEIS.includes(avaliacao.status)) {
+        return { valida: false, erros: ['Esta avaliação não permite finalização no momento.'], avisos: [] };
+    }
+
+    const erros = [];
+
+    // Contexto obrigatorio (secao 6).
+    const camposFaltantes = CAMPOS_CONTEXTO_OBRIGATORIOS.filter(
+        (campo) => avaliacao[campo] === null || avaliacao[campo] === undefined,
+    );
+    if (camposFaltantes.length > 0) {
+        console.error('Avaliação com contexto obrigatório incompleto:', camposFaltantes);
+        erros.push('O contexto da avaliação está incompleto. Revise o contexto antes de finalizar.');
+    }
+
+    // data_finalizacao >= data_avaliacao (secao 27) - checado antes do UPDATE
+    // para nunca depender so da CHECK constraint do banco para bloquear.
+    if (new Date() < new Date(avaliacao.data_avaliacao)) {
+        erros.push('A data da avaliação está no futuro; não é possível finalizar antes dela.');
+    }
+
+    // Atividade (secao 7).
+    const atividades = await listarAtividadesDaAvaliacao(idAvaliacao);
+    if (atividades.length === 0) {
+        erros.push('Adicione pelo menos uma atividade antes de finalizar a avaliação.');
+    }
+
+    // Perguntas obrigatorias + consistencia estrutural das respostas
+    // (secoes 8 a 17) - reutiliza a validacao por tipo do respostaService.js
+    // em vez de duplicar a logica aqui (secao 21).
+    const resultadoPerguntas = await verificarPerguntasObrigatoriasRespondidas(idAvaliacao);
+    if (resultadoPerguntas.faltantes.length > 0) {
+        erros.push(`Existem ${resultadoPerguntas.faltantes.length} pergunta(s) obrigatória(s) sem resposta.`);
+    }
+    if (resultadoPerguntas.inconsistencias.length > 0) {
+        console.error('Inconsistências encontradas nas respostas da avaliação:', resultadoPerguntas.inconsistencias);
+        erros.push('Foi encontrada uma inconsistência nas respostas. Revise o questionário antes de finalizar.');
+    }
+
+    return {
+        valida: erros.length === 0,
+        erros,
+        avisos: [],
+        totalAtividades: atividades.length,
+        perguntas: resultadoPerguntas,
+    };
+}
+
+// Finaliza a avaliacao somente apos validarAvaliacaoParaFinalizacao passar.
+// O UPDATE so afeta a linha se o status ainda for editavel no momento exato
+// da escrita (secao 25 - protecao contra concorrencia: duas abas, duplo
+// clique que escapou do bloqueio de UI, etc.) - se 0 linhas forem afetadas,
+// busca de novo em vez de presumir sucesso (secao 26).
+export async function finalizarAvaliacao(idAvaliacao) {
+    const validacao = await validarAvaliacaoParaFinalizacao(idAvaliacao);
+    if (!validacao.valida) {
+        const codigo = validacao.jaFinalizada ? 'AVALIACAO_JA_FINALIZADA' : 'VALIDACAO_FINALIZACAO_FALHOU';
+        const erro = erroValidacao(validacao.erros[0] || 'Não foi possível finalizar a avaliação.', codigo);
+        erro.detalhes = validacao;
+        throw erro;
+    }
+
+    const { data, error } = await supabase
+        .from('avaliacao_ergonomica')
+        .update({ status: 'FINALIZADA', data_finalizacao: new Date().toISOString() })
+        .eq('id_avaliacao', idAvaliacao)
+        .in('status', STATUS_EDITAVEIS)
+        .select(COLUNAS_AVALIACAO);
+
+    if (error) {
+        throw error;
+    }
+
+    if (!data || data.length === 0) {
+        // Ninguem foi atualizado: o status mudou entre a validacao e o UPDATE
+        // (ex.: outra aba ja finalizou nesse meio-tempo). Busca o estado real
+        // em vez de presumir o que aconteceu.
+        const avaliacaoAtual = await buscarAvaliacaoPorId(idAvaliacao);
+        if (avaliacaoAtual.status === 'FINALIZADA') {
+            throw erroValidacao('Esta avaliação já foi finalizada.', 'AVALIACAO_JA_FINALIZADA');
+        }
+        throw erroValidacao('Não foi possível finalizar a avaliação. Tente novamente.', 'FINALIZACAO_FALHOU');
+    }
+
+    const avaliacaoFinalizada = data[0];
+
+    // Confirma o resultado antes de anunciar sucesso (secao 26) - nunca
+    // presumir que o UPDATE fez o esperado so porque nao retornou erro.
+    if (avaliacaoFinalizada.status !== 'FINALIZADA' || !avaliacaoFinalizada.data_finalizacao) {
+        throw erroValidacao('Não foi possível confirmar a finalização da avaliação.', 'FINALIZACAO_NAO_CONFIRMADA');
+    }
+
+    return avaliacaoFinalizada;
 }

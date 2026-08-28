@@ -357,40 +357,166 @@ export async function salvarResposta(idAvaliacao, idPergunta, valor) {
     throw erroValidacao(`Tipo de pergunta não suportado: ${pergunta.tipo_resposta}`, 'TIPO_PERGUNTA_INVALIDO');
 }
 
-// --- Preparo para a AVA-05 (finalizacao) -----------------------------------------
+// --- Validacao por tipo, usada pela AVA-05 antes de finalizar --------------------
 
-function respostaTemValor(resposta) {
-    return (
-        resposta.resposta_booleano !== null ||
-        resposta.resposta_numero !== null ||
-        resposta.resposta_texto !== null ||
-        (resposta.opcoes && resposta.opcoes.length > 0)
-    );
+const CAMPO_ESCALAR_POR_TIPO = {
+    BOOLEANO: 'resposta_booleano',
+    NUMERICO: 'resposta_numero',
+    TEXTO: 'resposta_texto',
+};
+const CAMPOS_ESCALARES = Object.values(CAMPO_ESCALAR_POR_TIPO);
+
+// Campos escalares de uma resposta que NAO pertencem ao tipo em uso devem
+// estar todos NULL (secao 16 do prompt AVA-05). Reaproveitado tanto para
+// tipos escalares quanto para tipos com opcao.
+function possuiResiduoDeOutroTipo(resposta, tipoResposta) {
+    const possuiOpcoes = resposta.opcoes && resposta.opcoes.length > 0;
+
+    if (TIPOS_ESCALARES.includes(tipoResposta)) {
+        // O proprio campo esperado para este tipo e tratado separadamente
+        // (respondida-ou-nao); aqui so interessa a mistura com resposta_opcao
+        // ou com OUTRO campo escalar alem do esperado.
+        const campoEsperado = CAMPO_ESCALAR_POR_TIPO[tipoResposta];
+        const outrosEscalaresPreenchidos = CAMPOS_ESCALARES.some(
+            (campo) => campo !== campoEsperado && resposta[campo] !== null,
+        );
+        return outrosEscalaresPreenchidos || possuiOpcoes;
+    }
+
+    // ESCALA/ESCOLHA_UNICA/ESCOLHA_MULTIPLA: nenhum campo escalar pode estar
+    // preenchido, a resposta inteira mora em resposta_opcao.
+    return CAMPOS_ESCALARES.some((campo) => resposta[campo] !== null);
 }
 
-// Nao finaliza nem decide nada sozinha - apenas relata o estado, para a
-// AVA-05 usar antes de finalizar a avaliacao (secao 27 do prompt AVA-04).
+// Confere que cada id_opcao referenciado existe, esta ativo e pertence a
+// esta pergunta - a mesma regra que a AVA-04 aplica na escrita, reaplicada
+// aqui como segunda barreira antes de finalizar (secao 17): nunca confiar
+// so no estado que a interface produziu.
+function validarOpcoesContraCatalogo(idPergunta, idsOpcoes, mapaOpcoes) {
+    for (const idOpcao of idsOpcoes) {
+        const opcao = mapaOpcoes.get(idOpcao);
+        if (!opcao) {
+            return 'OPCAO_INEXISTENTE';
+        }
+        if (!opcao.ativo) {
+            return 'OPCAO_INATIVA';
+        }
+        if (opcao.id_pergunta !== idPergunta) {
+            return 'OPCAO_DE_OUTRA_PERGUNTA';
+        }
+    }
+    return null;
+}
+
+// Resultado por pergunta: 'OK' | 'FALTANTE' (obrigatoria sem resposta valida)
+// | 'VAZIA_OPCIONAL' (sem resposta, mas tudo bem) | 'INCONSISTENTE'
+// (estruturalmente invalida, independente de ser obrigatoria ou nao - ver
+// secao 22 ponto 11: "nao existem inconsistencias impeditivas").
+function validarRespostaPorTipo(pergunta, resposta, mapaOpcoes) {
+    const tipo = pergunta.tipo_resposta;
+
+    if (!resposta) {
+        return { status: pergunta.obrigatoria ? 'FALTANTE' : 'VAZIA_OPCIONAL' };
+    }
+
+    if (TIPOS_ESCALARES.includes(tipo)) {
+        const valorAtual = resposta[CAMPO_ESCALAR_POR_TIPO[tipo]];
+        const vazia = valorEscalarVazio(tipo, valorAtual);
+        if (vazia) {
+            return { status: pergunta.obrigatoria ? 'FALTANTE' : 'VAZIA_OPCIONAL' };
+        }
+        if (possuiResiduoDeOutroTipo(resposta, tipo)) {
+            return { status: 'INCONSISTENTE', motivo: 'CAMPOS_INCOMPATIVEIS' };
+        }
+        return { status: 'OK' };
+    }
+
+    if (TIPOS_COM_OPCOES.includes(tipo)) {
+        if (possuiResiduoDeOutroTipo(resposta, tipo)) {
+            return { status: 'INCONSISTENTE', motivo: 'CAMPOS_INCOMPATIVEIS' };
+        }
+
+        const quantidade = resposta.opcoes.length;
+        if (quantidade === 0) {
+            return { status: pergunta.obrigatoria ? 'FALTANTE' : 'VAZIA_OPCIONAL' };
+        }
+        if (tipo !== 'ESCOLHA_MULTIPLA' && quantidade > 1) {
+            return {
+                status: 'INCONSISTENTE',
+                motivo: tipo === 'ESCALA' ? 'MULTIPLAS_OPCOES_EM_ESCALA' : 'MULTIPLAS_OPCOES_EM_ESCOLHA_UNICA',
+            };
+        }
+
+        const motivoOpcaoInvalida = validarOpcoesContraCatalogo(pergunta.id_pergunta, resposta.opcoes, mapaOpcoes);
+        if (motivoOpcaoInvalida) {
+            return { status: 'INCONSISTENTE', motivo: motivoOpcaoInvalida };
+        }
+        return { status: 'OK' };
+    }
+
+    return { status: 'INCONSISTENTE', motivo: 'TIPO_DESCONHECIDO' };
+}
+
+// Segunda barreira de integridade antes da finalizacao (AVA-05): valida
+// TODAS as perguntas ativas (nao so as obrigatorias) contra o tipo real
+// armazenado no catalogo e contra o catalogo de opcoes, consultando o banco
+// de novo em vez de confiar no que a interface acumulou (secao 17 do
+// prompt AVA-05). So 3 consultas no total (perguntas + respostas, que por
+// sua vez ja faz resposta_avaliacao + resposta_opcao internamente, + uma
+// para os metadados das opcoes referenciadas) - nunca uma por pergunta
+// (secao 20).
 export async function verificarPerguntasObrigatoriasRespondidas(idAvaliacao) {
     const [perguntas, respostas] = await Promise.all([
         listarPerguntasAtivas(),
         listarRespostasDaAvaliacao(idAvaliacao),
     ]);
 
-    const obrigatorias = perguntas.filter((pergunta) => pergunta.obrigatoria);
-    const idsRespondidos = new Set(
-        respostas.filter(respostaTemValor).map((resposta) => resposta.id_pergunta),
-    );
+    const idsOpcoesReferenciadas = [...new Set(respostas.flatMap((resposta) => resposta.opcoes))];
+    let mapaOpcoes = new Map();
+    if (idsOpcoesReferenciadas.length > 0) {
+        const { data: opcoes, error } = await supabase
+            .from('opcao_resposta')
+            .select('id_opcao, id_pergunta, ativo')
+            .in('id_opcao', idsOpcoesReferenciadas);
 
-    const faltantes = obrigatorias.filter((pergunta) => !idsRespondidos.has(pergunta.id_pergunta));
+        if (error) {
+            throw error;
+        }
+        mapaOpcoes = new Map((opcoes || []).map((opcao) => [opcao.id_opcao, opcao]));
+    }
+
+    const respostaPorPergunta = new Map(respostas.map((resposta) => [resposta.id_pergunta, resposta]));
+    const obrigatorias = perguntas.filter((pergunta) => pergunta.obrigatoria);
+
+    const faltantes = [];
+    const inconsistencias = [];
+
+    perguntas.forEach((pergunta) => {
+        const resposta = respostaPorPergunta.get(pergunta.id_pergunta);
+        const resultado = validarRespostaPorTipo(pergunta, resposta, mapaOpcoes);
+
+        if (resultado.status === 'FALTANTE') {
+            faltantes.push({
+                id_pergunta: pergunta.id_pergunta,
+                codigo: pergunta.codigo,
+                texto_pergunta: pergunta.texto_pergunta,
+                motivo: 'SEM_RESPOSTA',
+            });
+        } else if (resultado.status === 'INCONSISTENTE') {
+            inconsistencias.push({
+                id_pergunta: pergunta.id_pergunta,
+                codigo: pergunta.codigo,
+                texto_pergunta: pergunta.texto_pergunta,
+                motivo: resultado.motivo,
+            });
+        }
+    });
 
     return {
-        completo: faltantes.length === 0,
+        completo: faltantes.length === 0 && inconsistencias.length === 0,
         totalObrigatorias: obrigatorias.length,
         totalRespondidas: obrigatorias.length - faltantes.length,
-        faltantes: faltantes.map((pergunta) => ({
-            id_pergunta: pergunta.id_pergunta,
-            codigo: pergunta.codigo,
-            texto_pergunta: pergunta.texto_pergunta,
-        })),
+        faltantes,
+        inconsistencias,
     };
 }
