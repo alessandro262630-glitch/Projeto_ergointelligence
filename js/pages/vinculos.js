@@ -12,14 +12,16 @@ import { buscarColaboradorPorId } from '../services/colaboradorService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido, dataNaoFutura } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
-import { iniciarSidebar } from '../utils/sidebar.js';
-
-iniciarSidebar();
 
 // --- Contexto: id_colaborador vem da URL, nunca solicitado novamente ao
 // usuario (ver vinculos.html?id_colaborador=...) -------------------------
 const parametros = new URLSearchParams(window.location.search);
 const idColaborador = Number(parametros.get('id_colaborador'));
+
+// Link para a AVA-01, ja com o colaborador desta pagina pre-selecionado
+// (ver js/pages/nova-avaliacao.js). Definido cedo porque independe do
+// resultado da carga do colaborador/vinculos abaixo.
+document.getElementById('link-nova-avaliacao').href = `nova-avaliacao.html?id_colaborador=${idColaborador}`;
 
 // --- Referencias de DOM --------------------------------------------------
 const contextoNome = document.getElementById('contexto-nome');
@@ -46,6 +48,9 @@ const campoIdVinculoEncerrar = document.getElementById('campo-id-vinculo-encerra
 const campoDataFim = document.getElementById('campo-data-fim');
 const botaoConfirmarEncerrar = document.getElementById('botao-confirmar-encerrar');
 
+const instanciaModalFormulario = new bootstrap.Modal(modalFormulario);
+const instanciaModalEncerrar = new bootstrap.Modal(modalEncerrar);
+
 // --- Estado local da pagina ------------------------------------------------
 let vinculos = [];
 
@@ -63,7 +68,7 @@ function definirEstado(tipo, mensagem) {
 
     areaTabela.hidden = true;
     areaEstado.hidden = false;
-    areaEstado.classList.toggle('estado--erro', tipo === 'erro');
+    areaEstado.classList.toggle('text-danger', tipo === 'erro');
     areaEstado.textContent = mensagem;
 }
 
@@ -112,14 +117,14 @@ function renderizarVinculoAtual(vinculoAtual) {
 
     if (!vinculoAtual) {
         const mensagem = document.createElement('p');
-        mensagem.className = 'conteudo__descricao';
+        mensagem.className = 'text-muted mb-0';
         mensagem.textContent = 'Nenhum vínculo principal vigente no momento.';
         areaVinculoAtual.appendChild(mensagem);
         return;
     }
 
     const lista = document.createElement('dl');
-    lista.className = 'vinculos__atual';
+    lista.className = 'row row-cols-2 row-cols-md-5 g-3 mb-0';
 
     // "Fim" nao aparece aqui de proposito: por definicao, o vinculo atual
     // (principal + ativo + vigente) nunca tem data_fim preenchida. O campo
@@ -134,14 +139,16 @@ function renderizarVinculoAtual(vinculoAtual) {
 
     itens.forEach(([rotulo, valor]) => {
         const item = document.createElement('div');
-        item.className = 'vinculos__atual-item';
+        item.className = 'col';
         const dt = document.createElement('dt');
+        dt.className = 'small text-uppercase text-muted mb-1';
         dt.textContent = rotulo;
         const dd = document.createElement('dd');
+        dd.className = 'mb-0 fw-medium';
 
         if (rotulo === 'Status') {
             const badge = document.createElement('span');
-            badge.className = 'badge badge--ativo';
+            badge.className = 'badge text-bg-success';
             badge.textContent = valor;
             dd.appendChild(badge);
         } else {
@@ -168,12 +175,12 @@ function derivarStatus(vinculo) {
 
 function classeBadgeStatus(status) {
     if (status === 'Vigente') {
-        return 'badge--ativo';
+        return 'text-bg-success';
     }
     if (status === 'Encerrado') {
-        return 'badge--inativo';
+        return 'text-bg-secondary';
     }
-    return 'badge--vinculo-inativo';
+    return 'text-bg-danger';
 }
 
 function renderizarHistorico() {
@@ -217,7 +224,7 @@ function criarLinhaVinculo(vinculo) {
     celulaStatus.appendChild(badge);
 
     const celulaAcoes = document.createElement('td');
-    celulaAcoes.className = 'tabela__acoes';
+    celulaAcoes.className = 'text-nowrap';
 
     // Vinculo encerrado e historico: nao oferece edicao nem reencerramento
     // (preserva a integridade do registro passado). Acoes compactas
@@ -225,23 +232,32 @@ function criarLinhaVinculo(vinculo) {
     if (!vinculo.data_fim) {
         const botaoEditar = document.createElement('button');
         botaoEditar.type = 'button';
-        botaoEditar.className = 'botao-icone';
+        botaoEditar.className = 'btn btn-sm btn-outline-secondary me-1';
         botaoEditar.dataset.acao = 'editar';
         botaoEditar.dataset.id = vinculo.id_vinculo;
         botaoEditar.setAttribute('aria-label', 'Editar vínculo');
         botaoEditar.title = 'Editar vínculo';
-        botaoEditar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>';
+        botaoEditar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>';
 
         const botaoEncerrar = document.createElement('button');
         botaoEncerrar.type = 'button';
-        botaoEncerrar.className = 'botao-icone botao-icone--perigo';
+        botaoEncerrar.className = 'btn btn-sm btn-outline-danger';
         botaoEncerrar.dataset.acao = 'encerrar';
         botaoEncerrar.dataset.id = vinculo.id_vinculo;
         botaoEncerrar.setAttribute('aria-label', 'Encerrar vínculo');
         botaoEncerrar.title = 'Encerrar vínculo';
-        botaoEncerrar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"></path></svg>';
+        botaoEncerrar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"></path></svg>';
 
-        celulaAcoes.append(botaoEditar, botaoEncerrar);
+        // Leva o vinculo desta linha (nao so o colaborador) ja pre-selecionado
+        // para a AVA-01 - ver js/pages/nova-avaliacao.js.
+        const linkNovaAvaliacao = document.createElement('a');
+        linkNovaAvaliacao.className = 'btn btn-sm btn-outline-secondary me-1';
+        linkNovaAvaliacao.href = `nova-avaliacao.html?id_colaborador=${idColaborador}&id_vinculo=${vinculo.id_vinculo}`;
+        linkNovaAvaliacao.setAttribute('aria-label', 'Nova avaliação com este vínculo');
+        linkNovaAvaliacao.title = 'Nova avaliação com este vínculo';
+        linkNovaAvaliacao.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>';
+
+        celulaAcoes.append(linkNovaAvaliacao, botaoEditar, botaoEncerrar);
     }
 
     linha.append(celulaSetor, celulaCargo, celulaInicio, celulaFim, celulaPrincipal, celulaStatus, celulaAcoes);
@@ -285,10 +301,22 @@ async function carregarOpcoesSelects() {
 }
 
 // --- Modal de novo/edicao de vinculo ---------------------------------------
+const CAMPOS_FORMULARIO_VINCULO = [
+    [campoSetor, 'erro-setor'],
+    [campoCargo, 'erro-cargo'],
+    [campoDataInicio, 'erro-data-inicio'],
+];
+
 function limparErrosFormularioVinculo() {
-    document.getElementById('erro-setor').textContent = '';
-    document.getElementById('erro-cargo').textContent = '';
-    document.getElementById('erro-data-inicio').textContent = '';
+    CAMPOS_FORMULARIO_VINCULO.forEach(([campo, idErro]) => {
+        campo.classList.remove('is-invalid');
+        document.getElementById(idErro).textContent = '';
+    });
+}
+
+function definirErroCampoVinculo(campo, idErro, mensagem) {
+    campo.classList.add('is-invalid');
+    document.getElementById(idErro).textContent = mensagem;
 }
 
 function abrirFormularioCriacao() {
@@ -296,7 +324,7 @@ function abrirFormularioCriacao() {
     campoIdVinculo.value = '';
     limparErrosFormularioVinculo();
     tituloModalFormulario.textContent = 'Novo vínculo';
-    modalFormulario.hidden = false;
+    instanciaModalFormulario.show();
     campoSetor.focus();
 }
 
@@ -311,7 +339,7 @@ async function abrirFormularioEdicao(id) {
         campoDataInicio.value = vinculo.data_inicio;
         campoPrincipal.checked = vinculo.principal;
         tituloModalFormulario.textContent = 'Editar vínculo';
-        modalFormulario.hidden = false;
+        instanciaModalFormulario.show();
         campoSetor.focus();
     } catch (error) {
         console.error('Erro ao carregar vínculo para edição:', error);
@@ -320,7 +348,7 @@ async function abrirFormularioEdicao(id) {
 }
 
 function fecharFormularioVinculo() {
-    modalFormulario.hidden = true;
+    instanciaModalFormulario.hide();
 }
 
 function validarFormularioVinculo() {
@@ -333,20 +361,20 @@ function validarFormularioVinculo() {
     const principal = campoPrincipal.checked;
 
     if (!campoPreenchido(idSetor)) {
-        document.getElementById('erro-setor').textContent = 'Selecione o setor.';
+        definirErroCampoVinculo(campoSetor, 'erro-setor', 'Selecione o setor.');
         valido = false;
     }
 
     if (!campoPreenchido(idCargo)) {
-        document.getElementById('erro-cargo').textContent = 'Selecione o cargo.';
+        definirErroCampoVinculo(campoCargo, 'erro-cargo', 'Selecione o cargo.');
         valido = false;
     }
 
     if (!campoPreenchido(dataInicio)) {
-        document.getElementById('erro-data-inicio').textContent = 'Informe a data de início.';
+        definirErroCampoVinculo(campoDataInicio, 'erro-data-inicio', 'Informe a data de início.');
         valido = false;
     } else if (!dataNaoFutura(dataInicio)) {
-        document.getElementById('erro-data-inicio').textContent = 'A data de início não pode ser futura.';
+        definirErroCampoVinculo(campoDataInicio, 'erro-data-inicio', 'A data de início não pode ser futura.');
         valido = false;
     }
 
@@ -407,22 +435,25 @@ function dataHojeIso() {
 
 function abrirModalEncerrar(id) {
     campoIdVinculoEncerrar.value = id;
+    campoDataFim.classList.remove('is-invalid');
     document.getElementById('erro-data-fim').textContent = '';
     campoDataFim.value = dataHojeIso();
-    modalEncerrar.hidden = false;
+    instanciaModalEncerrar.show();
 }
 
 function fecharModalEncerrar() {
-    modalEncerrar.hidden = true;
+    instanciaModalEncerrar.hide();
 }
 
 formularioEncerrar.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const dataFim = campoDataFim.value;
+    campoDataFim.classList.remove('is-invalid');
     document.getElementById('erro-data-fim').textContent = '';
 
     if (!campoPreenchido(dataFim)) {
+        campoDataFim.classList.add('is-invalid');
         document.getElementById('erro-data-fim').textContent = 'Informe a data de encerramento.';
         return;
     }
@@ -477,36 +508,9 @@ function mensagemErroAmigavelVinculo(error) {
     return 'Não foi possível salvar o vínculo. Tente novamente.';
 }
 
-// --- Abertura/fechamento dos modais -----------------------------------------
+// --- Abertura dos modais (fechamento fica a cargo do Bootstrap, via
+// data-bs-dismiss="modal" nos botoes de fechar/cancelar) --------------------
 document.getElementById('botao-novo-vinculo').addEventListener('click', abrirFormularioCriacao);
-document.getElementById('botao-fechar-formulario').addEventListener('click', fecharFormularioVinculo);
-document.getElementById('botao-cancelar-formulario').addEventListener('click', fecharFormularioVinculo);
-document.getElementById('botao-fechar-encerrar').addEventListener('click', fecharModalEncerrar);
-document.getElementById('botao-cancelar-encerrar').addEventListener('click', fecharModalEncerrar);
-
-modalFormulario.addEventListener('click', (event) => {
-    if (event.target === modalFormulario) {
-        fecharFormularioVinculo();
-    }
-});
-
-modalEncerrar.addEventListener('click', (event) => {
-    if (event.target === modalEncerrar) {
-        fecharModalEncerrar();
-    }
-});
-
-document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') {
-        return;
-    }
-    if (!modalFormulario.hidden) {
-        fecharFormularioVinculo();
-    }
-    if (!modalEncerrar.hidden) {
-        fecharModalEncerrar();
-    }
-});
 
 // --- Carga inicial -----------------------------------------------------------
 carregarPagina();

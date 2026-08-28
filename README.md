@@ -10,7 +10,9 @@ Validar, por meio de uma aplicação funcional e interativa em feira, a hipótes
 
 
 ## Tecnologias utilizadas
-- HTML, CSS e JavaScript puro (sem frameworks)
+- HTML e JavaScript puro (sem bundler/build step)
+- Bootstrap 5 (CSS + JS, via CDN) como framework de UI — layout, navbar,
+  offcanvas (sidebar), cards, tabelas, formulários, modais e toasts
 - Supabase (PostgreSQL) como infraestrutura de persistência do MVP
 
 ## Estrutura principal das pastas
@@ -18,13 +20,14 @@ Validar, por meio de uma aplicação funcional e interativa em feira, a hipótes
 ```
 ergointelligence/
 ├── index.html / avaliacao.html / resultado.html / dashboard.html
-├── css/            # estilos globais, de componentes e de páginas
+├── css/
+│   └── custom.css  # unicos ajustes que o tema padrao do Bootstrap nao cobre
 ├── js/
 │   ├── config/     # configuração (ex.: cliente Supabase)
 │   ├── services/   # acesso a dados (avaliações, perguntas, riscos, recomendações)
 │   ├── domain/     # motor de risco e classificação (regras de negócio)
 │   ├── pages/      # orquestração de cada tela
-│   └── utils/      # formatadores e validações
+│   └── utils/      # formatadores, validações e notificações (toast)
 ├── database/       # schema.sql, seed.sql e migrations do modelo físico
 ├── docs/           # documentação do projeto (modelo lógico, consolidação do MVP)
 └── assets/         # logo e ícones

@@ -12,16 +12,13 @@ import {
   dataNaoFutura,
 } from "../utils/validacoes.js";
 import { mostrarNotificacao as mostrarNotificacaoBase } from "../utils/notificacoes.js";
-import { iniciarSidebar } from "../utils/sidebar.js";
-
-iniciarSidebar();
 
 // --- Referencias de DOM --------------------------------------------------
 const areaEstado = document.getElementById("area-estado");
 const areaTabela = document.getElementById("area-tabela");
 const corpoTabela = document.getElementById("corpo-tabela");
 const campoBusca = document.getElementById("campo-busca");
-const botoesFiltro = document.querySelectorAll(".colaboradores__filtro");
+const botoesFiltro = document.querySelectorAll("[data-filtro-status]");
 const areaNotificacoes = document.getElementById("area-notificacoes");
 
 const modalFormulario = document.getElementById("modal-formulario");
@@ -38,6 +35,9 @@ const botaoSalvar = document.getElementById("botao-salvar-colaborador");
 
 const modalDetalhes = document.getElementById("modal-detalhes");
 
+const instanciaModalFormulario = new bootstrap.Modal(modalFormulario);
+const instanciaModalDetalhes = new bootstrap.Modal(modalDetalhes);
+
 // --- Estado local da pagina (cache da ultima listagem carregada) --------
 let colaboradores = [];
 let termoBusca = "";
@@ -53,7 +53,7 @@ function definirEstado(tipo, mensagem) {
 
   areaTabela.hidden = true;
   areaEstado.hidden = false;
-  areaEstado.classList.toggle("estado--erro", tipo === "erro");
+  areaEstado.classList.toggle("text-danger", tipo === "erro");
   areaEstado.textContent = mensagem;
 }
 
@@ -127,40 +127,47 @@ function criarLinhaColaborador(colaborador) {
 
   const celulaStatus = document.createElement("td");
   const badge = document.createElement("span");
-  badge.className = `badge ${colaborador.ativo ? "badge--ativo" : "badge--inativo"}`;
+  badge.className = `badge ${colaborador.ativo ? "text-bg-success" : "text-bg-secondary"}`;
   badge.textContent = formatarStatus(colaborador.ativo);
   celulaStatus.appendChild(badge);
 
   const celulaAcoes = document.createElement("td");
-  celulaAcoes.className = "tabela__acoes";
+  celulaAcoes.className = "text-nowrap";
 
   const botaoVisualizar = document.createElement("button");
   botaoVisualizar.type = "button";
-  botaoVisualizar.className = "botao botao--texto";
+  botaoVisualizar.className = "btn btn-sm btn-link";
   botaoVisualizar.textContent = "Visualizar";
   botaoVisualizar.dataset.acao = "visualizar";
   botaoVisualizar.dataset.id = colaborador.id_colaborador;
 
   const botaoEditar = document.createElement("button");
   botaoEditar.type = "button";
-  botaoEditar.className = "botao botao--texto";
+  botaoEditar.className = "btn btn-sm btn-link";
   botaoEditar.textContent = "Editar";
   botaoEditar.dataset.acao = "editar";
   botaoEditar.dataset.id = colaborador.id_colaborador;
 
   const linkVinculos = document.createElement("a");
-  linkVinculos.className = "botao botao--texto";
+  linkVinculos.className = "btn btn-sm btn-link";
   linkVinculos.textContent = "Vínculos";
   linkVinculos.href = `vinculos.html?id_colaborador=${colaborador.id_colaborador}`;
 
   celulaAcoes.append(botaoVisualizar, botaoEditar, linkVinculos);
 
-  // Colaborador ja inativo nao deve oferecer "Desativar" novamente
-  // (reativacao fica para uma proxima etapa).
+  // "Nova avaliação" e "Desativar" seguem a mesma regra: um colaborador
+  // inativo nao deve poder ser lancado em uma avaliacao nova (reativacao
+  // fica para uma proxima etapa).
   if (colaborador.ativo) {
+    const linkNovaAvaliacao = document.createElement("a");
+    linkNovaAvaliacao.className = "btn btn-sm btn-link";
+    linkNovaAvaliacao.textContent = "Nova avaliação";
+    linkNovaAvaliacao.href = `nova-avaliacao.html?id_colaborador=${colaborador.id_colaborador}`;
+    celulaAcoes.appendChild(linkNovaAvaliacao);
+
     const botaoDesativar = document.createElement("button");
     botaoDesativar.type = "button";
-    botaoDesativar.className = "botao botao--perigo";
+    botaoDesativar.className = "btn btn-sm btn-outline-danger";
     botaoDesativar.textContent = "Desativar";
     botaoDesativar.dataset.acao = "desativar";
     botaoDesativar.dataset.id = colaborador.id_colaborador;
@@ -196,11 +203,23 @@ corpoTabela.addEventListener("click", (event) => {
 });
 
 // --- Modal de cadastro/edicao --------------------------------------------
+const CAMPOS_FORMULARIO = [
+  [campoMatricula, "erro-matricula"],
+  [campoNome, "erro-nome"],
+  [campoEmail, "erro-email"],
+  [campoDataAdmissao, "erro-data-admissao"],
+];
+
 function limparErrosFormulario() {
-  document.getElementById("erro-matricula").textContent = "";
-  document.getElementById("erro-nome").textContent = "";
-  document.getElementById("erro-email").textContent = "";
-  document.getElementById("erro-data-admissao").textContent = "";
+  CAMPOS_FORMULARIO.forEach(([campo, idErro]) => {
+    campo.classList.remove("is-invalid");
+    document.getElementById(idErro).textContent = "";
+  });
+}
+
+function definirErroCampo(campo, idErro, mensagem) {
+  campo.classList.add("is-invalid");
+  document.getElementById(idErro).textContent = mensagem;
 }
 
 function abrirFormularioCriacao() {
@@ -208,7 +227,7 @@ function abrirFormularioCriacao() {
   campoIdColaborador.value = "";
   limparErrosFormulario();
   tituloModalFormulario.textContent = "Novo colaborador";
-  modalFormulario.hidden = false;
+  instanciaModalFormulario.show();
   campoMatricula.focus();
 }
 
@@ -223,7 +242,7 @@ async function abrirFormularioEdicao(id) {
     campoEmail.value = colaborador.email || "";
     campoDataAdmissao.value = colaborador.data_admissao || "";
     tituloModalFormulario.textContent = "Editar colaborador";
-    modalFormulario.hidden = false;
+    instanciaModalFormulario.show();
     campoMatricula.focus();
   } catch (error) {
     console.error("Erro ao carregar colaborador para edição:", error);
@@ -235,7 +254,7 @@ async function abrirFormularioEdicao(id) {
 }
 
 function fecharFormulario() {
-  modalFormulario.hidden = true;
+  instanciaModalFormulario.hide();
 }
 
 function validarFormulario() {
@@ -248,29 +267,33 @@ function validarFormulario() {
   const dataAdmissao = campoDataAdmissao.value;
 
   if (!campoPreenchido(matricula)) {
-    document.getElementById("erro-matricula").textContent =
-      "Informe a matrícula.";
+    definirErroCampo(campoMatricula, "erro-matricula", "Informe a matrícula.");
     valido = false;
   }
 
   if (!campoPreenchido(nome)) {
-    document.getElementById("erro-nome").textContent = "Informe o nome.";
+    definirErroCampo(campoNome, "erro-nome", "Informe o nome.");
     valido = false;
   }
 
   if (!emailValido(email)) {
-    document.getElementById("erro-email").textContent =
-      "Informe um e-mail válido.";
+    definirErroCampo(campoEmail, "erro-email", "Informe um e-mail válido.");
     valido = false;
   }
 
   if (!campoPreenchido(dataAdmissao)) {
-    document.getElementById("erro-data-admissao").textContent =
-      "Informe a data de admissão.";
+    definirErroCampo(
+      campoDataAdmissao,
+      "erro-data-admissao",
+      "Informe a data de admissão.",
+    );
     valido = false;
   } else if (!dataNaoFutura(dataAdmissao)) {
-    document.getElementById("erro-data-admissao").textContent =
-      "A data de admissão não pode ser futura.";
+    definirErroCampo(
+      campoDataAdmissao,
+      "erro-data-admissao",
+      "A data de admissão não pode ser futura.",
+    );
     valido = false;
   }
 
@@ -336,7 +359,7 @@ async function abrirDetalhes(id) {
     document.getElementById("detalhe-status").textContent = formatarStatus(
       colaborador.ativo,
     );
-    modalDetalhes.hidden = false;
+    instanciaModalDetalhes.show();
   } catch (error) {
     console.error("Erro ao carregar detalhes do colaborador:", error);
     mostrarNotificacao(
@@ -344,10 +367,6 @@ async function abrirDetalhes(id) {
       "erro",
     );
   }
-}
-
-function fecharDetalhes() {
-  modalDetalhes.hidden = true;
 }
 
 // --- Desativacao (soft delete) -------------------------------------------
@@ -417,53 +436,20 @@ campoBusca.addEventListener("input", (event) => {
 botoesFiltro.forEach((botao) => {
   botao.addEventListener("click", () => {
     filtroStatus = botao.dataset.filtroStatus;
-    botoesFiltro.forEach((outro) =>
-      outro.setAttribute("aria-pressed", String(outro === botao)),
-    );
+    botoesFiltro.forEach((outro) => {
+      const ativo = outro === botao;
+      outro.setAttribute("aria-pressed", String(ativo));
+      outro.classList.toggle("active", ativo);
+    });
     renderizar();
   });
 });
 
-// --- Abertura/fechamento dos modais ---------------------------------------
+// --- Abertura do modal de cadastro (fechamento fica a cargo do Bootstrap,
+// via data-bs-dismiss="modal" nos botoes de fechar/cancelar) ---------------
 document
   .getElementById("botao-novo-colaborador")
   .addEventListener("click", abrirFormularioCriacao);
-document
-  .getElementById("botao-fechar-formulario")
-  .addEventListener("click", fecharFormulario);
-document
-  .getElementById("botao-cancelar-formulario")
-  .addEventListener("click", fecharFormulario);
-document
-  .getElementById("botao-fechar-detalhes")
-  .addEventListener("click", fecharDetalhes);
-document
-  .getElementById("botao-fechar-detalhes-rodape")
-  .addEventListener("click", fecharDetalhes);
-
-modalFormulario.addEventListener("click", (event) => {
-  if (event.target === modalFormulario) {
-    fecharFormulario();
-  }
-});
-
-modalDetalhes.addEventListener("click", (event) => {
-  if (event.target === modalDetalhes) {
-    fecharDetalhes();
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape") {
-    return;
-  }
-  if (!modalFormulario.hidden) {
-    fecharFormulario();
-  }
-  if (!modalDetalhes.hidden) {
-    fecharDetalhes();
-  }
-});
 
 // --- Carga inicial ---------------------------------------------------------
 carregarColaboradores();

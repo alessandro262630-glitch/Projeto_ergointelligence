@@ -4,128 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vínculos do colaborador - ErgoIntelligence</title>
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/forms.css">
-    <link rel="stylesheet" href="css/tables.css">
-    <link rel="stylesheet" href="css/badges.css">
-    <link rel="stylesheet" href="css/vinculos.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
-    <div class="app-shell">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar__marca">
-                <img src="assets/logo/logo-marca.png" alt="" class="sidebar__logo">
-                <div>
-                    <div class="sidebar__nome">ErgoIntelligence</div>
-                    <div class="sidebar__subtitulo">MVP de demonstração</div>
-                </div>
-            </div>
-            <nav class="sidebar__nav">
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
-                    <span>Dashboard</span>
-                </span>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
-                    <span>Avaliações</span>
-                </span>
-                <a class="sidebar__link sidebar__link--ativo" href="colaboradores.html">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
-                    <span>Colaboradores</span>
+    <div class="d-flex vh-100">
+        <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 240px;">
+            <div class="offcanvas-header border-bottom py-3">
+                <a href="colaboradores.html" class="d-flex align-items-center text-decoration-none text-dark">
+                    <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
+                    <span>
+                        <span class="d-block fw-bold">ErgoIntelligence</span>
+                        <span class="d-block small text-muted">MVP de demonstração</span>
+                    </span>
                 </a>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
-                    <span>Cadastros</span>
-                </span>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
-                    <span>Riscos</span>
-                </span>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
-                    <span>Recomendações</span>
-                </span>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
-                    <span>Planos de Ação</span>
-                </span>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"></path><path d="M12 20V4"></path><path d="M20 20v-6.5"></path></svg>
-                    <span>Relatórios</span>
-                </span>
-                <span class="sidebar__link sidebar__link--desabilitado">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
-                    <span>Configurações</span>
-                </span>
-            </nav>
-        </aside>
+                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+            </div>
+            <div class="offcanvas-body p-2">
+                <nav class="nav nav-pills flex-column gap-1">
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+                        Dashboard
+                    </span>
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
+                        Avaliações
+                    </a>
+                    <a class="nav-link active d-flex align-items-center gap-2" href="colaboradores.html" aria-current="page">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
+                        Colaboradores
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
+                        Cadastros
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
+                        Riscos
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
+                        Recomendações
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
+                        Planos de Ação
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"></path><path d="M12 20V4"></path><path d="M20 20v-6.5"></path></svg>
+                        Relatórios
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+                        Configurações
+                    </span>
+                </nav>
+            </div>
+        </div>
 
-        <div class="app-shell__overlay" id="overlay-sidebar" hidden></div>
-
-        <div class="app-shell__main">
-            <header class="topbar">
-                <button type="button" class="topbar__menu" id="botao-menu" aria-label="Abrir menu">
-                    <span></span><span></span><span></span>
+        <div class="d-flex flex-column flex-grow-1" style="min-width: 0;">
+            <nav class="navbar navbar-light bg-white border-bottom px-3">
+                <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
-                <h1 class="topbar__titulo">Vínculos do Colaborador</h1>
-                <div class="topbar__espacador"></div>
-                <div class="topbar__usuario">
-                    <div class="topbar__usuario-texto">
-                        <div class="topbar__usuario-nome">SST Demo</div>
-                        <div class="topbar__usuario-papel">Administrador</div>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Vínculos do Colaborador</span>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <div class="text-end d-none d-sm-block">
+                        <div class="small fw-semibold">SST Demo</div>
+                        <div class="small text-muted">Administrador</div>
                     </div>
-                    <div class="topbar__avatar">SD</div>
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.78rem;">SD</div>
                 </div>
-            </header>
+            </nav>
 
-            <main class="conteudo">
-                <div class="conteudo__cabecalho">
-                    <p class="conteudo__descricao">Gerencie o histórico organizacional do colaborador.</p>
-                    <button type="button" class="botao botao--primario" id="botao-novo-vinculo">
-                        + Novo vínculo
-                    </button>
-                </div>
-
-                <div class="vinculos__contexto">
-                    <div>
-                        <span class="vinculos__contexto-nome" id="contexto-nome">Carregando colaborador...</span>
-                        <span class="vinculos__contexto-matricula" id="contexto-matricula"></span>
+            <main class="flex-grow-1 overflow-auto">
+                <div class="container-fluid p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                        <p class="text-muted mb-0">Gerencie o histórico organizacional do colaborador.</p>
+                        <button type="button" class="btn btn-primary" id="botao-novo-vinculo">
+                            + Novo vínculo
+                        </button>
                     </div>
-                    <a href="colaboradores.html" class="vinculos__contexto-voltar">&larr; Voltar para Colaboradores</a>
-                </div>
 
-                <section class="cartao" style="margin-bottom: 20px;">
-                    <h2 class="cartao__titulo">Vínculo atual</h2>
-                    <div id="area-vinculo-atual"></div>
-                </section>
-
-                <section class="cartao">
-                    <h2 class="cartao__titulo">Histórico de vínculos</h2>
-
-                    <div id="area-estado" class="estado" hidden></div>
-
-                    <div id="area-tabela" class="tabela-scroll" hidden>
-                        <table class="tabela">
-                            <thead>
-                                <tr>
-                                    <th>Setor</th>
-                                    <th>Cargo</th>
-                                    <th>Início</th>
-                                    <th>Fim</th>
-                                    <th>Principal</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="corpo-tabela"></tbody>
-                        </table>
+                    <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-4">
+                        <div>
+                            <span class="fw-semibold" id="contexto-nome">Carregando colaborador...</span>
+                            <span class="text-muted small ms-2" id="contexto-matricula"></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <a id="link-nova-avaliacao" href="#" class="btn btn-sm btn-outline-primary">+ Nova avaliação</a>
+                            <a href="colaboradores.html" class="small fw-semibold text-decoration-none">&larr; Voltar para Colaboradores</a>
+                        </div>
                     </div>
-                </section>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h2 class="fs-6 fw-semibold mb-3">Vínculo atual</h2>
+                            <div id="area-vinculo-atual"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="fs-6 fw-semibold mb-3">Histórico de vínculos</h2>
+
+                            <div id="area-estado" class="text-center text-muted py-5" hidden></div>
+
+                            <div id="area-tabela" class="table-responsive" hidden>
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Setor</th>
+                                            <th>Cargo</th>
+                                            <th>Início</th>
+                                            <th>Fim</th>
+                                            <th>Principal</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="corpo-tabela"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
 
-            <footer class="rodape">
+            <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
                 <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
                 <span>MVP de demonstração &middot; dados fictícios</span>
             </footer>
@@ -133,82 +139,87 @@
     </div>
 
     <!-- Modal de novo/edicao de vinculo -->
-    <div class="modal-fundo" id="modal-formulario" hidden>
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-formulario-titulo">
-            <div class="modal__cabecalho">
-                <h2 class="modal__titulo" id="modal-formulario-titulo">Novo vínculo</h2>
-                <button type="button" class="modal__fechar" id="botao-fechar-formulario" aria-label="Fechar">&times;</button>
+    <div class="modal fade" id="modal-formulario" tabindex="-1" aria-labelledby="modal-formulario-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-formulario-titulo">Novo vínculo</h2>
+                    <button type="button" class="btn-close" id="botao-fechar-formulario" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-vinculo" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="campo-id-vinculo">
+
+                        <div class="mb-3">
+                            <label for="campo-setor" class="form-label">Setor</label>
+                            <select id="campo-setor" class="form-select" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                            <div class="invalid-feedback" id="erro-setor"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="campo-cargo" class="form-label">Cargo</label>
+                            <select id="campo-cargo" class="form-select" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                            <div class="invalid-feedback" id="erro-cargo"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="campo-data-inicio" class="form-label">Data de início</label>
+                            <input type="date" id="campo-data-inicio" class="form-control" required>
+                            <div class="invalid-feedback" id="erro-data-inicio"></div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" id="campo-principal" class="form-check-input">
+                            <label for="campo-principal" class="form-check-label">Vínculo principal</label>
+                            <div class="invalid-feedback" id="erro-principal"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-formulario" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-vinculo">Salvar</button>
+                    </div>
+                </form>
             </div>
-            <form id="formulario-vinculo" novalidate>
-                <input type="hidden" id="campo-id-vinculo">
-
-                <div class="formulario__grupo">
-                    <label for="campo-setor">Setor</label>
-                    <select id="campo-setor" class="campo-selecao" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                    <span class="formulario__erro" id="erro-setor"></span>
-                </div>
-
-                <div class="formulario__grupo">
-                    <label for="campo-cargo">Cargo</label>
-                    <select id="campo-cargo" class="campo-selecao" required>
-                        <option value="">Selecione...</option>
-                    </select>
-                    <span class="formulario__erro" id="erro-cargo"></span>
-                </div>
-
-                <div class="formulario__grupo">
-                    <label for="campo-data-inicio">Data de início</label>
-                    <input type="date" id="campo-data-inicio" class="campo-texto" required>
-                    <span class="formulario__erro" id="erro-data-inicio"></span>
-                </div>
-
-                <div class="formulario__grupo">
-                    <label>
-                        <input type="checkbox" id="campo-principal">
-                        Vínculo principal
-                    </label>
-                    <span class="formulario__erro" id="erro-principal"></span>
-                </div>
-
-                <div class="formulario__acoes">
-                    <button type="button" class="botao botao--secundario" id="botao-cancelar-formulario">Cancelar</button>
-                    <button type="submit" class="botao botao--primario" id="botao-salvar-vinculo">Salvar</button>
-                </div>
-            </form>
         </div>
     </div>
 
     <!-- Modal de encerramento de vinculo -->
-    <div class="modal-fundo" id="modal-encerrar" hidden>
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-encerrar-titulo">
-            <div class="modal__cabecalho">
-                <h2 class="modal__titulo" id="modal-encerrar-titulo">Encerrar vínculo</h2>
-                <button type="button" class="modal__fechar" id="botao-fechar-encerrar" aria-label="Fechar">&times;</button>
+    <div class="modal fade" id="modal-encerrar" tabindex="-1" aria-labelledby="modal-encerrar-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-encerrar-titulo">Encerrar vínculo</h2>
+                    <button type="button" class="btn-close" id="botao-fechar-encerrar" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-encerrar" novalidate>
+                    <div class="modal-body">
+                        <p class="text-muted mb-3">
+                            O vínculo não será excluído: ele passará a constar como encerrado no histórico.
+                        </p>
+                        <input type="hidden" id="campo-id-vinculo-encerrar">
+
+                        <div class="mb-3">
+                            <label for="campo-data-fim" class="form-label">Data de encerramento</label>
+                            <input type="date" id="campo-data-fim" class="form-control" required>
+                            <div class="invalid-feedback" id="erro-data-fim"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-encerrar" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-outline-danger" id="botao-confirmar-encerrar">Confirmar encerramento</button>
+                    </div>
+                </form>
             </div>
-            <p class="conteudo__descricao" style="margin-bottom: 16px;">
-                O vínculo não será excluído: ele passará a constar como encerrado no histórico.
-            </p>
-            <form id="formulario-encerrar" novalidate>
-                <input type="hidden" id="campo-id-vinculo-encerrar">
-
-                <div class="formulario__grupo">
-                    <label for="campo-data-fim">Data de encerramento</label>
-                    <input type="date" id="campo-data-fim" class="campo-texto" required>
-                    <span class="formulario__erro" id="erro-data-fim"></span>
-                </div>
-
-                <div class="formulario__acoes">
-                    <button type="button" class="botao botao--secundario" id="botao-cancelar-encerrar">Cancelar</button>
-                    <button type="submit" class="botao botao--perigo" id="botao-confirmar-encerrar">Confirmar encerramento</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <div class="notificacoes" id="area-notificacoes" aria-live="polite"></div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="js/pages/vinculos.js"></script>
 </body>
 </html>

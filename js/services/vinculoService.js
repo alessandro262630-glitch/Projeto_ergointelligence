@@ -195,3 +195,54 @@ export async function listarCargos() {
 
     return data;
 }
+
+// Funcoes vigentes (ativas, sem data_fim) de um vinculo especifico.
+// Reutilizavel pela AVA-01 (selecao opcional de id_vinculo_funcao no
+// contexto da avaliacao) e por futuras telas de gestao de vinculo.
+export async function listarFuncoesPorVinculo(idVinculo) {
+    const { data, error } = await supabase
+        .from('vinculo_funcao')
+        .select('id_vinculo_funcao, id_vinculo, id_funcao, principal, funcao(nome)')
+        .eq('id_vinculo', idVinculo)
+        .eq('ativo', true)
+        .is('data_fim', null)
+        .order('principal', { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+
+    return data.map((linha) => ({
+        id_vinculo_funcao: linha.id_vinculo_funcao,
+        id_vinculo: linha.id_vinculo,
+        id_funcao: linha.id_funcao,
+        principal: linha.principal,
+        nome: linha.funcao?.nome ?? null,
+    }));
+}
+
+// Busca uma unica funcao-de-vinculo por id, independente de estar vigente.
+// Usada pela AVA-02 para nunca "perder" a funcao ja gravada em uma
+// avaliacao (ver secao 9) mesmo que ela tenha sido encerrada depois que a
+// avaliacao foi criada - listarFuncoesPorVinculo, ao contrario, so traz as
+// vigentes (proposital: nao oferecer opcoes encerradas para uma nova
+// selecao).
+export async function buscarFuncaoVinculoPorId(idVinculoFuncao) {
+    const { data, error } = await supabase
+        .from('vinculo_funcao')
+        .select('id_vinculo_funcao, id_vinculo, id_funcao, principal, funcao(nome)')
+        .eq('id_vinculo_funcao', idVinculoFuncao)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return {
+        id_vinculo_funcao: data.id_vinculo_funcao,
+        id_vinculo: data.id_vinculo,
+        id_funcao: data.id_funcao,
+        principal: data.principal,
+        nome: data.funcao?.nome ?? null,
+    };
+}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colaboradores - ErgoIntelligence</title>
+    <title>Nova Avaliação - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
 </head>
@@ -26,11 +26,11 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
                         Dashboard
                     </span>
-                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
+                    <a class="nav-link active d-flex align-items-center gap-2" href="nova-avaliacao.html" aria-current="page">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
-                    <a class="nav-link active d-flex align-items-center gap-2" href="colaboradores.html" aria-current="page">
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
                         Colaboradores
                     </a>
@@ -67,7 +67,7 @@
                 <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Colaboradores</span>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Nova Avaliação</span>
                 <div class="ms-auto d-flex align-items-center gap-2">
                     <div class="text-end d-none d-sm-block">
                         <div class="small fw-semibold">SST Demo</div>
@@ -78,50 +78,111 @@
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-4">
-                    <div class="d-flex justify-content-end mb-3">
-                        <button type="button" class="btn btn-primary" id="botao-novo-colaborador">
-                            + Novo colaborador
-                        </button>
-                    </div>
+                <div class="container-fluid p-4" style="max-width: 860px;">
+                    <p class="text-muted">
+                        Registre o contexto inicial da avaliação ergonômica. O questionário, o cálculo de risco e as
+                        recomendações são preenchidos em etapas posteriores.
+                    </p>
 
-                    <div class="card">
+                    <div id="area-estado" class="text-center text-muted py-5"></div>
+
+                    <form id="formulario-avaliacao" class="card" novalidate hidden>
                         <div class="card-body">
-                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
-                                <input
-                                    type="search"
-                                    id="campo-busca"
-                                    class="form-control flex-grow-1"
-                                    style="min-width: 240px;"
-                                    placeholder="Buscar por nome, matrícula ou e-mail"
-                                    aria-label="Buscar colaborador"
-                                >
-                                <div class="btn-group" role="group" aria-label="Filtrar por status">
-                                    <button type="button" class="btn btn-outline-primary active" data-filtro-status="ativos" aria-pressed="true">Ativos</button>
-                                    <button type="button" class="btn btn-outline-primary" data-filtro-status="inativos" aria-pressed="false">Inativos</button>
-                                    <button type="button" class="btn btn-outline-primary" data-filtro-status="todos" aria-pressed="false">Todos</button>
+                            <h2 class="fs-6 fw-semibold mb-3">Contexto do colaborador</h2>
+
+                            <div class="row g-3 mb-1">
+                                <div class="col-md-6">
+                                    <label for="campo-colaborador" class="form-label">Colaborador *</label>
+                                    <select id="campo-colaborador" class="form-select" required>
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="erro-colaborador"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="campo-vinculo" class="form-label">Vínculo *</label>
+                                    <select id="campo-vinculo" class="form-select" required disabled>
+                                        <option value="">Selecione o colaborador primeiro...</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="erro-vinculo"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="campo-funcao" class="form-label">Função</label>
+                                    <select id="campo-funcao" class="form-select" disabled>
+                                        <option value="">Selecione o vínculo primeiro...</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="campo-perfil" class="form-label">Perfil antropométrico</label>
+                                    <select id="campo-perfil" class="form-select" disabled>
+                                        <option value="">Selecione o colaborador primeiro...</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div id="area-estado" class="text-center text-muted py-5" hidden></div>
+                            <hr class="my-4">
 
-                            <div id="area-tabela" class="table-responsive" hidden>
-                                <table class="table table-hover align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>Matrícula</th>
-                                            <th>Nome</th>
-                                            <th>E-mail</th>
-                                            <th>Data de admissão</th>
-                                            <th>Status</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="corpo-tabela"></tbody>
-                                </table>
+                            <h2 class="fs-6 fw-semibold mb-3">Local de trabalho</h2>
+
+                            <div class="row g-3 mb-1">
+                                <div class="col-md-6">
+                                    <label for="campo-ambiente" class="form-label">Ambiente *</label>
+                                    <select id="campo-ambiente" class="form-select" required disabled>
+                                        <option value="">Selecione o vínculo primeiro...</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="erro-ambiente"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="campo-posto" class="form-label">Posto</label>
+                                    <select id="campo-posto" class="form-select" disabled>
+                                        <option value="">Selecione o ambiente primeiro...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h2 class="fs-6 fw-semibold mb-3">Dados da avaliação</h2>
+
+                            <div class="row g-3 mb-1">
+                                <div class="col-md-6">
+                                    <label for="campo-tipo-avaliacao" class="form-label">Tipo de avaliação *</label>
+                                    <select id="campo-tipo-avaliacao" class="form-select" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="INICIAL">Inicial</option>
+                                        <option value="ACOMPANHAMENTO">Acompanhamento</option>
+                                        <option value="POS_INTERVENCAO">Pós-intervenção</option>
+                                        <option value="AEP">AEP</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="erro-tipo-avaliacao"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="campo-data-avaliacao" class="form-label">Data da avaliação *</label>
+                                    <input type="datetime-local" id="campo-data-avaliacao" class="form-control" required>
+                                    <div class="invalid-feedback" id="erro-data-avaliacao"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Avaliador</label>
+                                    <input type="text" class="form-control" id="campo-avaliador" readonly>
+                                    <div class="invalid-feedback" id="erro-avaliador"></div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="campo-observacoes" class="form-label">Observações</label>
+                                    <textarea id="campo-observacoes" class="form-control" rows="3" maxlength="2000"></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="card-footer d-flex flex-wrap justify-content-end gap-2 bg-white">
+                            <button type="button" class="btn btn-outline-secondary" id="botao-salvar-rascunho">Salvar rascunho</button>
+                            <button type="button" class="btn btn-primary" id="botao-iniciar-avaliacao">Iniciar avaliação</button>
+                        </div>
+                    </form>
                 </div>
             </main>
 
@@ -132,87 +193,9 @@
         </div>
     </div>
 
-    <!-- Modal de cadastro/edicao -->
-    <div class="modal fade" id="modal-formulario" tabindex="-1" aria-labelledby="modal-formulario-titulo" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-formulario-titulo">Novo colaborador</h2>
-                    <button type="button" class="btn-close" id="botao-fechar-formulario" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <form id="formulario-colaborador" novalidate>
-                    <div class="modal-body">
-                        <input type="hidden" id="campo-id-colaborador">
-
-                        <div class="mb-3">
-                            <label for="campo-matricula" class="form-label">Matrícula</label>
-                            <input type="text" id="campo-matricula" class="form-control" maxlength="50" required>
-                            <div class="invalid-feedback" id="erro-matricula"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-nome" class="form-label">Nome</label>
-                            <input type="text" id="campo-nome" class="form-control" maxlength="160" required>
-                            <div class="invalid-feedback" id="erro-nome"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-email" class="form-label">E-mail</label>
-                            <input type="email" id="campo-email" class="form-control" maxlength="254">
-                            <div class="invalid-feedback" id="erro-email"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-data-admissao" class="form-label">Data de admissão</label>
-                            <input type="date" id="campo-data-admissao" class="form-control" required>
-                            <div class="invalid-feedback" id="erro-data-admissao"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-formulario" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" id="botao-salvar-colaborador">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de visualizacao (somente leitura) -->
-    <div class="modal fade" id="modal-detalhes" tabindex="-1" aria-labelledby="modal-detalhes-titulo" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-detalhes-titulo">Detalhes do colaborador</h2>
-                    <button type="button" class="btn-close" id="botao-fechar-detalhes" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <dl class="row mb-0">
-                        <dt class="col-5 text-muted text-uppercase small">Matrícula</dt>
-                        <dd class="col-7" id="detalhe-matricula"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">Nome</dt>
-                        <dd class="col-7" id="detalhe-nome"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">E-mail</dt>
-                        <dd class="col-7" id="detalhe-email"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">Data de admissão</dt>
-                        <dd class="col-7" id="detalhe-data-admissao"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">Status</dt>
-                        <dd class="col-7" id="detalhe-status"></dd>
-                    </dl>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" id="botao-fechar-detalhes-rodape" data-bs-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/pages/colaboradores.js"></script>
+    <script type="module" src="js/pages/nova-avaliacao.js"></script>
 </body>
 </html>

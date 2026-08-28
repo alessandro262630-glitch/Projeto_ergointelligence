@@ -1,0 +1,31 @@
+/* ErgoIntelligence - Ajustes minimos sobre o tema padrao do Bootstrap 5.
+   Layout, botoes, cards, modais, toasts, tabelas e forms usam os
+   componentes nativos do Bootstrap direto no HTML; aqui ficam apenas os
+   pontos que o tema padrao nao cobre. */
+
+.sidebar-logo {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Itens de navegacao de telas ainda nao implementadas (Dashboard,
+   Avaliacoes, Cadastros, Riscos, Recomendacoes, Planos de Acao,
+   Relatorios, Configuracoes). */
+.nav-link.disabled {
+    cursor: default;
+}
+
+/* Badges de risco (baixo/moderado/alto/critico) - reservados para as
+   telas de Avaliacao/Resultado, ainda nao implementadas. O tema padrao do
+   Bootstrap so cobre 3 niveis (success/warning/danger); aqui ficam os 2
+   niveis extras para distinguir "alto" de "critico". */
+.text-bg-risco-alto {
+    color: #fff;
+    background-color: #C2410C !important;
+}
+
+.text-bg-risco-critico {
+    color: #fff;
+    background-color: #B91C1C !important;
+}
