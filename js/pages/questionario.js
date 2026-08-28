@@ -1,6 +1,7 @@
 import { buscarAvaliacaoPorId, validarAvaliacaoParaFinalizacao, finalizarAvaliacao } from '../services/avaliacaoService.js';
 import { carregarQuestionario } from '../services/perguntaService.js';
 import { carregarRespostasDaAvaliacao, salvarResposta } from '../services/respostaService.js';
+import { listarResultadosRiscoDaAvaliacao, processarOuObterResultadoRisco } from '../services/riscoService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
 
 // AVA-03 - Carrega o questionario ergonomico dinamicamente.
@@ -8,9 +9,12 @@ import { formatarCategoria } from '../utils/formatadores.js';
 // resposta_avaliacao/resposta_opcao (ver js/services/respostaService.js).
 // AVA-05 - Acao explicita "Finalizar avaliacao": valida tudo de novo no
 // servidor (nunca confia so no estado acumulado aqui) e muda o status para
-// FINALIZADA (ver js/services/avaliacaoService.js). Nao calcula risco, nao
-// gera classificacao/recomendacao - isso e responsabilidade do Motor de
-// Risco, em uma proxima fase.
+// FINALIZADA (ver js/services/avaliacaoService.js).
+// INT-RSK-01 - Depois de FINALIZADA, aciona o Motor de Risco
+// (js/services/riscoService.js) e leva o usuario para resultado.html.
+// Finalizacao e calculo de risco sao estados distintos: uma finalizacao
+// bem-sucedida nunca e desfeita ou reportada como falha so porque o motor
+// falhou (secao 5 do prompt INT-RSK-01).
 
 // --- Identificacao da avaliacao, sempre via URL (mesmo padrao das demais
 // paginas do fluxo: nova-avaliacao.html, contexto-avaliacao.html) ----------
@@ -40,6 +44,11 @@ const botaoRevisarQuestionario = document.getElementById('botao-revisar-question
 const modalConfirmarFinalizacaoEl = document.getElementById('modal-confirmar-finalizacao');
 const botaoConfirmarFinalizacao = document.getElementById('botao-confirmar-finalizacao');
 const instanciaModalConfirmarFinalizacao = new bootstrap.Modal(modalConfirmarFinalizacaoEl);
+
+const cardProcessamentoRisco = document.getElementById('card-processamento-risco');
+const statusProcessamentoRisco = document.getElementById('status-processamento-risco');
+const botaoReprocessarRisco = document.getElementById('botao-reprocessar-risco');
+const linkVerResultado = document.getElementById('link-ver-resultado');
 
 // --- Estado local da pagina (mesmo modelo desenhado na AVA-03; a AVA-04 so
 // passa a persistir estadoQuestionario.respostas em vez de mante-lo somente
@@ -129,6 +138,13 @@ async function carregarPagina() {
 
         renderizarPergunta();
         definirEstado('pronto');
+
+        // Avaliacao ja finalizada anteriormente (reabertura/refresh - secao
+        // 19 do prompt INT-RSK-01): nunca encerrar o fluxo em silencio, mas
+        // tambem nunca recalcular so por reabrir a pagina.
+        if (somenteLeitura) {
+            await verificarResultadoRiscoExistente();
+        }
     } catch (error) {
         console.error('Erro ao carregar questionário:', error);
         if (error?.code === 'CATALOGO_INCONSISTENTE') {
@@ -578,6 +594,7 @@ botaoFinalizarAvaliacao.addEventListener('click', async () => {
         const validacao = await validarAvaliacaoParaFinalizacao(idAvaliacao);
         if (validacao.jaFinalizada) {
             ativarModoSomenteLeitura('Esta avaliação já foi finalizada.', 'warning');
+            await verificarResultadoRiscoExistente();
             return;
         }
         if (!validacao.valida) {
@@ -597,22 +614,27 @@ botaoFinalizarAvaliacao.addEventListener('click', async () => {
 // 2o clique (dentro do modal): a acao definitiva. Desabilita o botao
 // imediatamente para proteger contra duplo clique (secao 24) - o proprio
 // service tambem protege contra concorrencia no UPDATE (secao 25).
+//
+// Finalizacao e calculo de risco sao reportados como estados DISTINTOS
+// (secao 5 do prompt INT-RSK-01): uma vez que finalizarAvaliacao() tenha
+// sucesso, nenhuma falha do motor depois disso pode ser confundida com
+// "nao foi possivel finalizar a avaliacao" - isso seria falso.
 botaoConfirmarFinalizacao.addEventListener('click', async () => {
     const textoOriginal = botaoConfirmarFinalizacao.textContent;
     botaoConfirmarFinalizacao.disabled = true;
     botaoFinalizarAvaliacao.disabled = true;
-    botaoConfirmarFinalizacao.textContent = 'Finalizando avaliação...';
+    botaoConfirmarFinalizacao.textContent = 'Finalizando avaliação...'; // ESTADO 1
 
+    let finalizacaoConcluida = false;
     try {
         await finalizarAvaliacao(idAvaliacao);
-        instanciaModalConfirmarFinalizacao.hide();
-        limparValidacaoFinalizacao();
-        ativarModoSomenteLeitura('Avaliação finalizada com sucesso.', 'success');
+        finalizacaoConcluida = true;
     } catch (error) {
         console.error('Erro ao finalizar avaliação:', error);
         instanciaModalConfirmarFinalizacao.hide();
         if (error?.code === 'AVALIACAO_JA_FINALIZADA') {
             ativarModoSomenteLeitura('Esta avaliação já foi finalizada.', 'warning');
+            await verificarResultadoRiscoExistente();
         } else {
             exibirValidacaoFinalizacao({ erros: [mensagemErroFinalizacao(error)] });
         }
@@ -620,6 +642,104 @@ botaoConfirmarFinalizacao.addEventListener('click', async () => {
         botaoConfirmarFinalizacao.disabled = false;
         botaoConfirmarFinalizacao.textContent = textoOriginal;
         botaoFinalizarAvaliacao.disabled = false;
+    }
+
+    if (!finalizacaoConcluida) {
+        return;
+    }
+
+    instanciaModalConfirmarFinalizacao.hide();
+    limparValidacaoFinalizacao();
+    ativarModoSomenteLeitura('Avaliação finalizada com sucesso.', 'success');
+    await processarRiscoAposFinalizacao();
+});
+
+// --- Motor de Risco (INT-RSK-01): acionado so depois de FINALIZADA -----------
+
+function definirStatusProcessamentoRisco(mensagem, isErro = false) {
+    cardProcessamentoRisco.hidden = false;
+    statusProcessamentoRisco.textContent = mensagem;
+    statusProcessamentoRisco.classList.toggle('text-danger', isErro);
+    statusProcessamentoRisco.classList.toggle('text-muted', !isErro);
+}
+
+function mostrarBotaoCalcularRisco() {
+    botaoReprocessarRisco.hidden = false;
+    linkVerResultado.hidden = true;
+}
+
+function mostrarLinkVerResultado() {
+    linkVerResultado.href = `resultado.html?id_avaliacao=${idAvaliacao}`;
+    linkVerResultado.hidden = false;
+    botaoReprocessarRisco.hidden = true;
+}
+
+// Avaliacao ja finalizada (por esta sessao antes, ou ao reabrir a pagina):
+// so LE se ja existe resultado - nunca calcula automaticamente (secao 7/19).
+async function verificarResultadoRiscoExistente() {
+    try {
+        const resultados = await listarResultadosRiscoDaAvaliacao(idAvaliacao);
+        if (resultados.length > 0) {
+            definirStatusProcessamentoRisco('O resultado desta avaliação já foi calculado.');
+            mostrarLinkVerResultado();
+        } else {
+            definirStatusProcessamentoRisco('A avaliação está finalizada, mas o resultado ainda não foi calculado.');
+            mostrarBotaoCalcularRisco();
+        }
+    } catch (error) {
+        console.error('Erro ao verificar resultado de risco existente:', error);
+        definirStatusProcessamentoRisco('Não foi possível verificar se o resultado já foi calculado.', true);
+        mostrarBotaoCalcularRisco();
+    }
+}
+
+// ESTADO 2 -> ESTADO 3 (ou falha do motor, secao 6): chamado uma unica vez,
+// automaticamente, logo apos uma finalizacao bem-sucedida nesta sessao.
+async function processarRiscoAposFinalizacao() {
+    definirStatusProcessamentoRisco('Avaliação finalizada. Calculando riscos...');
+    botaoReprocessarRisco.hidden = true;
+    linkVerResultado.hidden = true;
+
+    try {
+        await processarOuObterResultadoRisco(idAvaliacao);
+        definirStatusProcessamentoRisco('Resultado calculado com sucesso.');
+        window.setTimeout(() => {
+            window.location.href = `resultado.html?id_avaliacao=${idAvaliacao}`;
+        }, 900);
+    } catch (error) {
+        console.error('Erro ao calcular risco após finalização:', error);
+        definirStatusProcessamentoRisco(
+            'A avaliação foi finalizada, mas não foi possível calcular o resultado neste momento.',
+            true,
+        );
+        mostrarBotaoCalcularRisco();
+    }
+}
+
+// Botao de retentativa: chama a MESMA porta de entrada idempotente, nunca
+// forca um recalculo (secao 18) - se ja existir resultado, so reutiliza.
+botaoReprocessarRisco.addEventListener('click', async () => {
+    const textoOriginal = botaoReprocessarRisco.textContent;
+    botaoReprocessarRisco.disabled = true;
+    botaoReprocessarRisco.textContent = 'Calculando...';
+    definirStatusProcessamentoRisco('Avaliação finalizada. Calculando riscos...');
+
+    try {
+        await processarOuObterResultadoRisco(idAvaliacao);
+        definirStatusProcessamentoRisco('Resultado calculado com sucesso.');
+        window.setTimeout(() => {
+            window.location.href = `resultado.html?id_avaliacao=${idAvaliacao}`;
+        }, 900);
+    } catch (error) {
+        console.error('Erro ao tentar calcular o risco novamente:', error);
+        definirStatusProcessamentoRisco(
+            'A avaliação foi finalizada, mas não foi possível calcular o resultado neste momento.',
+            true,
+        );
+        mostrarBotaoCalcularRisco();
+    } finally {
+        botaoReprocessarRisco.disabled = false;
+        botaoReprocessarRisco.textContent = textoOriginal;
     }
 });
 

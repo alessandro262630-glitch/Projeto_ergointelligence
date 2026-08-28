@@ -115,6 +115,22 @@
                                 Finalizar avaliação
                             </button>
                         </div>
+
+                        <!-- INT-RSK-01: acionamento/acompanhamento do Motor de Risco apos a
+                             avaliacao estar FINALIZADA. Nao substitui card-finalizacao - fica
+                             visivel so quando ha algo a mostrar (calculando, resultado pronto,
+                             falha do motor ou avaliacao ja finalizada anteriormente). -->
+                        <div id="card-processamento-risco" class="card mt-3" hidden>
+                            <div class="card-body">
+                                <p class="mb-2" id="status-processamento-risco" aria-live="polite"></p>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-primary" id="botao-reprocessar-risco" hidden>
+                                        Tentar calcular novamente
+                                    </button>
+                                    <a href="#" class="btn btn-success" id="link-ver-resultado" hidden>Ver resultado</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

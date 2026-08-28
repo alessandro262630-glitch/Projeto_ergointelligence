@@ -1,6 +1,7 @@
 import { supabase } from '../config/supabase.js';
 import { buscarAvaliacaoPorId } from './avaliacaoService.js';
 import { processarMotorRisco } from '../domain/motorRisco.js';
+import { obterClassificacaoGeral } from '../domain/classificadorRisco.js';
 
 // Motor de Risco Ergonomico - camada de service.
 // Responsavel por: carregar dados do Supabase, chamar o motor (dominio
@@ -301,4 +302,135 @@ export async function processarRiscosDaAvaliacao(idAvaliacao) {
     await persistirResultado(idAvaliacao, resultado);
 
     return resultado;
+}
+
+// =====================================================================
+// INT-RSK-01 - Integracao ao fluxo (orquestracao + recuperacao de resumo).
+// =====================================================================
+
+// Reconstroi SOMENTE o resumo agregado em avaliacao_ergonomica
+// (pontuacao_total, id_classificacao_geral, versao_motor_regras) a partir
+// dos avaliacao_risco ja persistidos - nunca recalcula regra alguma e nunca
+// toca em avaliacao_risco/avaliacao_risco_regra/respostas (secoes 11/15).
+// Usada para recuperar o cenario em que o calculo e a persistencia por
+// risco funcionaram, mas so a atualizacao final do resumo falhou.
+export async function sincronizarResumoAvaliacaoComResultados(idAvaliacao) {
+    const resultados = await listarResultadosRiscoDaAvaliacao(idAvaliacao);
+
+    if (resultados.length === 0) {
+        throw erroRisco(
+            'Não há resultados de risco persistidos para reconstruir o resumo desta avaliação.',
+            'SEM_RESULTADOS_PARA_SINCRONIZAR',
+        );
+    }
+
+    // Todos os resultados de uma mesma avaliacao devem ter sido calculados
+    // pela mesma versao do motor - nunca escolher uma arbitrariamente
+    // (secao 14).
+    const versoes = new Set(resultados.map((resultado) => resultado.versao_motor_regras));
+    if (versoes.size > 1) {
+        throw erroRisco(
+            'Os resultados da avaliação possuem versões de motor inconsistentes.',
+            'VERSAO_MOTOR_INCONSISTENTE',
+        );
+    }
+    const [versaoMotor] = versoes;
+
+    // Soma simples das pontuacoes ja persistidas (secao 12) e classificacao
+    // geral pela mesma regra do dominio - maior prioridade entre as
+    // classificacoes individuais (secao 13) - reaproveitando
+    // obterClassificacaoGeral em vez de duplicar a logica aqui.
+    const pontuacaoTotal = resultados.reduce((soma, resultado) => soma + Number(resultado.pontuacao), 0);
+    const classificacaoGeral = obterClassificacaoGeral(resultados);
+
+    const { data, error } = await supabase
+        .from('avaliacao_ergonomica')
+        .update({
+            pontuacao_total: pontuacaoTotal,
+            id_classificacao_geral: classificacaoGeral.id_classificacao,
+            versao_motor_regras: versaoMotor,
+        })
+        .eq('id_avaliacao', idAvaliacao)
+        .select('id_avaliacao, pontuacao_total, id_classificacao_geral, versao_motor_regras, status')
+        .single();
+
+    if (error) {
+        console.error('Erro ao sincronizar resumo da avaliação a partir dos resultados existentes:', error);
+        throw erroRisco('Não foi possível sincronizar o resumo da avaliação.', 'SINCRONIZACAO_RESUMO_FALHOU');
+    }
+
+    return data;
+}
+
+// Porta de entrada para a integracao com o fluxo (questionario.js apos
+// finalizar, resultado.html ao abrir/retentar). Nunca reprocessa
+// silenciosamente uma avaliacao ja calculada (RISCO_JA_PROCESSADO vira
+// sucesso, nao falha) e se autorrecupera quando o calculo/persistencia por
+// risco deu certo mas so o resumo agregado falhou (ATUALIZACAO_AVALIACAO_FALHOU).
+export async function processarOuObterResultadoRisco(idAvaliacao) {
+    let jaExistia = false;
+    let precisaRecomporResumo = false;
+
+    try {
+        await processarRiscosDaAvaliacao(idAvaliacao);
+    } catch (error) {
+        if (error.code === 'RISCO_JA_PROCESSADO') {
+            jaExistia = true;
+            precisaRecomporResumo = true;
+        } else if (error.code === 'ATUALIZACAO_AVALIACAO_FALHOU') {
+            precisaRecomporResumo = true;
+        } else {
+            throw error;
+        }
+    }
+
+    if (precisaRecomporResumo) {
+        await sincronizarResumoAvaliacaoComResultados(idAvaliacao);
+    }
+
+    const resultados = await listarResultadosRiscoDaAvaliacao(idAvaliacao);
+    return { processadoAgora: !jaExistia, jaExistia, resultados };
+}
+
+// Rastreabilidade de um unico resultado (secao 28) - usada pelo "Entenda
+// por que" da tela de resultado, carregada sob demanda (so quando o
+// participante expande), nunca calculada de novo aqui.
+export async function listarRastreabilidadeDoResultado(idAvaliacaoRisco) {
+    const { data, error } = await supabase
+        .from('avaliacao_risco_regra')
+        .select('id_avaliacao_risco_regra, id_regra, satisfeita, pontuacao_aplicada, detalhe, avaliado_em, regra_risco(codigo, nome)')
+        .eq('id_avaliacao_risco', idAvaliacaoRisco)
+        .order('id_avaliacao_risco_regra', { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+
+    return (data || []).map((linha) => ({
+        id_avaliacao_risco_regra: linha.id_avaliacao_risco_regra,
+        id_regra: linha.id_regra,
+        codigo: linha.regra_risco?.codigo ?? null,
+        nome: linha.regra_risco?.nome ?? null,
+        satisfeita: linha.satisfeita,
+        pontuacao_aplicada: linha.pontuacao_aplicada,
+        detalhe: linha.detalhe,
+    }));
+}
+
+// Classificacao geral da avaliacao (secao 26) - buscarAvaliacaoPorId so traz
+// o id_classificacao_geral cru; esta consulta resolve o registro completo
+// (nome, cor_hex, prioridade) sem duplicar a regra de classificacao no
+// frontend.
+export async function buscarClassificacaoPorId(idClassificacao) {
+    const { data, error } = await supabase
+        .from('classificacao_risco')
+        .select('id_classificacao, codigo, nome, pontuacao_min, pontuacao_max, prioridade, cor_hex, descricao')
+        .eq('id_classificacao', idClassificacao)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
 }
