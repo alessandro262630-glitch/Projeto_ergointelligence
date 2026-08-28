@@ -196,11 +196,12 @@ export async function obterAvaliadorPadrao(idEmpresa) {
 // avaliacao ja existente.
 // =====================================================================
 
-// Busca a avaliacao e garante que seu status ainda permite edicao de
-// contexto/atividades (RASCUNHO ou EM_ANDAMENTO). Usada por toda operacao
-// de escrita da AVA-02 para nunca alterar uma avaliacao ja fechada, mesmo
-// que a interface (que ja bloqueia os controles) seja contornada.
-async function garantirAvaliacaoEditavel(idAvaliacao) {
+// Busca a avaliacao e garante que seu status ainda permite edicao
+// (RASCUNHO ou EM_ANDAMENTO). Usada por toda operacao de escrita sobre uma
+// avaliacao existente - contexto/atividades (AVA-02) e respostas (AVA-04) -
+// para nunca alterar uma avaliacao ja fechada, mesmo que a interface (que ja
+// bloqueia os controles) seja contornada.
+export async function garantirAvaliacaoEditavel(idAvaliacao) {
     const avaliacao = await buscarAvaliacaoPorId(idAvaliacao);
 
     if (avaliacao.status === 'FINALIZADA') {

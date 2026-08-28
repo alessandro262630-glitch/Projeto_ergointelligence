@@ -34,6 +34,25 @@ export async function listarPerguntasAtivas() {
     return data;
 }
 
+// Busca autoritativa de uma pergunta por id (usada pela AVA-04 para nunca
+// confiar apenas no tipo_resposta que o frontend enviar - ver secao 11 do
+// prompt AVA-04). So considera perguntas ativas: uma pergunta desativada
+// nao deve mais aceitar novas respostas.
+export async function buscarPerguntaPorId(idPergunta) {
+    const { data, error } = await supabase
+        .from('pergunta_avaliacao')
+        .select(COLUNAS_PERGUNTA)
+        .eq('id_pergunta', idPergunta)
+        .eq('ativo', true)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
 export async function listarOpcoesPorPergunta(idPergunta) {
     const { data, error } = await supabase
         .from('opcao_resposta')

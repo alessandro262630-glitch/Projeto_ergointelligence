@@ -1,11 +1,13 @@
 import { buscarAvaliacaoPorId } from '../services/avaliacaoService.js';
 import { carregarQuestionario } from '../services/perguntaService.js';
+import { carregarRespostasDaAvaliacao, salvarResposta } from '../services/respostaService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
 
-// AVA-03 - Carregar questionario ergonomico.
-// So LE pergunta_avaliacao/opcao_resposta e valida a avaliacao pelo id.
-// Nao salva resposta_avaliacao/resposta_opcao (isso e a AVA-04) e nao
-// calcula risco algum (ver js/services/perguntaService.js).
+// AVA-03 - Carrega o questionario ergonomico dinamicamente.
+// AVA-04 - Evolui a mesma pagina/estado para persistir as respostas em
+// resposta_avaliacao/resposta_opcao (ver js/services/respostaService.js).
+// Nao calcula risco, nao finaliza avaliacao e nao decide se uma resposta e
+// "boa" ou "ruim" - apenas registra fielmente o que foi respondido.
 
 // --- Identificacao da avaliacao, sempre via URL (mesmo padrao das demais
 // paginas do fluxo: nova-avaliacao.html, contexto-avaliacao.html) ----------
@@ -24,9 +26,11 @@ const legendaPergunta = document.getElementById('legenda-pergunta');
 const areaControlePergunta = document.getElementById('area-controle-pergunta');
 const botaoAnterior = document.getElementById('botao-anterior');
 const botaoProxima = document.getElementById('botao-proxima');
+const textoStatusSalvamento = document.getElementById('texto-status-salvamento');
 
-// --- Estado local da pagina (secao 37: preparo para a AVA-04, respostas
-// ficam somente em memoria nesta feature - nada e persistido) --------------
+// --- Estado local da pagina (mesmo modelo desenhado na AVA-03; a AVA-04 so
+// passa a persistir estadoQuestionario.respostas em vez de mante-lo somente
+// em memoria) ----------------------------------------------------------------
 const estadoQuestionario = {
     idAvaliacao,
     perguntas: [],
@@ -85,7 +89,15 @@ async function carregarPagina() {
 
         estadoQuestionario.perguntas = perguntas;
         estadoQuestionario.indiceAtual = 0;
-        estadoQuestionario.respostas = {};
+
+        definirEstado('carregando', 'Carregando respostas...');
+        try {
+            estadoQuestionario.respostas = await carregarRespostasDaAvaliacao(idAvaliacao, perguntas);
+        } catch (error) {
+            console.error('Erro ao carregar respostas anteriores:', error);
+            definirEstado('erro', 'Não foi possível carregar suas respostas anteriores.');
+            return;
+        }
 
         if (somenteLeitura) {
             alertaSomenteLeitura.hidden = false;
@@ -139,8 +151,22 @@ function renderizarPergunta() {
         });
     }
 
-    botaoAnterior.disabled = estadoQuestionario.indiceAtual === 0;
-    botaoProxima.disabled = estadoQuestionario.indiceAtual === total - 1;
+    definirStatusSalvamento('');
+    desabilitarNavegacao(false);
+}
+
+// Reaplicada apos cada render (que sempre parte de um estado "nao esta
+// salvando"); durante um salvamento em andamento, desabilitarNavegacao(true)
+// sobrescreve os dois temporariamente (secao 21 do prompt AVA-04).
+function desabilitarNavegacao(bloqueado) {
+    botaoAnterior.disabled = bloqueado || estadoQuestionario.indiceAtual === 0;
+    botaoProxima.disabled = bloqueado;
+}
+
+function definirStatusSalvamento(mensagem, isErro = false) {
+    textoStatusSalvamento.textContent = mensagem;
+    textoStatusSalvamento.classList.toggle('text-danger', isErro);
+    textoStatusSalvamento.classList.toggle('text-muted', !isErro);
 }
 
 // --- Controle "estilo botao" (radio/checkbox grandes, area de toque
@@ -315,18 +341,122 @@ function criarControlePergunta(pergunta) {
     }
 }
 
-// --- Navegacao (secao 26: apenas visual nesta feature, estado em memoria) --
-botaoAnterior.addEventListener('click', () => {
+// --- Validacao local de obrigatoriedade (secao 18) ---------------------------
+// Espelha, do lado do cliente, a mesma nocao de "vazio" que o service aplica
+// antes de gravar - so para dar feedback imediato sem round-trip ao Supabase.
+// A validacao que realmente vale (e que nunca confia no frontend) e a do
+// respostaService.js.
+function respostaPreenchida(pergunta) {
+    const valor = estadoQuestionario.respostas[pergunta.id_pergunta];
+    switch (pergunta.tipo_resposta) {
+        case 'BOOLEANO':
+            return valor === true || valor === false;
+        case 'NUMERICO':
+            return typeof valor === 'number' && !Number.isNaN(valor);
+        case 'TEXTO':
+            return typeof valor === 'string' && valor.trim().length > 0;
+        case 'ESCALA':
+        case 'ESCOLHA_UNICA':
+            return valor !== null && valor !== undefined;
+        case 'ESCOLHA_MULTIPLA':
+            return Array.isArray(valor) && valor.length > 0;
+        default:
+            return false;
+    }
+}
+
+// --- Persistencia da pergunta atual (secao 19/20/21 do prompt AVA-04) -------
+// Usada tanto por "Proxima" quanto por "Anterior": os dois devem persistir o
+// que estiver preenchido antes de navegar. Retorna { ok } para quem chamou
+// decidir se pode avancar (Proxima nao avanca se falhar; Anterior sempre
+// volta, mesmo em erro - ver os handlers abaixo).
+async function salvarRespostaAtual() {
+    if (somenteLeitura) {
+        return { ok: true };
+    }
+
+    const pergunta = estadoQuestionario.perguntas[estadoQuestionario.indiceAtual];
+    const valor = estadoQuestionario.respostas[pergunta.id_pergunta];
+
+    definirStatusSalvamento('Salvando resposta...');
+    desabilitarNavegacao(true);
+
+    try {
+        await salvarResposta(idAvaliacao, pergunta.id_pergunta, valor);
+        definirStatusSalvamento('');
+        return { ok: true };
+    } catch (error) {
+        console.error('Erro ao salvar resposta:', error);
+        definirStatusSalvamento(mensagemErroAmigavel(error), true);
+        return { ok: false };
+    } finally {
+        desabilitarNavegacao(false);
+    }
+}
+
+function mensagemErroAmigavel(error) {
+    const codigo = error?.code;
+
+    if (codigo === 'RESPOSTA_OBRIGATORIA') {
+        return 'Responda esta pergunta antes de continuar.';
+    }
+    if (
+        [
+            'AVALIACAO_FINALIZADA',
+            'AVALIACAO_CANCELADA',
+            'STATUS_NAO_EDITAVEL',
+            'TIPO_INCOMPATIVEL',
+            'TIPO_PERGUNTA_INVALIDO',
+            'MULTIPLAS_OPCOES_NAO_PERMITIDAS',
+            'OPCAO_INEXISTENTE',
+            'OPCAO_INATIVA',
+            'OPCAO_INCOMPATIVEL',
+        ].includes(codigo)
+    ) {
+        return error.message;
+    }
+
+    const mensagem = (error?.message || '').toLowerCase();
+    if (mensagem.includes('permission denied') || mensagem.includes('policy') || mensagem.includes('rls')) {
+        return 'Sem permissão para realizar esta operação.';
+    }
+
+    return 'Não foi possível salvar esta resposta.';
+}
+
+// --- Navegacao ------------------------------------------------------------------
+// "Anterior": nunca bloqueia o retorno, mesmo que a pergunta atual seja
+// obrigatoria e esteja vazia (secao 20) - o usuario deve poder voltar para
+// corrigir respostas anteriores.
+botaoAnterior.addEventListener('click', async () => {
+    await salvarRespostaAtual();
     if (estadoQuestionario.indiceAtual > 0) {
         estadoQuestionario.indiceAtual -= 1;
         renderizarPergunta();
     }
 });
 
-botaoProxima.addEventListener('click', () => {
+// "Proxima": bloqueia se a pergunta e obrigatoria e ainda esta vazia (sem
+// round-trip), e nao avanca se o salvamento falhar (secao 19). Na ultima
+// pergunta, so confirma a conclusao (secao 26) - nao ha "Finalizar" aqui.
+botaoProxima.addEventListener('click', async () => {
+    const pergunta = estadoQuestionario.perguntas[estadoQuestionario.indiceAtual];
+
+    if (pergunta.obrigatoria && !somenteLeitura && !respostaPreenchida(pergunta)) {
+        definirStatusSalvamento('Responda esta pergunta antes de continuar.', true);
+        return;
+    }
+
+    const resultado = await salvarRespostaAtual();
+    if (!resultado.ok) {
+        return;
+    }
+
     if (estadoQuestionario.indiceAtual < estadoQuestionario.perguntas.length - 1) {
         estadoQuestionario.indiceAtual += 1;
         renderizarPergunta();
+    } else if (!somenteLeitura) {
+        definirStatusSalvamento('Questionário preenchido com sucesso.');
     }
 });
 
