@@ -108,6 +108,38 @@ function renderizar() {
   definirEstado("sucesso");
 }
 
+// Botoes/links de acao compactos (somente icone, Bootstrap Icons) para a
+// coluna de Acoes: title + aria-label mantem a acessibilidade sem precisar
+// do texto visivel, que ficaria apertado com 5 acoes por linha.
+function criarIconeSvg(classeIcone) {
+  const icone = document.createElement("i");
+  icone.className = `bi ${classeIcone}`;
+  icone.setAttribute("aria-hidden", "true");
+  return icone;
+}
+
+function criarBotaoIcone({ icone, rotulo, acao, id, variante = "outline-secondary" }) {
+  const botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = `btn btn-${variante}`;
+  botao.dataset.acao = acao;
+  botao.dataset.id = id;
+  botao.title = rotulo;
+  botao.setAttribute("aria-label", rotulo);
+  botao.appendChild(criarIconeSvg(icone));
+  return botao;
+}
+
+function criarLinkIcone({ icone, rotulo, href, variante = "outline-secondary" }) {
+  const link = document.createElement("a");
+  link.className = `btn btn-${variante}`;
+  link.href = href;
+  link.title = rotulo;
+  link.setAttribute("aria-label", rotulo);
+  link.appendChild(criarIconeSvg(icone));
+  return link;
+}
+
 // Elementos criados via DOM API (nao innerHTML) para nao expor os dados do
 // colaborador a injecao de HTML.
 function criarLinhaColaborador(colaborador) {
@@ -132,47 +164,57 @@ function criarLinhaColaborador(colaborador) {
   celulaStatus.appendChild(badge);
 
   const celulaAcoes = document.createElement("td");
-  celulaAcoes.className = "text-nowrap";
+  celulaAcoes.className = "text-nowrap text-end";
 
-  const botaoVisualizar = document.createElement("button");
-  botaoVisualizar.type = "button";
-  botaoVisualizar.className = "btn btn-sm btn-link";
-  botaoVisualizar.textContent = "Visualizar";
-  botaoVisualizar.dataset.acao = "visualizar";
-  botaoVisualizar.dataset.id = colaborador.id_colaborador;
+  const grupo = document.createElement("div");
+  grupo.className = "btn-group btn-group-sm";
+  grupo.setAttribute("role", "group");
+  grupo.setAttribute("aria-label", "Ações do colaborador");
 
-  const botaoEditar = document.createElement("button");
-  botaoEditar.type = "button";
-  botaoEditar.className = "btn btn-sm btn-link";
-  botaoEditar.textContent = "Editar";
-  botaoEditar.dataset.acao = "editar";
-  botaoEditar.dataset.id = colaborador.id_colaborador;
+  const botaoVisualizar = criarBotaoIcone({
+    icone: "bi-eye",
+    rotulo: "Visualizar",
+    acao: "visualizar",
+    id: colaborador.id_colaborador,
+  });
 
-  const linkVinculos = document.createElement("a");
-  linkVinculos.className = "btn btn-sm btn-link";
-  linkVinculos.textContent = "Vínculos";
-  linkVinculos.href = `vinculos.html?id_colaborador=${colaborador.id_colaborador}`;
+  const botaoEditar = criarBotaoIcone({
+    icone: "bi-pencil",
+    rotulo: "Editar",
+    acao: "editar",
+    id: colaborador.id_colaborador,
+  });
 
-  celulaAcoes.append(botaoVisualizar, botaoEditar, linkVinculos);
+  const linkVinculos = criarLinkIcone({
+    icone: "bi-diagram-3",
+    rotulo: "Vínculos",
+    href: `vinculos.html?id_colaborador=${colaborador.id_colaborador}`,
+  });
+
+  grupo.append(botaoVisualizar, botaoEditar, linkVinculos);
 
   // "Nova avaliação" e "Desativar" seguem a mesma regra: um colaborador
   // inativo nao deve poder ser lancado em uma avaliacao nova (reativacao
   // fica para uma proxima etapa).
   if (colaborador.ativo) {
-    const linkNovaAvaliacao = document.createElement("a");
-    linkNovaAvaliacao.className = "btn btn-sm btn-link";
-    linkNovaAvaliacao.textContent = "Nova avaliação";
-    linkNovaAvaliacao.href = `nova-avaliacao.html?id_colaborador=${colaborador.id_colaborador}`;
-    celulaAcoes.appendChild(linkNovaAvaliacao);
+    const linkNovaAvaliacao = criarLinkIcone({
+      icone: "bi-clipboard-plus",
+      rotulo: "Nova avaliação",
+      href: `nova-avaliacao.html?id_colaborador=${colaborador.id_colaborador}`,
+    });
+    grupo.appendChild(linkNovaAvaliacao);
 
-    const botaoDesativar = document.createElement("button");
-    botaoDesativar.type = "button";
-    botaoDesativar.className = "btn btn-sm btn-outline-danger";
-    botaoDesativar.textContent = "Desativar";
-    botaoDesativar.dataset.acao = "desativar";
-    botaoDesativar.dataset.id = colaborador.id_colaborador;
-    celulaAcoes.appendChild(botaoDesativar);
+    const botaoDesativar = criarBotaoIcone({
+      icone: "bi-x-circle",
+      rotulo: "Desativar",
+      acao: "desativar",
+      id: colaborador.id_colaborador,
+      variante: "outline-danger",
+    });
+    grupo.appendChild(botaoDesativar);
   }
+
+  celulaAcoes.appendChild(grupo);
 
   linha.append(
     celulaMatricula,
