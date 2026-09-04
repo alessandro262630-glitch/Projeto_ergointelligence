@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Ação - ErgoIntelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/plano-acao.css">
+</head>
+<body>
+    <div class="d-flex vh-100">
+        <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 240px;">
+            <div class="sidebar-brand d-flex align-items-center justify-content-between border-bottom py-3 px-3">
+                <a href="colaboradores.html" class="d-flex align-items-center text-decoration-none text-dark">
+                    <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
+                    <span class="fw-bold">ErgoIntelligence</span>
+                </a>
+                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
+            </div>
+            <div class="offcanvas-body p-2">
+                <nav class="nav nav-pills flex-column gap-1">
+                    <a class="nav-link d-flex align-items-center gap-2" href="dashboard.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+                        Dashboard
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
+                        Avaliações
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
+                        Colaboradores
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
+                        Cadastros
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
+                        Riscos
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
+                        Recomendações
+                    </span>
+                    <a class="nav-link active d-flex align-items-center gap-2" href="plano-acao.html" aria-current="page">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
+                        Planos de Ação
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"></path><path d="M12 20V4"></path><path d="M20 20v-6.5"></path></svg>
+                        Relatórios
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+                        Configurações
+                    </span>
+                </nav>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-grow-1" style="min-width: 0;">
+            <nav class="navbar navbar-light bg-white border-bottom px-3">
+                <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Plano de Ação</span>
+            </nav>
+
+            <main class="flex-grow-1 overflow-auto">
+                <div class="container-fluid p-3 p-md-4" style="max-width: 960px;">
+
+                    <div id="area-estado" class="text-center text-muted py-5"></div>
+
+                    <div id="area-conteudo" hidden>
+                        <!-- Contexto (secao 17/18) -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                                    <h1 class="fs-5 fw-semibold mb-0">Plano de Ação</h1>
+                                    <div class="d-flex gap-2">
+                                        <a href="#" id="link-voltar-resultado" class="btn btn-outline-secondary btn-sm">&larr; Voltar ao Resultado</a>
+                                        <a href="dashboard.html" class="btn btn-outline-secondary btn-sm">Ir para Dashboard</a>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Colaborador</div>
+                                        <div class="fw-semibold" id="texto-contexto-colaborador">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Setor</div>
+                                        <div class="fw-semibold" id="texto-contexto-setor">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Data da avaliação</div>
+                                        <div class="fw-semibold" id="texto-contexto-data">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Classificação geral</div>
+                                        <div class="fw-semibold" id="texto-contexto-classificacao">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado sem plano (secao 15) -->
+                        <div class="card mb-3" id="area-sem-plano" hidden>
+                            <div class="card-body text-center py-4">
+                                <p class="text-muted mb-3">Esta avaliação ainda não possui um plano de ação.</p>
+                                <button type="button" class="btn btn-primary" id="botao-criar-plano">Criar Plano de Ação</button>
+                            </div>
+                        </div>
+
+                        <!-- Plano existente (secao 16) -->
+                        <div id="area-plano" hidden>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                        <h2 class="fs-6 fw-semibold mb-0" id="texto-plano-titulo">-</h2>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge" id="badge-plano-status">-</span>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="botao-editar-plano">Editar Plano</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted small mb-3" id="texto-plano-descricao"></p>
+                                    <div class="row g-3">
+                                        <div class="col-6 col-md-4">
+                                            <div class="small text-uppercase text-muted">Início</div>
+                                            <div class="fw-semibold" id="texto-plano-data-inicio">-</div>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <div class="small text-uppercase text-muted">Alvo</div>
+                                            <div class="fw-semibold" id="texto-plano-data-alvo">-</div>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <div class="small text-uppercase text-muted">Conclusão</div>
+                                            <div class="fw-semibold" id="texto-plano-data-conclusao">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumo de progresso (secao 42) -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-6 col-lg-3">
+                                    <div class="card h-100 resumo-card">
+                                        <div class="card-body">
+                                            <div class="resumo-rotulo">Total de ações</div>
+                                            <div class="resumo-valor" id="resumo-total">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <div class="card h-100 resumo-card">
+                                        <div class="card-body">
+                                            <div class="resumo-rotulo">Abertas</div>
+                                            <div class="resumo-valor" id="resumo-abertas">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <div class="card h-100 resumo-card">
+                                        <div class="card-body">
+                                            <div class="resumo-rotulo">Em andamento</div>
+                                            <div class="resumo-valor" id="resumo-andamento">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <div class="card h-100 resumo-card resumo-card--sucesso">
+                                        <div class="card-body">
+                                            <div class="resumo-rotulo">Concluídas</div>
+                                            <div class="resumo-valor" id="resumo-concluidas">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acoes do plano (secao 25/26) -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                        <h2 class="fs-6 fw-semibold mb-0">Ações do Plano</h2>
+                                        <button type="button" class="btn btn-primary btn-sm" id="botao-adicionar-acao">
+                                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                                            Adicionar Ação
+                                        </button>
+                                    </div>
+
+                                    <p class="text-muted text-center py-4 mb-0" id="area-sem-acoes" hidden>
+                                        Nenhuma ação cadastrada neste plano.
+                                    </p>
+
+                                    <div class="table-responsive" id="area-tabela-acoes" hidden>
+                                        <table class="table table-hover align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ação</th>
+                                                    <th>Origem</th>
+                                                    <th>Responsável</th>
+                                                    <th>Prioridade</th>
+                                                    <th>Prazo</th>
+                                                    <th>Status</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="corpo-tabela-acoes"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
+                <span>MVP de demonstração &middot; dados fictícios</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal: criar/editar plano (secao 19-24) -->
+    <div class="modal fade" id="modal-plano" tabindex="-1" aria-labelledby="modal-plano-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-plano-titulo">Novo Plano de Ação</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-plano" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="campo-id-plano">
+
+                        <div class="mb-3">
+                            <label for="campo-titulo-plano" class="form-label">Título do plano</label>
+                            <input type="text" id="campo-titulo-plano" class="form-control" maxlength="180" required
+                                placeholder="Ex.: Plano de adequação ergonômica — Setor Produção">
+                            <div class="invalid-feedback" id="erro-titulo-plano"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="campo-descricao-plano" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                            <textarea id="campo-descricao-plano" class="form-control" rows="2"
+                                placeholder="Ex.: Medidas destinadas à redução dos riscos identificados na avaliação."></textarea>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="campo-status-plano" class="form-label">Status</label>
+                                <select id="campo-status-plano" class="form-select" required>
+                                    <option value="ABERTO">Aberto</option>
+                                    <option value="EM_ANDAMENTO">Em andamento</option>
+                                    <option value="CONCLUIDO">Concluído</option>
+                                    <option value="CANCELADO">Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-inicio-plano" class="form-label">Data de início</label>
+                                <input type="date" id="campo-data-inicio-plano" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-inicio-plano"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-alvo-plano" class="form-label">Data alvo <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="date" id="campo-data-alvo-plano" class="form-control">
+                                <div class="invalid-feedback" id="erro-data-alvo-plano"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-conclusao-plano" class="form-label">Data de conclusão <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="date" id="campo-data-conclusao-plano" class="form-control">
+                                <div class="invalid-feedback" id="erro-data-conclusao-plano"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-plano">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: criar/editar acao (secao 27-37) -->
+    <div class="modal fade" id="modal-acao" tabindex="-1" aria-labelledby="modal-acao-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-acao-titulo">Nova Ação</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-acao" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="campo-id-acao">
+
+                        <div class="mb-3">
+                            <label for="campo-descricao-acao" class="form-label">Descrição da ação</label>
+                            <textarea id="campo-descricao-acao" class="form-control" rows="2" required
+                                placeholder="Ex.: Ajustar altura do monitor."></textarea>
+                            <div class="invalid-feedback" id="erro-descricao-acao"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="campo-recomendacao-acao" class="form-label">Origem da ação <span class="text-muted fw-normal">(opcional)</span></label>
+                            <select id="campo-recomendacao-acao" class="form-select">
+                                <option value="">Nenhuma (ação definida manualmente)</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="campo-responsavel-acao" class="form-label">Responsável</label>
+                                <select id="campo-responsavel-acao" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-responsavel-acao"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-prioridade-acao" class="form-label">Prioridade</label>
+                                <select id="campo-prioridade-acao" class="form-select" required>
+                                    <option value="BAIXA">Baixa</option>
+                                    <option value="MEDIA" selected>Média</option>
+                                    <option value="ALTA">Alta</option>
+                                    <option value="CRITICA">Crítica</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-prazo-acao" class="form-label">Prazo</label>
+                                <input type="date" id="campo-prazo-acao" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-prazo-acao"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-status-acao" class="form-label">Status</label>
+                                <select id="campo-status-acao" class="form-select" required>
+                                    <option value="ABERTA">Aberta</option>
+                                    <option value="EM_ANDAMENTO">Em andamento</option>
+                                    <option value="BLOQUEADA">Bloqueada</option>
+                                    <option value="CONCLUIDA">Concluída</option>
+                                    <option value="CANCELADA">Cancelada</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="grupo-data-conclusao-acao" hidden>
+                                <label for="campo-data-conclusao-acao" class="form-label">Data de conclusão</label>
+                                <input type="date" id="campo-data-conclusao-acao" class="form-control">
+                                <div class="invalid-feedback" id="erro-data-conclusao-acao"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-0 mt-3">
+                            <label for="campo-evidencia-acao" class="form-label">Evidência <span class="text-muted fw-normal">(opcional)</span></label>
+                            <textarea id="campo-evidencia-acao" class="form-control" rows="2"
+                                placeholder="Ex.: descrição do que foi feito, ou um link de referência."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-acao">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: confirmar conclusao rapida (mudanca de status na tabela - secao 36/45) -->
+    <div class="modal fade" id="modal-concluir-acao" tabindex="-1" aria-labelledby="modal-concluir-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-concluir-titulo">Concluir ação</h2>
+                    <button type="button" class="btn-close" id="botao-fechar-concluir" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-concluir-acao" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="campo-id-acao-concluir">
+                        <label for="campo-data-conclusao-rapida" class="form-label">Data de conclusão</label>
+                        <input type="date" id="campo-data-conclusao-rapida" class="form-control" required>
+                        <div class="invalid-feedback" id="erro-data-conclusao-rapida"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-concluir" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-confirmar-concluir">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/pages/plano-acao.js"></script>
+</body>
+</html>

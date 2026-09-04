@@ -6,6 +6,7 @@ import {
     processarOuObterResultadoRisco,
 } from '../services/riscoService.js';
 import { processarOuObterRecomendacoes } from '../services/recomendacaoService.js';
+import { buscarPlanoPorAvaliacao } from '../services/planoAcaoService.js';
 
 // INT-RSK-01 - Versao funcional minima da pagina de resultado.
 // So LE o que o Motor de Risco ja calculou/persistiu (avaliacao_ergonomica,
@@ -36,6 +37,8 @@ const textoSemRecomendacoes = document.getElementById('texto-sem-recomendacoes')
 const areaErroRecomendacoes = document.getElementById('area-erro-recomendacoes');
 const textoErroRecomendacoes = document.getElementById('texto-erro-recomendacoes');
 const botaoTentarRecomendacoes = document.getElementById('botao-tentar-recomendacoes');
+const textoStatusPlanoAcao = document.getElementById('texto-status-plano-acao');
+const botaoPlanoAcao = document.getElementById('botao-plano-acao');
 
 let avaliacaoAtual = null;
 // Preenchido a cada render de riscos, para a etapa de recomendacoes (que
@@ -133,6 +136,11 @@ async function carregarResultados() {
         // aqui nunca desfaz ou esconde o resultado do motor ja exibido
         // acima (secao 36 do prompt REC-01/REC-02).
         await carregarRecomendacoes();
+
+        // Idem para o acesso ao Plano de Acao (FEIRA-04, secao 14-16): so
+        // LEITURA (buscarPlanoPorAvaliacao nunca cria nada), e uma falha
+        // aqui tambem nunca invalida o resultado ja exibido.
+        await carregarAreaPlanoAcao();
     } catch (error) {
         console.error('Erro ao carregar resultado da avaliação:', error);
         definirEstado('erro', mensagemErroResultado(error));
@@ -438,6 +446,29 @@ async function carregarRecomendacoes() {
         textoErroRecomendacoes.textContent =
             'O resultado foi calculado, mas não foi possível carregar as recomendações.';
         areaErroRecomendacoes.hidden = false;
+    }
+}
+
+// --- Acesso ao Plano de Acao (FEIRA-04, secao 14-16) --------------------------
+// So LE (buscarPlanoPorAvaliacao nunca cria plano automaticamente so por
+// abrir esta pagina - secao 15). O rotulo do botao muda conforme ja existir
+// ou nao um plano; o destino e sempre o mesmo, plano-acao.html?id_avaliacao=X
+// (secao 14), que trata os dois estados.
+async function carregarAreaPlanoAcao() {
+    botaoPlanoAcao.href = `plano-acao.html?id_avaliacao=${idAvaliacao}`;
+    try {
+        const plano = await buscarPlanoPorAvaliacao(idAvaliacao);
+        if (plano) {
+            textoStatusPlanoAcao.textContent = 'Esta avaliação já possui um plano de ação.';
+            botaoPlanoAcao.textContent = 'Ver Plano de Ação';
+        } else {
+            textoStatusPlanoAcao.textContent = 'Esta avaliação ainda não possui um plano de ação.';
+            botaoPlanoAcao.textContent = 'Criar Plano de Ação';
+        }
+        botaoPlanoAcao.hidden = false;
+    } catch (error) {
+        console.error('Erro ao verificar plano de ação da avaliação:', error);
+        textoStatusPlanoAcao.textContent = 'Não foi possível verificar o plano de ação.';
     }
 }
 
