@@ -7,7 +7,9 @@ const COLUNAS_COLABORADOR = 'id_colaborador, id_empresa, matricula, nome, email,
 // extra a cada cadastro.
 let idEmpresaAtivaCache = null;
 
-async function obterIdEmpresaAtiva() {
+// Exportada para reuso por outros services que tambem precisam resolver a
+// empresa ativa sem duplicar a consulta (ex.: gheService.js - MVP-06).
+export async function obterIdEmpresaAtiva() {
     if (idEmpresaAtivaCache !== null) {
         return idEmpresaAtivaCache;
     }

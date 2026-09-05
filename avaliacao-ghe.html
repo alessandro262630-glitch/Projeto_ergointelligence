@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Avaliação - ErgoIntelligence</title>
+    <title>Avaliação do GHE - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/ghe.css">
 </head>
 <body>
     <div class="d-flex vh-100">
@@ -23,7 +25,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
                         Dashboard
                     </a>
-                    <a class="nav-link active d-flex align-items-center gap-2" href="nova-avaliacao.html" aria-current="page">
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
@@ -31,7 +33,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
                         Colaboradores
                     </a>
-                    <a class="nav-link d-flex align-items-center gap-2" href="ghes.html">
+                    <a class="nav-link active d-flex align-items-center gap-2" href="ghes.html" aria-current="page">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"></circle><circle cx="16" cy="8" r="2.6"></circle><circle cx="12" cy="15" r="2.6"></circle><path d="M8 10.6V13M16 10.6V13M9.6 16.4h4.8"></path></svg>
                         GHE
                     </a>
@@ -68,127 +70,93 @@
                 <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Nova Avaliação</span>
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <div class="text-end d-none d-sm-block">
-                        <div class="small fw-semibold">SST Demo</div>
-                        <div class="small text-muted">Administrador</div>
-                    </div>
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.78rem;">SD</div>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Avaliação do GHE</span>
+                <div class="ms-auto">
+                    <a href="#" class="btn btn-outline-secondary btn-sm" id="link-voltar-ghe">&larr; Voltar ao GHE</a>
                 </div>
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-4" style="max-width: 860px;">
-                    <p class="text-muted">
-                        Registre o contexto inicial da avaliação ergonômica. O questionário, o cálculo de risco e as
-                        recomendações são preenchidos em etapas posteriores.
-                    </p>
+                <div class="container-fluid p-3 p-md-4" style="max-width: 1000px;">
 
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
-                    <form id="formulario-avaliacao" class="card" novalidate hidden>
-                        <div class="card-body">
-                            <h2 class="fs-6 fw-semibold mb-3">Contexto do colaborador</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-colaborador" class="form-label">Colaborador *</label>
-                                    <select id="campo-colaborador" class="form-select" required>
-                                        <option value="">Selecione...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-colaborador"></div>
+                    <div id="area-conteudo" hidden>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                    <div>
+                                        <p class="text-muted small text-uppercase mb-1">Avaliação do GHE</p>
+                                        <h1 class="fs-4 mb-0" id="texto-ghe-nome">-</h1>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge" id="badge-avaliacao-status">-</span>
+                                        <p class="text-muted small mb-0 mt-1" id="texto-avaliacao-data"></p>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="campo-vinculo" class="form-label">Vínculo *</label>
-                                    <select id="campo-vinculo" class="form-select" required disabled>
-                                        <option value="">Selecione o colaborador primeiro...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-vinculo"></div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card">
+                                            <div class="ghe-numero-valor" id="numero-universo">0</div>
+                                            <div class="ghe-numero-rotulo">Universo</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card">
+                                            <div class="ghe-numero-valor" id="numero-amostra-planejada">0</div>
+                                            <div class="ghe-numero-rotulo">Amostra planejada</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card">
+                                            <div class="ghe-numero-valor" id="numero-participantes-registrados">0</div>
+                                            <div class="ghe-numero-rotulo">Participantes registrados</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card ghe-numero-card--destaque">
+                                            <div class="ghe-numero-valor" id="numero-coletas-concluidas">0</div>
+                                            <div class="ghe-numero-rotulo">Coletas concluídas</div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="campo-funcao" class="form-label">Função</label>
-                                    <select id="campo-funcao" class="form-select" disabled>
-                                        <option value="">Selecione o vínculo primeiro...</option>
-                                    </select>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                                    <a href="#" class="btn btn-outline-secondary btn-sm" id="link-ver-consolidacao">Ver Consolidação</a>
+                                    <button type="button" class="btn btn-success btn-sm" id="botao-consolidar-avaliacao">Consolidar Avaliação do GHE</button>
                                 </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-perfil" class="form-label">Perfil antropométrico</label>
-                                    <select id="campo-perfil" class="form-select" disabled>
-                                        <option value="">Selecione o colaborador primeiro...</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <h2 class="fs-6 fw-semibold mb-3">Local de trabalho</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-ambiente" class="form-label">Ambiente *</label>
-                                    <select id="campo-ambiente" class="form-select" required disabled>
-                                        <option value="">Selecione o vínculo primeiro...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-ambiente"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-posto" class="form-label">Posto</label>
-                                    <select id="campo-posto" class="form-select" disabled>
-                                        <option value="">Selecione o ambiente primeiro...</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <h2 class="fs-6 fw-semibold mb-3">Dados da avaliação</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-tipo-avaliacao" class="form-label">Tipo de avaliação *</label>
-                                    <select id="campo-tipo-avaliacao" class="form-select" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="INICIAL">Inicial</option>
-                                        <option value="ACOMPANHAMENTO">Acompanhamento</option>
-                                        <option value="POS_INTERVENCAO">Pós-intervenção</option>
-                                        <option value="AEP">AEP</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-tipo-avaliacao"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-data-avaliacao" class="form-label">Data da avaliação *</label>
-                                    <input type="datetime-local" id="campo-data-avaliacao" class="form-control" required>
-                                    <div class="invalid-feedback" id="erro-data-avaliacao"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label">Avaliador</label>
-                                    <input type="text" class="form-control" id="campo-avaliador" readonly>
-                                    <div class="invalid-feedback" id="erro-avaliador"></div>
-                                </div>
-
-                                <div class="col-12">
-                                    <label for="campo-observacoes" class="form-label">Observações</label>
-                                    <textarea id="campo-observacoes" class="form-control" rows="3" maxlength="2000"></textarea>
+                                <div id="alerta-avaliacao-consolidada" class="alert alert-info mt-3 mb-0" hidden>
+                                    Esta avaliação do GHE já foi consolidada. As coletas não podem mais ser alteradas.
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer d-flex flex-wrap justify-content-end gap-2 bg-white">
-                            <button type="button" class="btn btn-outline-secondary" id="botao-salvar-rascunho">Salvar rascunho</button>
-                            <button type="button" class="btn btn-primary" id="botao-iniciar-avaliacao">Iniciar avaliação</button>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 class="fs-6 fw-semibold mb-3">Participantes e Coletas</h2>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Colaborador</th>
+                                                <th>Setor</th>
+                                                <th>Cargo</th>
+                                                <th>Status da coleta</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="corpo-tabela-progresso"></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </main>
 
             <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
-                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
                 <span>MVP de demonstração &middot; dados fictícios</span>
             </footer>
         </div>
@@ -197,6 +165,6 @@
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/pages/nova-avaliacao.js"></script>
+    <script type="module" src="js/pages/avaliacao-ghe.js"></script>
 </body>
 </html>

@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vínculos do colaborador - ErgoIntelligence</title>
+    <title>GHEs - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/ghe.css">
 </head>
 <body>
     <div class="d-flex vh-100">
@@ -27,11 +29,11 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
-                    <a class="nav-link active d-flex align-items-center gap-2" href="colaboradores.html" aria-current="page">
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
                         Colaboradores
                     </a>
-                    <a class="nav-link d-flex align-items-center gap-2" href="ghes.html">
+                    <a class="nav-link active d-flex align-items-center gap-2" href="ghes.html" aria-current="page">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"></circle><circle cx="16" cy="8" r="2.6"></circle><circle cx="12" cy="15" r="2.6"></circle><path d="M8 10.6V13M16 10.6V13M9.6 16.4h4.8"></path></svg>
                         GHE
                     </a>
@@ -68,60 +70,44 @@
                 <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Vínculos do Colaborador</span>
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <div class="text-end d-none d-sm-block">
-                        <div class="small fw-semibold">SST Demo</div>
-                        <div class="small text-muted">Administrador</div>
-                    </div>
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.78rem;">SD</div>
+                <div class="ms-2 ms-lg-0">
+                    <span class="navbar-brand mb-0 h5 d-block">GHEs — Grupos Homogêneos de Exposição</span>
+                    <span class="small text-muted">Universo, amostragem e participantes demonstrativos</span>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo — dados fictícios</span>
                 </div>
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-4">
-                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-                        <p class="text-muted mb-0">Gerencie o histórico organizacional do colaborador.</p>
-                        <button type="button" class="btn btn-primary" id="botao-novo-vinculo">
-                            + Novo vínculo
+                <div class="container-fluid p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <p class="text-muted small mb-0">
+                            Um GHE reúne trabalhadores com exposição semelhante — não é necessariamente um único cargo
+                            ou colaborador. Cadastre o universo declarado do grupo e planeje a amostra a ser coletada.
+                        </p>
+                        <button type="button" class="btn btn-primary text-nowrap ms-3" id="botao-novo-ghe">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                            Novo GHE
                         </button>
-                    </div>
-
-                    <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-4">
-                        <div>
-                            <span class="fw-semibold" id="contexto-nome">Carregando colaborador...</span>
-                            <span class="text-muted small ms-2" id="contexto-matricula"></span>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <a id="link-nova-avaliacao" href="#" class="btn btn-sm btn-outline-primary">+ Nova avaliação</a>
-                            <a href="colaboradores.html" class="small fw-semibold text-decoration-none">&larr; Voltar para Colaboradores</a>
-                        </div>
-                    </div>
-
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h2 class="fs-6 fw-semibold mb-3">Vínculo atual</h2>
-                            <div id="area-vinculo-atual"></div>
-                        </div>
                     </div>
 
                     <div class="card">
                         <div class="card-body">
-                            <h2 class="fs-6 fw-semibold mb-3">Histórico de vínculos</h2>
-
-                            <div id="area-estado" class="text-center text-muted py-5" hidden></div>
+                            <div id="area-estado" class="text-center text-muted py-5"></div>
 
                             <div id="area-tabela" class="table-responsive" hidden>
                                 <table class="table table-hover align-middle">
                                     <thead>
                                         <tr>
+                                            <th>Código</th>
+                                            <th>Nome</th>
                                             <th>Setor</th>
-                                            <th>Cargo</th>
-                                            <th>Início</th>
-                                            <th>Fim</th>
-                                            <th>Principal</th>
+                                            <th class="text-end">Universo</th>
+                                            <th class="text-end">Amostra atual</th>
+                                            <th>Plano</th>
                                             <th>Status</th>
-                                            <th>Ações</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody id="corpo-tabela"></tbody>
@@ -133,85 +119,54 @@
             </main>
 
             <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
-                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
                 <span>MVP de demonstração &middot; dados fictícios</span>
             </footer>
         </div>
     </div>
 
-    <!-- Modal de novo/edicao de vinculo -->
-    <div class="modal fade" id="modal-formulario" tabindex="-1" aria-labelledby="modal-formulario-titulo" aria-hidden="true">
+    <!-- Modal: criar/editar GHE -->
+    <div class="modal fade" id="modal-ghe" tabindex="-1" aria-labelledby="modal-ghe-titulo" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-formulario-titulo">Novo vínculo</h2>
-                    <button type="button" class="btn-close" id="botao-fechar-formulario" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <h2 class="modal-title fs-5" id="modal-ghe-titulo">Novo GHE</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <form id="formulario-vinculo" novalidate>
+                <form id="formulario-ghe" novalidate>
                     <div class="modal-body">
-                        <input type="hidden" id="campo-id-vinculo">
+                        <input type="hidden" id="campo-id-ghe">
 
-                        <div class="mb-3">
-                            <label for="campo-setor" class="form-label">Setor</label>
-                            <select id="campo-setor" class="form-select" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                            <div class="invalid-feedback" id="erro-setor"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-cargo" class="form-label">Cargo</label>
-                            <select id="campo-cargo" class="form-select" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                            <div class="invalid-feedback" id="erro-cargo"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-data-inicio" class="form-label">Data de início</label>
-                            <input type="date" id="campo-data-inicio" class="form-control" required>
-                            <div class="invalid-feedback" id="erro-data-inicio"></div>
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" id="campo-principal" class="form-check-input">
-                            <label for="campo-principal" class="form-check-label">Vínculo principal</label>
-                            <div class="invalid-feedback" id="erro-principal"></div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="campo-codigo-ghe" class="form-label">Código <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="text" id="campo-codigo-ghe" class="form-control" maxlength="30" placeholder="Ex.: GHE-01">
+                            </div>
+                            <div class="col-md-8">
+                                <label for="campo-nome-ghe" class="form-label">Nome do GHE</label>
+                                <input type="text" id="campo-nome-ghe" class="form-control" maxlength="160" required placeholder="Ex.: Operadores de Produção">
+                                <div class="invalid-feedback" id="erro-nome-ghe"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-setor-ghe" class="form-label">Setor <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select id="campo-setor-ghe" class="form-select">
+                                    <option value="">Não especificado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-universo-ghe" class="form-label">Universo (trabalhadores)</label>
+                                <input type="number" id="campo-universo-ghe" class="form-control" min="1" step="1" required>
+                                <div class="invalid-feedback" id="erro-universo-ghe"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-descricao-ghe" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-descricao-ghe" class="form-control" rows="2" placeholder="Ex.: Trabalhadores expostos a condições semelhantes na linha de produção."></textarea>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-formulario" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" id="botao-salvar-vinculo">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de encerramento de vinculo -->
-    <div class="modal fade" id="modal-encerrar" tabindex="-1" aria-labelledby="modal-encerrar-titulo" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-encerrar-titulo">Encerrar vínculo</h2>
-                    <button type="button" class="btn-close" id="botao-fechar-encerrar" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <form id="formulario-encerrar" novalidate>
-                    <div class="modal-body">
-                        <p class="text-muted mb-3">
-                            O vínculo não será excluído: ele passará a constar como encerrado no histórico.
-                        </p>
-                        <input type="hidden" id="campo-id-vinculo-encerrar">
-
-                        <div class="mb-3">
-                            <label for="campo-data-fim" class="form-label">Data de encerramento</label>
-                            <input type="date" id="campo-data-fim" class="form-control" required>
-                            <div class="invalid-feedback" id="erro-data-fim"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-encerrar" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-outline-danger" id="botao-confirmar-encerrar">Confirmar encerramento</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-ghe">Salvar</button>
                     </div>
                 </form>
             </div>
@@ -221,6 +176,6 @@
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/pages/vinculos.js"></script>
+    <script type="module" src="js/pages/ghes.js"></script>
 </body>
 </html>

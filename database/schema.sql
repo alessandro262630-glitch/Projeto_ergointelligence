@@ -875,6 +875,209 @@ ALTER TABLE avaliacao_ergonomica
     REFERENCES classificacao_risco (id_classificacao) ON DELETE RESTRICT;
 
 -- =====================================================================
+-- BLOCO 6 - GHE E AMOSTRAGEM DEMONSTRATIVA (MVP-06)
+-- =====================================================================
+-- Fundacao organizacional do novo modelo (Empresa -> Setor -> GHE ->
+-- Universo -> Plano de Amostragem -> Amostra -> Coletas -> Consolidacao).
+-- Esta etapa implementa SOMENTE GHE + universo + plano de amostragem +
+-- participantes. Consolidacao de coletas e risco do GHE ficam para o
+-- MVP-07 (ver docs/ghe-amostragem-mvp.md).
+
+-- ---------------------------------------------------------------------
+-- 32. GHE (Grupo Homogeneo de Exposicao)
+-- ---------------------------------------------------------------------
+CREATE TABLE ghe (
+    id_ghe          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_empresa      BIGINT NOT NULL,
+    id_setor        BIGINT,
+    codigo          VARCHAR(30),
+    nome            VARCHAR(160) NOT NULL,
+    descricao       TEXT,
+    universo        INTEGER NOT NULL,
+    ativo           BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_ghe_empresa FOREIGN KEY (id_empresa)
+        REFERENCES empresa (id_empresa) ON DELETE RESTRICT,
+    CONSTRAINT fk_ghe_setor FOREIGN KEY (id_setor)
+        REFERENCES setor (id_setor) ON DELETE RESTRICT,
+    CONSTRAINT uq_ghe_empresa_codigo UNIQUE (id_empresa, codigo),
+    CONSTRAINT uq_ghe_empresa_nome UNIQUE (id_empresa, nome),
+    CONSTRAINT chk_ghe_universo CHECK (universo > 0)
+);
+
+COMMENT ON TABLE ghe IS 'Grupo Homogeneo de Exposicao: conjunto de trabalhadores com condicoes semelhantes de exposicao. Unidade principal de analise de risco ocupacional a partir do MVP-06 - nao representa necessariamente um unico cargo/colaborador. id_setor e opcional (nem todo GHE mapeia 1:1 para um setor). "universo" e o tamanho declarado do grupo, nao exige cadastro individual de cada trabalhador (ver docs/ghe-amostragem-mvp.md).';
+
+-- ---------------------------------------------------------------------
+-- 33. GHE_CARGO (associativa N:N)
+-- ---------------------------------------------------------------------
+CREATE TABLE ghe_cargo (
+    id_ghe_cargo    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_ghe          BIGINT NOT NULL,
+    id_cargo        BIGINT NOT NULL,
+    ativo           BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_ghe_cargo_ghe FOREIGN KEY (id_ghe)
+        REFERENCES ghe (id_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_ghe_cargo_cargo FOREIGN KEY (id_cargo)
+        REFERENCES cargo (id_cargo) ON DELETE RESTRICT,
+    CONSTRAINT uq_ghe_cargo UNIQUE (id_ghe, id_cargo)
+);
+
+COMMENT ON TABLE ghe_cargo IS 'Cargos compativeis com o contexto de exposicao de cada GHE (N:N) - um GHE pode abranger mais de um cargo.';
+
+-- ---------------------------------------------------------------------
+-- 34. PLANO_AMOSTRAGEM
+-- ---------------------------------------------------------------------
+CREATE TABLE plano_amostragem (
+    id_plano_amostragem  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_ghe               BIGINT NOT NULL,
+    universo_snapshot    INTEGER NOT NULL,
+    amostra_planejada    INTEGER NOT NULL,
+    criterio             TEXT,
+    observacao           TEXT,
+    status               VARCHAR(20) NOT NULL,
+    id_responsavel       BIGINT NOT NULL,
+    data_plano           DATE NOT NULL,
+    criado_em            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_plano_amostragem_ghe FOREIGN KEY (id_ghe)
+        REFERENCES ghe (id_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_plano_amostragem_responsavel FOREIGN KEY (id_responsavel)
+        REFERENCES usuario (id_usuario) ON DELETE RESTRICT,
+    CONSTRAINT chk_plano_amostragem_universo CHECK (universo_snapshot > 0),
+    CONSTRAINT chk_plano_amostragem_amostra CHECK (amostra_planejada > 0),
+    CONSTRAINT chk_plano_amostragem_amostra_universo CHECK (amostra_planejada <= universo_snapshot),
+    CONSTRAINT chk_plano_amostragem_status CHECK (
+        status IN ('PLANEJADO', 'EM_COLETA', 'CONCLUIDO', 'CANCELADO')
+    )
+);
+
+COMMENT ON TABLE plano_amostragem IS 'Planejamento da amostra de um GHE. universo_snapshot preserva o tamanho do universo no momento do plano (historico, nao acompanha alteracoes futuras do GHE). Nao calcula representatividade estatistica - amostra_planejada/universo_snapshot e apenas percentual descritivo de participacao (MVP-06, secao 5/16).';
+
+-- ---------------------------------------------------------------------
+-- 35. AMOSTRA_PARTICIPANTE (associativa)
+-- ---------------------------------------------------------------------
+CREATE TABLE amostra_participante (
+    id_amostra_participante  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_plano_amostragem      BIGINT NOT NULL,
+    id_vinculo               BIGINT NOT NULL,
+    criado_em                TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_amostra_participante_plano FOREIGN KEY (id_plano_amostragem)
+        REFERENCES plano_amostragem (id_plano_amostragem) ON DELETE RESTRICT,
+    CONSTRAINT fk_amostra_participante_vinculo FOREIGN KEY (id_vinculo)
+        REFERENCES colaborador_vinculo (id_vinculo) ON DELETE RESTRICT,
+    CONSTRAINT uq_amostra_participante UNIQUE (id_plano_amostragem, id_vinculo)
+);
+
+COMMENT ON TABLE amostra_participante IS 'Vinculos de colaboradores registrados como participantes de um Plano de Amostragem. Nao e o mesmo conceito que amostra_planejada (tamanho pretendido) - ver contagem real em COUNT(*) desta tabela por plano.';
+
+-- =====================================================================
+-- BLOCO 7 - AVALIACAO DO GHE E COLETAS DA AMOSTRA (MVP-07)
+-- =====================================================================
+-- Processo coletivo: Avaliacao do GHE agrupa Coletas (uma por
+-- participante da amostra), reutilizando o catalogo existente de
+-- perguntas/opcoes. Nao calcula risco/classificacao do GHE (MVP-08) e nao
+-- altera o fluxo individual (Bloco 2) nem o MVP-06 (Bloco 6).
+
+-- ---------------------------------------------------------------------
+-- 36. AVALIACAO_GHE
+-- ---------------------------------------------------------------------
+CREATE TABLE avaliacao_ghe (
+    id_avaliacao_ghe     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_ghe               BIGINT NOT NULL,
+    id_plano_amostragem  BIGINT NOT NULL,
+    id_avaliador         BIGINT NOT NULL,
+    tipo_avaliacao       VARCHAR(30) NOT NULL DEFAULT 'AEP',
+    status               VARCHAR(20) NOT NULL,
+    data_avaliacao       TIMESTAMPTZ NOT NULL,
+    observacoes          TEXT,
+    criado_em            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_avaliacao_ghe_ghe FOREIGN KEY (id_ghe)
+        REFERENCES ghe (id_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_plano_amostragem FOREIGN KEY (id_plano_amostragem)
+        REFERENCES plano_amostragem (id_plano_amostragem) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_avaliador FOREIGN KEY (id_avaliador)
+        REFERENCES usuario (id_usuario) ON DELETE RESTRICT,
+    CONSTRAINT chk_avaliacao_ghe_tipo CHECK (tipo_avaliacao IN ('AEP')),
+    CONSTRAINT chk_avaliacao_ghe_status CHECK (
+        status IN ('RASCUNHO', 'EM_COLETA', 'CONSOLIDADA', 'CANCELADA')
+    )
+);
+
+COMMENT ON TABLE avaliacao_ghe IS 'Processo coletivo de avaliacao de um GHE, agrupando as coletas dos participantes de um Plano de Amostragem. Nao calcula risco/classificacao do GHE (MVP-08) - so organiza a coleta de evidencias.';
+
+-- ---------------------------------------------------------------------
+-- 37. COLETA_GHE
+-- ---------------------------------------------------------------------
+CREATE TABLE coleta_ghe (
+    id_coleta                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_avaliacao_ghe         BIGINT NOT NULL,
+    id_amostra_participante  BIGINT NOT NULL,
+    status                   VARCHAR(20) NOT NULL,
+    data_conclusao           TIMESTAMPTZ,
+    criado_em                TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_coleta_ghe_avaliacao_ghe FOREIGN KEY (id_avaliacao_ghe)
+        REFERENCES avaliacao_ghe (id_avaliacao_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_coleta_ghe_amostra_participante FOREIGN KEY (id_amostra_participante)
+        REFERENCES amostra_participante (id_amostra_participante) ON DELETE RESTRICT,
+    CONSTRAINT uq_coleta_ghe_avaliacao_participante UNIQUE (id_avaliacao_ghe, id_amostra_participante),
+    CONSTRAINT chk_coleta_ghe_status CHECK (
+        status IN ('EM_ANDAMENTO', 'CONCLUIDA', 'CANCELADA')
+    ),
+    CONSTRAINT chk_coleta_ghe_conclusao CHECK (
+        status <> 'CONCLUIDA' OR data_conclusao IS NOT NULL
+    )
+);
+
+COMMENT ON TABLE coleta_ghe IS 'Coleta de evidencias de UM participante da amostra dentro de uma Avaliacao do GHE. E evidencia, nao resultado ocupacional individual definitivo (secao 2 do prompt MVP-07).';
+
+-- ---------------------------------------------------------------------
+-- 38. RESPOSTA_COLETA
+-- ---------------------------------------------------------------------
+CREATE TABLE resposta_coleta (
+    id_resposta_coleta   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_coleta            BIGINT NOT NULL,
+    id_pergunta          BIGINT NOT NULL,
+    resposta_texto       TEXT,
+    resposta_numero      NUMERIC(12,3),
+    resposta_booleano    BOOLEAN,
+    observacao           TEXT,
+    respondido_em        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_resposta_coleta_coleta FOREIGN KEY (id_coleta)
+        REFERENCES coleta_ghe (id_coleta) ON DELETE CASCADE,
+    CONSTRAINT fk_resposta_coleta_pergunta FOREIGN KEY (id_pergunta)
+        REFERENCES pergunta_avaliacao (id_pergunta) ON DELETE RESTRICT,
+    CONSTRAINT uq_resposta_coleta UNIQUE (id_coleta, id_pergunta),
+    CONSTRAINT chk_resposta_coleta_valor_unico CHECK (
+        (CASE WHEN resposta_texto IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN resposta_numero IS NOT NULL THEN 1 ELSE 0 END) +
+        (CASE WHEN resposta_booleano IS NOT NULL THEN 1 ELSE 0 END) <= 1
+    )
+);
+
+COMMENT ON TABLE resposta_coleta IS 'Resposta unica por pergunta/coleta; valores de escolha ficam na associativa resposta_coleta_opcao. Sem pontuacao (a coleta nao aciona o Motor de Risco).';
+
+-- ---------------------------------------------------------------------
+-- 39. RESPOSTA_COLETA_OPCAO (associativa)
+-- ---------------------------------------------------------------------
+CREATE TABLE resposta_coleta_opcao (
+    id_resposta_coleta_opcao   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_resposta_coleta          BIGINT NOT NULL,
+    id_opcao                    BIGINT NOT NULL,
+    criado_em                   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_resposta_coleta_opcao_resposta FOREIGN KEY (id_resposta_coleta)
+        REFERENCES resposta_coleta (id_resposta_coleta) ON DELETE CASCADE,
+    CONSTRAINT fk_resposta_coleta_opcao_opcao FOREIGN KEY (id_opcao)
+        REFERENCES opcao_resposta (id_opcao) ON DELETE RESTRICT,
+    CONSTRAINT uq_resposta_coleta_opcao UNIQUE (id_resposta_coleta, id_opcao)
+);
+
+COMMENT ON TABLE resposta_coleta_opcao IS 'Opcoes selecionadas em uma resposta de coleta de escolha unica ou multipla.';
+
+-- =====================================================================
 -- INDICES
 -- =====================================================================
 -- Indices em FKs usadas em JOIN/filtro que ainda nao possuem indice
@@ -930,6 +1133,23 @@ CREATE INDEX ix_plano_acao_criado_por ON plano_acao (criado_por);
 CREATE INDEX ix_acao_plano_id_plano ON acao_plano (id_plano);
 CREATE INDEX ix_acao_plano_id_avaliacao_recomendacao ON acao_plano (id_avaliacao_recomendacao);
 CREATE INDEX ix_acao_plano_id_responsavel ON acao_plano (id_responsavel);
+
+-- Bloco 6
+CREATE INDEX ix_ghe_id_empresa ON ghe (id_empresa);
+CREATE INDEX ix_ghe_id_setor ON ghe (id_setor);
+CREATE INDEX ix_ghe_cargo_id_cargo ON ghe_cargo (id_cargo);
+CREATE INDEX ix_plano_amostragem_id_ghe ON plano_amostragem (id_ghe);
+CREATE INDEX ix_plano_amostragem_id_responsavel ON plano_amostragem (id_responsavel);
+CREATE INDEX ix_amostra_participante_id_vinculo ON amostra_participante (id_vinculo);
+
+-- Bloco 7
+CREATE INDEX ix_avaliacao_ghe_id_ghe ON avaliacao_ghe (id_ghe);
+CREATE INDEX ix_avaliacao_ghe_id_plano_amostragem ON avaliacao_ghe (id_plano_amostragem);
+CREATE INDEX ix_avaliacao_ghe_id_avaliador ON avaliacao_ghe (id_avaliador);
+CREATE INDEX ix_coleta_ghe_id_avaliacao_ghe ON coleta_ghe (id_avaliacao_ghe);
+CREATE INDEX ix_coleta_ghe_id_amostra_participante ON coleta_ghe (id_amostra_participante);
+CREATE INDEX ix_resposta_coleta_id_pergunta ON resposta_coleta (id_pergunta);
+CREATE INDEX ix_resposta_coleta_opcao_id_opcao ON resposta_coleta_opcao (id_opcao);
 
 -- Indices compostos recomendados explicitamente pelo modelo logico (Secao F)
 CREATE INDEX ix_avaliacao_ergonomica_vinculo_data

@@ -1,0 +1,44 @@
+/* ErgoIntelligence - GHE e Amostragem Demonstrativa (MVP-06).
+   Bootstrap cobre cards/tabela/badges/forms/modais; aqui ficam so os
+   ajustes que o tema padrao nao cobre. */
+
+.ghe-destaque {
+    border-top: 4px solid var(--bs-primary);
+}
+
+.ghe-destaque__rotulo {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-primary);
+}
+
+.ghe-destaque__titulo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--bs-emphasis-color, #10263B);
+}
+
+.ghe-numero-card {
+    background: var(--bs-tertiary-bg, #f3f5f7);
+    border-radius: 0.65rem;
+    padding: 0.9rem 1rem;
+    height: 100%;
+}
+
+.ghe-numero-card--destaque {
+    background: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.ghe-numero-valor {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--bs-emphasis-color, #10263B);
+    line-height: 1.15;
+}
+
+.ghe-numero-rotulo {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Avaliação - ErgoIntelligence</title>
+    <title>Coleta do GHE - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
 </head>
@@ -23,7 +23,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
                         Dashboard
                     </a>
-                    <a class="nav-link active d-flex align-items-center gap-2" href="nova-avaliacao.html" aria-current="page">
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
@@ -68,122 +68,63 @@
                 <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Nova Avaliação</span>
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <div class="text-end d-none d-sm-block">
-                        <div class="small fw-semibold">SST Demo</div>
-                        <div class="small text-muted">Administrador</div>
-                    </div>
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.78rem;">SD</div>
-                </div>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Coleta do GHE</span>
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-4" style="max-width: 860px;">
-                    <p class="text-muted">
-                        Registre o contexto inicial da avaliação ergonômica. O questionário, o cálculo de risco e as
-                        recomendações são preenchidos em etapas posteriores.
-                    </p>
-
+                <div class="container-fluid p-3 p-md-4" style="max-width: 640px;">
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
-                    <form id="formulario-avaliacao" class="card" novalidate hidden>
-                        <div class="card-body">
-                            <h2 class="fs-6 fw-semibold mb-3">Contexto do colaborador</h2>
+                    <div id="area-coleta" hidden>
+                        <div id="alerta-somente-leitura" class="alert alert-warning" hidden></div>
 
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-colaborador" class="form-label">Colaborador *</label>
-                                    <select id="campo-colaborador" class="form-select" required>
-                                        <option value="">Selecione...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-colaborador"></div>
-                                </div>
+                        <p class="text-muted small text-uppercase mb-1" id="texto-ghe-nome"></p>
+                        <p class="fw-semibold mb-1" id="texto-participante-nome"></p>
+                        <p class="text-muted small mb-2" id="texto-categoria"></p>
 
-                                <div class="col-md-6">
-                                    <label for="campo-vinculo" class="form-label">Vínculo *</label>
-                                    <select id="campo-vinculo" class="form-select" required disabled>
-                                        <option value="">Selecione o colaborador primeiro...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-vinculo"></div>
-                                </div>
+                        <div class="progress mb-1" role="progressbar" aria-label="Progresso da coleta" style="height: 8px;">
+                            <div class="progress-bar" id="barra-progresso" style="width: 0%;"></div>
+                        </div>
+                        <p class="text-muted small mb-4" id="texto-progresso"></p>
 
-                                <div class="col-md-6">
-                                    <label for="campo-funcao" class="form-label">Função</label>
-                                    <select id="campo-funcao" class="form-select" disabled>
-                                        <option value="">Selecione o vínculo primeiro...</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-perfil" class="form-label">Perfil antropométrico</label>
-                                    <select id="campo-perfil" class="form-select" disabled>
-                                        <option value="">Selecione o colaborador primeiro...</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <h2 class="fs-6 fw-semibold mb-3">Local de trabalho</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-ambiente" class="form-label">Ambiente *</label>
-                                    <select id="campo-ambiente" class="form-select" required disabled>
-                                        <option value="">Selecione o vínculo primeiro...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-ambiente"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-posto" class="form-label">Posto</label>
-                                    <select id="campo-posto" class="form-select" disabled>
-                                        <option value="">Selecione o ambiente primeiro...</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <h2 class="fs-6 fw-semibold mb-3">Dados da avaliação</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-tipo-avaliacao" class="form-label">Tipo de avaliação *</label>
-                                    <select id="campo-tipo-avaliacao" class="form-select" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="INICIAL">Inicial</option>
-                                        <option value="ACOMPANHAMENTO">Acompanhamento</option>
-                                        <option value="POS_INTERVENCAO">Pós-intervenção</option>
-                                        <option value="AEP">AEP</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-tipo-avaliacao"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-data-avaliacao" class="form-label">Data da avaliação *</label>
-                                    <input type="datetime-local" id="campo-data-avaliacao" class="form-control" required>
-                                    <div class="invalid-feedback" id="erro-data-avaliacao"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label">Avaliador</label>
-                                    <input type="text" class="form-control" id="campo-avaliador" readonly>
-                                    <div class="invalid-feedback" id="erro-avaliador"></div>
-                                </div>
-
-                                <div class="col-12">
-                                    <label for="campo-observacoes" class="form-label">Observações</label>
-                                    <textarea id="campo-observacoes" class="form-control" rows="3" maxlength="2000"></textarea>
-                                </div>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <fieldset>
+                                    <legend class="fs-5 fw-semibold mb-3" id="legenda-pergunta"></legend>
+                                    <div id="area-controle-pergunta"></div>
+                                </fieldset>
                             </div>
                         </div>
-                        <div class="card-footer d-flex flex-wrap justify-content-end gap-2 bg-white">
-                            <button type="button" class="btn btn-outline-secondary" id="botao-salvar-rascunho">Salvar rascunho</button>
-                            <button type="button" class="btn btn-primary" id="botao-iniciar-avaliacao">Iniciar avaliação</button>
+
+                        <p class="text-muted small text-center mb-2" id="texto-status-salvamento" aria-live="polite"></p>
+
+                        <div class="d-flex justify-content-between gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-lg" id="botao-anterior">&larr; Anterior</button>
+                            <button type="button" class="btn btn-primary btn-lg" id="botao-proxima">Próxima &rarr;</button>
                         </div>
-                    </form>
+
+                        <hr class="my-4">
+
+                        <div id="card-finalizacao">
+                            <div id="alerta-validacao-finalizacao" class="alert alert-danger" hidden>
+                                <p class="mb-2 fw-semibold" id="texto-validacao-finalizacao"></p>
+                                <ul class="mb-2" id="lista-erros-finalizacao"></ul>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="botao-revisar-coleta" hidden>
+                                    Revisar coleta
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-success btn-lg w-100" id="botao-concluir-coleta">
+                                Concluir coleta
+                            </button>
+                        </div>
+
+                        <div id="area-pos-conclusao" class="card mt-3" hidden>
+                            <div class="card-body">
+                                <p class="mb-2">Coleta concluída com sucesso.</p>
+                                <a href="#" class="btn btn-outline-primary" id="link-voltar-avaliacao-ghe">Voltar à Avaliação do GHE</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
 
@@ -194,9 +135,30 @@
         </div>
     </div>
 
+    <!-- Confirmacao antes de concluir a coleta -->
+    <div class="modal fade" id="modal-confirmar-conclusao" tabindex="-1" aria-labelledby="modal-confirmar-conclusao-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-confirmar-conclusao-titulo">Concluir coleta?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        Após concluída, as respostas desta coleta não poderão mais ser alteradas pelo fluxo normal.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="botao-confirmar-conclusao">Concluir coleta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/pages/nova-avaliacao.js"></script>
+    <script type="module" src="js/pages/coleta-ghe.js"></script>
 </body>
 </html>

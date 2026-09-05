@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhe do GHE - ErgoIntelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/ghe.css">
+</head>
+<body>
+    <div class="d-flex vh-100">
+        <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 240px;">
+            <div class="sidebar-brand d-flex align-items-center justify-content-between border-bottom py-3 px-3">
+                <a href="colaboradores.html" class="d-flex align-items-center text-decoration-none text-dark">
+                    <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
+                    <span class="fw-bold">ErgoIntelligence</span>
+                </a>
+                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
+            </div>
+            <div class="offcanvas-body p-2">
+                <nav class="nav nav-pills flex-column gap-1">
+                    <a class="nav-link d-flex align-items-center gap-2" href="dashboard.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+                        Dashboard
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
+                        Avaliações
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
+                        Colaboradores
+                    </a>
+                    <a class="nav-link active d-flex align-items-center gap-2" href="ghes.html" aria-current="page">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"></circle><circle cx="16" cy="8" r="2.6"></circle><circle cx="12" cy="15" r="2.6"></circle><path d="M8 10.6V13M16 10.6V13M9.6 16.4h4.8"></path></svg>
+                        GHE
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
+                        Cadastros
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
+                        Riscos
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
+                        Recomendações
+                    </span>
+                    <a class="nav-link d-flex align-items-center gap-2" href="plano-acao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
+                        Planos de Ação
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"></path><path d="M12 20V4"></path><path d="M20 20v-6.5"></path></svg>
+                        Relatórios
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+                        Configurações
+                    </span>
+                </nav>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-grow-1" style="min-width: 0;">
+            <nav class="navbar navbar-light bg-white border-bottom px-3">
+                <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Detalhe do GHE</span>
+                <div class="ms-auto">
+                    <a href="ghes.html" class="btn btn-outline-secondary btn-sm">&larr; Voltar aos GHEs</a>
+                </div>
+            </nav>
+
+            <main class="flex-grow-1 overflow-auto">
+                <div class="container-fluid p-3 p-md-4" style="max-width: 1100px;">
+
+                    <div id="area-estado" class="text-center text-muted py-5"></div>
+
+                    <div id="area-conteudo" hidden>
+                        <!-- Destaque do conceito (secao 28) -->
+                        <div class="card mb-3 ghe-destaque">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
+                                    <p class="ghe-destaque__rotulo mb-0">GHE</p>
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <span class="badge text-bg-light border text-muted">Ambiente demonstrativo — dados fictícios</span>
+                                        <span class="badge" id="badge-ghe-status">-</span>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="botao-editar-ghe">Editar</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="botao-alternar-status-ghe"></button>
+                                    </div>
+                                </div>
+                                <h1 class="ghe-destaque__titulo mb-1" id="texto-ghe-nome">-</h1>
+                                <p class="text-muted small mb-3" id="texto-ghe-descricao"></p>
+                                <div class="row g-3 mb-2">
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Empresa</div>
+                                        <div class="fw-semibold" id="texto-ghe-empresa">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Setor</div>
+                                        <div class="fw-semibold" id="texto-ghe-setor">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Código</div>
+                                        <div class="fw-semibold" id="texto-ghe-codigo">-</div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-2">
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card">
+                                            <div class="ghe-numero-valor" id="numero-universo">0</div>
+                                            <div class="ghe-numero-rotulo">Trabalhadores no universo</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card">
+                                            <div class="ghe-numero-valor" id="numero-amostra-planejada">0</div>
+                                            <div class="ghe-numero-rotulo">Amostra planejada</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card">
+                                            <div class="ghe-numero-valor" id="numero-participantes">0</div>
+                                            <div class="ghe-numero-rotulo">Participantes registrados</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="ghe-numero-card ghe-numero-card--destaque">
+                                            <div class="ghe-numero-valor" id="numero-participacao">-</div>
+                                            <div class="ghe-numero-rotulo">Participação planejada</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="small text-muted mt-3 mb-0">
+                                    Percentual descritivo (amostra planejada ÷ universo). A metodologia de amostragem
+                                    deve ser definida pelo profissional responsável — não representa validade
+                                    estatística garantida.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <!-- Cargos relacionados -->
+                            <div class="col-lg-5">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h2 class="fs-6 fw-semibold mb-0">Cargos Relacionados</h2>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" id="botao-adicionar-cargo">
+                                                <i class="bi bi-plus-lg" aria-hidden="true"></i> Associar
+                                            </button>
+                                        </div>
+                                        <p class="text-muted small text-center py-3 mb-0" id="area-sem-cargos" hidden>
+                                            Nenhum cargo associado a este GHE.
+                                        </p>
+                                        <ul class="list-group list-group-flush" id="lista-cargos" hidden></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Plano de amostragem -->
+                            <div class="col-lg-7">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h2 class="fs-6 fw-semibold mb-0">Plano de Amostragem</h2>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="botao-editar-plano" hidden>Editar Plano</button>
+                                        </div>
+
+                                        <div id="area-sem-plano" class="text-center py-4" hidden>
+                                            <p class="text-muted mb-3">Este GHE ainda não possui um plano de amostragem.</p>
+                                            <button type="button" class="btn btn-primary" id="botao-criar-plano">Criar Plano de Amostragem</button>
+                                        </div>
+
+                                        <div id="area-plano" hidden>
+                                            <div class="row g-2 mb-2">
+                                                <div class="col-6 col-md-3">
+                                                    <div class="small text-uppercase text-muted">Universo (snapshot)</div>
+                                                    <div class="fw-semibold" id="texto-plano-universo">-</div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="small text-uppercase text-muted">Amostra</div>
+                                                    <div class="fw-semibold" id="texto-plano-amostra">-</div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="small text-uppercase text-muted">Status</div>
+                                                    <div class="fw-semibold" id="texto-plano-status">-</div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="small text-uppercase text-muted">Data do plano</div>
+                                                    <div class="fw-semibold" id="texto-plano-data">-</div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="small text-uppercase text-muted">Critério de seleção</div>
+                                                <div id="texto-plano-criterio">-</div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="small text-uppercase text-muted">Observação</div>
+                                                <div id="texto-plano-observacao">-</div>
+                                            </div>
+                                            <div class="small text-muted">Responsável: <span id="texto-plano-responsavel">-</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Avaliacao do GHE (MVP-07) -->
+                        <div class="card mb-3" id="card-avaliacao-ghe" hidden>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                    <div>
+                                        <h2 class="fs-6 fw-semibold mb-1">Avaliação do GHE</h2>
+                                        <p class="text-muted small mb-0" id="texto-avaliacao-ghe-status">-</p>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="button" class="btn btn-primary btn-sm" id="botao-nova-avaliacao-ghe" hidden>Nova Avaliação do GHE</button>
+                                        <button type="button" class="btn btn-primary btn-sm" id="botao-continuar-avaliacao-ghe" hidden>Continuar Avaliação</button>
+                                        <a href="#" class="btn btn-outline-secondary btn-sm" id="link-ver-consolidacao-ghe" hidden>Ver Consolidação</a>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    A avaliação do GHE reúne coletas descritivas dos participantes da amostra. A
+                                    classificação de risco do GHE será calculada por uma metodologia específica em
+                                    uma etapa futura.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Participantes -->
+                        <div class="card" id="card-participantes" hidden>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="fs-6 fw-semibold mb-0">Participantes da Amostra</h2>
+                                    <button type="button" class="btn btn-primary btn-sm" id="botao-adicionar-participante">
+                                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Adicionar Participante
+                                    </button>
+                                </div>
+                                <p class="text-muted small mb-3" id="texto-resumo-participantes"></p>
+
+                                <p class="text-muted text-center py-3 mb-0" id="area-sem-participantes" hidden>
+                                    Nenhum participante registrado neste plano ainda.
+                                </p>
+
+                                <div class="table-responsive" id="area-tabela-participantes" hidden>
+                                    <table class="table table-sm table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Colaborador</th>
+                                                <th>Matrícula</th>
+                                                <th>Setor</th>
+                                                <th>Cargo</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="corpo-tabela-participantes"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
+                <span>MVP de demonstração &middot; dados fictícios</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal: editar GHE (reaproveita os mesmos campos de ghes.html) -->
+    <div class="modal fade" id="modal-ghe" tabindex="-1" aria-labelledby="modal-ghe-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-ghe-titulo">Editar GHE</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-ghe" novalidate>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="campo-codigo-ghe" class="form-label">Código <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="text" id="campo-codigo-ghe" class="form-control" maxlength="30">
+                            </div>
+                            <div class="col-md-8">
+                                <label for="campo-nome-ghe" class="form-label">Nome do GHE</label>
+                                <input type="text" id="campo-nome-ghe" class="form-control" maxlength="160" required>
+                                <div class="invalid-feedback" id="erro-nome-ghe"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-setor-ghe" class="form-label">Setor <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select id="campo-setor-ghe" class="form-select">
+                                    <option value="">Não especificado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-universo-ghe" class="form-label">Universo (trabalhadores)</label>
+                                <input type="number" id="campo-universo-ghe" class="form-control" min="1" step="1" required>
+                                <div class="invalid-feedback" id="erro-universo-ghe"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-descricao-ghe" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-descricao-ghe" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-ghe">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: associar cargo -->
+    <div class="modal fade" id="modal-cargo" tabindex="-1" aria-labelledby="modal-cargo-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-cargo-titulo">Associar Cargo</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-cargo" novalidate>
+                    <div class="modal-body">
+                        <label for="campo-cargo" class="form-label">Cargo</label>
+                        <select id="campo-cargo" class="form-select" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-cargo">Associar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: criar/editar plano de amostragem -->
+    <div class="modal fade" id="modal-plano" tabindex="-1" aria-labelledby="modal-plano-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-plano-titulo">Novo Plano de Amostragem</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-plano" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="campo-id-plano">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="campo-universo-plano" class="form-label">Universo considerado</label>
+                                <input type="number" id="campo-universo-plano" class="form-control" min="1" step="1" required>
+                                <div class="form-text">Copiado do universo atual do GHE; fica preservado mesmo se o GHE mudar depois.</div>
+                                <div class="invalid-feedback" id="erro-universo-plano"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-amostra-plano" class="form-label">Amostra planejada</label>
+                                <input type="number" id="campo-amostra-plano" class="form-control" min="1" step="1" required>
+                                <div class="invalid-feedback" id="erro-amostra-plano"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-status-plano" class="form-label">Status</label>
+                                <select id="campo-status-plano" class="form-select" required>
+                                    <option value="PLANEJADO">Planejado</option>
+                                    <option value="EM_COLETA">Em coleta</option>
+                                    <option value="CONCLUIDO">Concluído</option>
+                                    <option value="CANCELADO">Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-plano" class="form-label">Data do plano</label>
+                                <input type="date" id="campo-data-plano" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-plano"></div>
+                            </div>
+                            <div class="col-md-6" id="grupo-responsavel-plano">
+                                <label for="campo-responsavel-plano" class="form-label">Responsável</label>
+                                <select id="campo-responsavel-plano" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-responsavel-plano"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-criterio-plano" class="form-label">Critério de seleção <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-criterio-plano" class="form-control" rows="2" placeholder="Ex.: Seleção considerando turnos e atividades do GHE."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-observacao-plano" class="form-label">Observação <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-observacao-plano" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-plano">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: adicionar participante -->
+    <div class="modal fade" id="modal-participante" tabindex="-1" aria-labelledby="modal-participante-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-participante-titulo">Adicionar Participante</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-participante" novalidate>
+                    <div class="modal-body">
+                        <label for="campo-vinculo-participante" class="form-label">Colaborador (vínculo vigente)</label>
+                        <select id="campo-vinculo-participante" class="form-select" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                        <div class="invalid-feedback" id="erro-vinculo-participante"></div>
+                        <p class="small text-muted mt-2 mb-0">
+                            Não é necessário registrar todos os participantes planejados para demonstrar o conceito.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-confirmar-participante">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/pages/ghe-detalhe.js"></script>
+</body>
+</html>
