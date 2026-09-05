@@ -16,8 +16,27 @@
    feira). Fundo levemente destacado do resto da pagina, sem gradiente
    chamativo. */
 .home-hero {
+    position: relative;
+    overflow: hidden;
     background: linear-gradient(180deg, #f4f8ff 0%, #ffffff 100%);
     padding-block: clamp(3rem, 8vw, 6rem);
+}
+
+/* Fundo animado (rede de particulas) - puramente decorativo, atras do
+   conteudo. js/pages/heroAnimacao.js desenha nele; some sozinho se o
+   usuario prefere menos movimento (prefers-reduced-motion, ver o JS). */
+.home-hero__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.home-hero > .container {
+    position: relative;
+    z-index: 1;
 }
 
 .home-hero__kicker {
