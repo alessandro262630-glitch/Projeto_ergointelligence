@@ -229,26 +229,26 @@ INSERT INTO funcao_atividade (id_funcao, id_atividade, principal, tempo_medio_mi
 -- 15. PERGUNTA_AVALIACAO (20)
 -- ---------------------------------------------------------------------
 INSERT INTO pergunta_avaliacao (codigo, categoria, texto_pergunta, tipo_resposta, unidade, obrigatoria, ordem, versao, ativo) VALUES
-('Q01', 'POSTURA',         'Permanece sentado por periodos prolongados sem se levantar?',                              'BOOLEANO',      NULL, TRUE,  1,  1, TRUE),
-('Q02', 'POSTURA',         'E necessario inclinar o tronco com frequencia durante a atividade?',                       'BOOLEANO',      NULL, TRUE,  2,  1, TRUE),
-('Q03', 'POSTURA',         'Ha necessidade de manter os bracos elevados acima da linha dos ombros?',                   'BOOLEANO',      NULL, TRUE,  3,  1, TRUE),
-('Q04', 'REPETITIVIDADE',  'A atividade exige movimentos repetitivos das maos ou bracos?',                             'BOOLEANO',      NULL, TRUE,  4,  1, TRUE),
-('Q05', 'REPETITIVIDADE',  'Com que frequencia os mesmos movimentos sao repetidos ao longo da jornada?',               'ESCALA',        NULL, TRUE,  5,  1, TRUE),
+('Q01', 'POSTURA',         'Permanece sentado por períodos prolongados sem se levantar?',                              'BOOLEANO',      NULL, TRUE,  1,  1, TRUE),
+('Q02', 'POSTURA',         'É necessário inclinar o tronco com frequência durante a atividade?',                       'BOOLEANO',      NULL, TRUE,  2,  1, TRUE),
+('Q03', 'POSTURA',         'Há necessidade de manter os braços elevados acima da linha dos ombros?',                   'BOOLEANO',      NULL, TRUE,  3,  1, TRUE),
+('Q04', 'REPETITIVIDADE',  'A atividade exige movimentos repetitivos das mãos ou braços?',                             'BOOLEANO',      NULL, TRUE,  4,  1, TRUE),
+('Q05', 'REPETITIVIDADE',  'Com que frequência os mesmos movimentos são repetidos ao longo da jornada?',               'ESCALA',        NULL, TRUE,  5,  1, TRUE),
 ('Q06', 'ESFORCO',         'A atividade exige levantamento manual de cargas?',                                         'BOOLEANO',      NULL, TRUE,  6,  1, TRUE),
-('Q07', 'ESFORCO',         'Ha necessidade de aplicacao frequente de forca com as maos ou bracos?',                    'BOOLEANO',      NULL, TRUE,  7,  1, TRUE),
-('Q08', 'ESFORCO',         'Com que frequencia voce realiza esforco fisico intenso durante a jornada?',                'ESCALA',        NULL, TRUE,  8,  1, TRUE),
+('Q07', 'ESFORCO',         'Há necessidade de aplicação frequente de força com as mãos ou braços?',                    'BOOLEANO',      NULL, TRUE,  7,  1, TRUE),
+('Q08', 'ESFORCO',         'Com que frequência você realiza esforço físico intenso durante a jornada?',                'ESCALA',        NULL, TRUE,  8,  1, TRUE),
 ('Q09', 'MOBILIARIO',      'A cadeira utilizada permite ajuste de altura?',                                            'BOOLEANO',      NULL, TRUE,  9,  1, TRUE),
-('Q10', 'MOBILIARIO',      'A superficie de trabalho esta em altura adequada para voce?',                              'BOOLEANO',      NULL, TRUE,  10, 1, TRUE),
-('Q11', 'MOBILIARIO',      'Como voce avalia o conforto geral do mobiliario utilizado?',                               'ESCOLHA_UNICA', NULL, TRUE,  11, 1, TRUE),
-('Q12', 'AMBIENTE',        'O ambiente apresenta condicoes que dificultam a execucao confortavel da atividade (ruido, iluminacao, temperatura)?', 'BOOLEANO', NULL, TRUE, 12, 1, TRUE),
-('Q13', 'AMBIENTE',        'Como voce avalia a iluminacao do ambiente de trabalho?',                                   'ESCOLHA_UNICA', NULL, TRUE,  13, 1, TRUE),
-('Q14', 'FADIGA',          'Voce percebe aumento de fadiga ao longo da jornada de trabalho?',                          'BOOLEANO',      NULL, TRUE,  14, 1, TRUE),
-('Q15', 'FADIGA',          'Com que frequencia sente desconforto apos periodos prolongados de atividade?',             'ESCALA',        NULL, TRUE,  15, 1, TRUE),
+('Q10', 'MOBILIARIO',      'A superfície de trabalho está em altura adequada para você?',                              'BOOLEANO',      NULL, TRUE,  10, 1, TRUE),
+('Q11', 'MOBILIARIO',      'Como você avalia o conforto geral do mobiliário utilizado?',                               'ESCOLHA_UNICA', NULL, TRUE,  11, 1, TRUE),
+('Q12', 'AMBIENTE',        'O ambiente apresenta condições que dificultam a execução confortável da atividade (ruído, iluminação, temperatura)?', 'BOOLEANO', NULL, TRUE, 12, 1, TRUE),
+('Q13', 'AMBIENTE',        'Como você avalia a iluminação do ambiente de trabalho?',                                   'ESCOLHA_UNICA', NULL, TRUE,  13, 1, TRUE),
+('Q14', 'FADIGA',          'Você percebe aumento de fadiga ao longo da jornada de trabalho?',                          'BOOLEANO',      NULL, TRUE,  14, 1, TRUE),
+('Q15', 'FADIGA',          'Com que frequência sente desconforto após períodos prolongados de atividade?',             'ESCALA',        NULL, TRUE,  15, 1, TRUE),
 ('Q16', 'FADIGA',          'Qual a intensidade do desconforto percebido ao final da jornada?',                        'ESCOLHA_UNICA', NULL, TRUE,  16, 1, TRUE),
 ('Q17', 'ORGANIZACAO',     'Existem pausas programadas durante a jornada de trabalho?',                                'BOOLEANO',      NULL, TRUE,  17, 1, TRUE),
-('Q18', 'ORGANIZACAO',     'Ha possibilidade de alternar entre diferentes tarefas ao longo do dia?',                   'BOOLEANO',      NULL, TRUE,  18, 1, TRUE),
-('Q19', 'OUTRO',           'Voce ja recebeu orientacao sobre postura adequada para a atividade?',                      'BOOLEANO',      NULL, TRUE,  19, 1, TRUE),
-('Q20', 'OUTRO',           'Deseja registrar alguma observacao adicional sobre sua condicao de trabalho?',             'TEXTO',         NULL, FALSE, 20, 1, TRUE);
+('Q18', 'ORGANIZACAO',     'Há possibilidade de alternar entre diferentes tarefas ao longo do dia?',                   'BOOLEANO',      NULL, TRUE,  18, 1, TRUE),
+('Q19', 'OUTRO',           'Você já recebeu orientação sobre postura adequada para a atividade?',                      'BOOLEANO',      NULL, TRUE,  19, 1, TRUE),
+('Q20', 'OUTRO',           'Deseja registrar alguma observação adicional sobre sua condição de trabalho?',             'TEXTO',         NULL, FALSE, 20, 1, TRUE);
 
 -- ---------------------------------------------------------------------
 -- 16. OPCAO_RESPOSTA (29) - apenas para perguntas ESCALA/ESCOLHA_UNICA
@@ -260,31 +260,31 @@ INSERT INTO opcao_resposta (id_pergunta, codigo, rotulo, valor_numero, pontuacao
 -- Q05 - frequencia de movimentos repetitivos
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q05'), 'NUNCA',          'Nunca',           0, 0, 1, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q05'), 'RARAMENTE',      'Raramente',       1, 0, 2, TRUE),
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q05'), 'AS_VEZES',       'As vezes',        2, 0, 3, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q05'), 'AS_VEZES',       'Às vezes',        2, 0, 3, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q05'), 'FREQUENTEMENTE', 'Frequentemente',  3, 0, 4, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q05'), 'SEMPRE',         'Sempre',          4, 0, 5, TRUE),
 -- Q08 - frequencia de esforco fisico intenso
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q08'), 'NUNCA',          'Nunca',           0, 0, 1, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q08'), 'RARAMENTE',      'Raramente',       1, 0, 2, TRUE),
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q08'), 'AS_VEZES',       'As vezes',        2, 0, 3, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q08'), 'AS_VEZES',       'Às vezes',        2, 0, 3, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q08'), 'FREQUENTEMENTE', 'Frequentemente',  3, 0, 4, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q08'), 'SEMPRE',         'Sempre',          4, 0, 5, TRUE),
 -- Q11 - conforto do mobiliario
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'OTIMO',   'Otimo',   0, 0, 1, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'OTIMO',   'Ótimo',   0, 0, 1, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'BOM',     'Bom',     1, 0, 2, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'REGULAR', 'Regular', 2, 0, 3, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'RUIM',    'Ruim',    3, 0, 4, TRUE),
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'PESSIMO', 'Pessimo', 4, 0, 5, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q11'), 'PESSIMO', 'Péssimo', 4, 0, 5, TRUE),
 -- Q13 - iluminacao do ambiente
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'OTIMO',   'Otimo',   0, 0, 1, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'OTIMO',   'Ótimo',   0, 0, 1, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'BOM',     'Bom',     1, 0, 2, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'REGULAR', 'Regular', 2, 0, 3, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'RUIM',    'Ruim',    3, 0, 4, TRUE),
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'PESSIMO', 'Pessimo', 4, 0, 5, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q13'), 'PESSIMO', 'Péssimo', 4, 0, 5, TRUE),
 -- Q15 - frequencia de desconforto pos-atividade
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q15'), 'NUNCA',          'Nunca',           0, 0, 1, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q15'), 'RARAMENTE',      'Raramente',       1, 0, 2, TRUE),
-((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q15'), 'AS_VEZES',       'As vezes',        2, 0, 3, TRUE),
+((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q15'), 'AS_VEZES',       'Às vezes',        2, 0, 3, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q15'), 'FREQUENTEMENTE', 'Frequentemente',  3, 0, 4, TRUE),
 ((SELECT id_pergunta FROM pergunta_avaliacao WHERE codigo = 'Q15'), 'SEMPRE',         'Sempre',          4, 0, 5, TRUE),
 -- Q16 - intensidade do desconforto ao final da jornada
