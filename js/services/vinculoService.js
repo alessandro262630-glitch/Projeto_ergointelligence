@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase.js';
+import { obterIdEmpresaAtiva } from './colaboradorService.js';
 
 // colaborador_vinculo nao possui coluna atualizado_em no schema (apenas
 // criado_em) - ver database/schema.sql. Nao adicionar essa coluna aqui.
@@ -245,4 +246,74 @@ export async function buscarFuncaoVinculoPorId(idVinculoFuncao) {
         principal: data.principal,
         nome: data.funcao?.nome ?? null,
     };
+}
+
+// Catalogo de funcoes da empresa ativa (isolamento explicito, mesmo padrao
+// de gheService.listarCargosDaEmpresa) - usado para associar uma funcao
+// especifica a um vinculo em vinculos.html. Nunca cria/edita a funcao em
+// si (CRUD de funcao fica fora de escopo, mesma decisao ja tomada para
+// setor/cargo).
+export async function listarFuncoesDaEmpresa() {
+    const idEmpresa = await obterIdEmpresaAtiva();
+    const { data, error } = await supabase
+        .from('funcao')
+        .select('id_funcao, nome')
+        .eq('id_empresa', idEmpresa)
+        .eq('ativo', true)
+        .order('nome', { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+}
+
+// dados: { id_vinculo, id_funcao, data_inicio, principal }
+// Uma segunda funcao "principal" vigente no mesmo vinculo e bloqueada pelo
+// indice unico parcial do banco (uq_vinculo_funcao_principal_vigente) -
+// aqui so traduzimos o 23505 numa mensagem amigavel (ver
+// mensagemErroAmigavelVinculo em vinculos.js).
+export async function associarFuncaoAoVinculo(dados) {
+    const { data, error } = await supabase
+        .from('vinculo_funcao')
+        .insert({
+            id_vinculo: dados.id_vinculo,
+            id_funcao: dados.id_funcao,
+            data_inicio: dados.data_inicio,
+            principal: dados.principal ?? false,
+            ativo: true,
+        })
+        .select('id_vinculo_funcao, id_vinculo, id_funcao, principal, funcao(nome)')
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return {
+        id_vinculo_funcao: data.id_vinculo_funcao,
+        id_vinculo: data.id_vinculo,
+        id_funcao: data.id_funcao,
+        principal: data.principal,
+        nome: data.funcao?.nome ?? null,
+    };
+}
+
+// Nunca DELETE: encerra preenchendo data_fim, preservando o historico
+// (mesmo principio de encerrarVinculo, ver comentario da tabela em
+// database/schema.sql).
+export async function removerFuncaoDoVinculo(idVinculoFuncao, dataFim) {
+    const { data, error } = await supabase
+        .from('vinculo_funcao')
+        .update({ data_fim: dataFim, ativo: false })
+        .eq('id_vinculo_funcao', idVinculoFuncao)
+        .select('id_vinculo_funcao')
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
 }

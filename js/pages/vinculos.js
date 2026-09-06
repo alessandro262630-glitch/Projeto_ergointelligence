@@ -7,9 +7,14 @@ import {
     encerrarVinculo,
     listarSetores,
     listarCargos,
+    listarFuncoesDaEmpresa,
+    listarFuncoesPorVinculo,
+    associarFuncaoAoVinculo,
+    removerFuncaoDoVinculo,
 } from '../services/vinculoService.js';
 import { listarUltimasAvaliacoesFinalizadasPorVinculos } from '../services/avaliacaoService.js';
 import { buscarColaboradorPorId } from '../services/colaboradorService.js';
+import { listarPerfisPorColaborador, criarPerfil, desativarPerfil } from '../services/perfilAntropometricoService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido, dataNaoFutura } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
@@ -52,9 +57,33 @@ const botaoConfirmarEncerrar = document.getElementById('botao-confirmar-encerrar
 const instanciaModalFormulario = new bootstrap.Modal(modalFormulario);
 const instanciaModalEncerrar = new bootstrap.Modal(modalEncerrar);
 
+// Perfil antropometrico
+const botaoNovoPerfil = document.getElementById('botao-novo-perfil');
+const textoSemPerfil = document.getElementById('texto-sem-perfil');
+const areaPerfis = document.getElementById('area-perfis');
+const corpoTabelaPerfis = document.getElementById('corpo-tabela-perfis');
+const modalPerfil = document.getElementById('modal-perfil');
+const formularioPerfil = document.getElementById('formulario-perfil');
+const campoAltura = document.getElementById('campo-altura');
+const campoPeso = document.getElementById('campo-peso');
+const campoMaoDominante = document.getElementById('campo-mao-dominante');
+const campoDataMedicao = document.getElementById('campo-data-medicao');
+const campoOrigemPerfil = document.getElementById('campo-origem-perfil');
+const botaoSalvarPerfil = document.getElementById('botao-salvar-perfil');
+const instanciaModalPerfil = new bootstrap.Modal(modalPerfil);
+
+// Funcoes do vinculo
+const modalFuncoes = document.getElementById('modal-funcoes');
+const campoIdVinculoFuncoes = document.getElementById('campo-id-vinculo-funcoes');
+const listaFuncoesVinculo = document.getElementById('lista-funcoes-vinculo');
+const campoNovaFuncao = document.getElementById('campo-nova-funcao');
+const botaoAssociarFuncao = document.getElementById('botao-associar-funcao');
+const instanciaModalFuncoes = new bootstrap.Modal(modalFuncoes);
+
 // --- Estado local da pagina ------------------------------------------------
 let vinculos = [];
 let avaliacoesFinalizadasPorVinculo = {};
+let funcoesCatalogo = [];
 
 function mostrarNotificacao(texto, tipo = 'info') {
     mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
@@ -95,6 +124,7 @@ async function carregarPagina() {
 
     await carregarOpcoesSelects();
     await carregarVinculos();
+    await carregarPerfis();
 }
 
 async function carregarVinculos() {
@@ -276,7 +306,16 @@ function criarLinhaVinculo(vinculo) {
         linkNovaAvaliacao.title = 'Nova avaliação com este vínculo';
         linkNovaAvaliacao.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>';
 
-        celulaAcoes.append(linkNovaAvaliacao, botaoEditar, botaoEncerrar);
+        const botaoFuncoes = document.createElement('button');
+        botaoFuncoes.type = 'button';
+        botaoFuncoes.className = 'btn btn-sm btn-outline-secondary me-1';
+        botaoFuncoes.dataset.acao = 'funcoes';
+        botaoFuncoes.dataset.id = vinculo.id_vinculo;
+        botaoFuncoes.setAttribute('aria-label', 'Gerenciar funções deste vínculo');
+        botaoFuncoes.title = 'Funções deste vínculo';
+        botaoFuncoes.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 12h6M9 15.5h6"></path></svg>';
+
+        celulaAcoes.append(linkNovaAvaliacao, botaoFuncoes, botaoEditar, botaoEncerrar);
     }
 
     linha.append(celulaSetor, celulaCargo, celulaInicio, celulaFim, celulaPrincipal, celulaStatus, celulaAcoes);
@@ -295,6 +334,8 @@ corpoTabela.addEventListener('click', (event) => {
         abrirFormularioEdicao(id);
     } else if (botao.dataset.acao === 'encerrar') {
         abrirModalEncerrar(id);
+    } else if (botao.dataset.acao === 'funcoes') {
+        abrirModalFuncoes(id);
     }
 });
 
@@ -310,12 +351,13 @@ function preencherSelect(select, itens, chaveId) {
 
 async function carregarOpcoesSelects() {
     try {
-        const [setores, cargos] = await Promise.all([listarSetores(), listarCargos()]);
+        const [setores, cargos, funcoes] = await Promise.all([listarSetores(), listarCargos(), listarFuncoesDaEmpresa()]);
         preencherSelect(campoSetor, setores, 'id_setor');
         preencherSelect(campoCargo, cargos, 'id_cargo');
+        funcoesCatalogo = funcoes;
     } catch (error) {
-        console.error('Erro ao carregar setores/cargos:', error);
-        mostrarNotificacao('Não foi possível carregar setores e cargos.', 'erro');
+        console.error('Erro ao carregar setores/cargos/funções:', error);
+        mostrarNotificacao('Não foi possível carregar setores, cargos e funções.', 'erro');
     }
 }
 
@@ -496,6 +538,224 @@ formularioEncerrar.addEventListener('submit', async (event) => {
     }
 });
 
+// --- Perfil antropometrico ---------------------------------------------------
+function formatarMaoDominante(valor) {
+    const rotulos = { DIREITA: 'Direita', ESQUERDA: 'Esquerda', AMBIDESTRO: 'Ambidestro' };
+    return rotulos[valor] || '-';
+}
+
+function formatarOrigemPerfil(valor) {
+    return valor === 'MEDIDO' ? 'Medido' : 'Autodeclarado';
+}
+
+async function carregarPerfis() {
+    try {
+        const perfis = await listarPerfisPorColaborador(idColaborador);
+        renderizarPerfis(perfis);
+    } catch (error) {
+        console.error('Erro ao carregar perfis antropométricos:', error);
+        mostrarNotificacao('Não foi possível carregar os perfis antropométricos.', 'erro');
+    }
+}
+
+function renderizarPerfis(perfis) {
+    if (perfis.length === 0) {
+        textoSemPerfil.hidden = false;
+        areaPerfis.hidden = true;
+        return;
+    }
+    textoSemPerfil.hidden = true;
+    areaPerfis.hidden = false;
+    corpoTabelaPerfis.innerHTML = '';
+    perfis.forEach((perfil) => {
+        const linha = document.createElement('tr');
+
+        const celulaAltura = document.createElement('td');
+        celulaAltura.textContent = perfil.altura_cm ? `${perfil.altura_cm} cm` : '-';
+        const celulaPeso = document.createElement('td');
+        celulaPeso.textContent = perfil.peso_kg ? `${perfil.peso_kg} kg` : '-';
+        const celulaMao = document.createElement('td');
+        celulaMao.textContent = perfil.mao_dominante ? formatarMaoDominante(perfil.mao_dominante) : '-';
+        const celulaData = document.createElement('td');
+        celulaData.textContent = formatarDataBR(perfil.data_medicao);
+        const celulaOrigem = document.createElement('td');
+        celulaOrigem.textContent = formatarOrigemPerfil(perfil.origem);
+
+        const celulaAcoes = document.createElement('td');
+        const botaoDesativar = document.createElement('button');
+        botaoDesativar.type = 'button';
+        botaoDesativar.className = 'btn btn-sm btn-outline-danger';
+        botaoDesativar.title = 'Desativar perfil';
+        botaoDesativar.setAttribute('aria-label', 'Desativar perfil');
+        botaoDesativar.innerHTML = '<i class="bi bi-x-lg" aria-hidden="true"></i>';
+        botaoDesativar.addEventListener('click', async () => {
+            try {
+                await desativarPerfil(perfil.id_perfil_antropometrico);
+                mostrarNotificacao('Perfil desativado.', 'sucesso');
+                await carregarPerfis();
+            } catch (error) {
+                console.error('Erro ao desativar perfil:', error);
+                mostrarNotificacao('Não foi possível desativar o perfil.', 'erro');
+            }
+        });
+        celulaAcoes.appendChild(botaoDesativar);
+
+        linha.append(celulaAltura, celulaPeso, celulaMao, celulaData, celulaOrigem, celulaAcoes);
+        corpoTabelaPerfis.appendChild(linha);
+    });
+}
+
+botaoNovoPerfil.addEventListener('click', () => {
+    formularioPerfil.reset();
+    [campoDataMedicao, campoOrigemPerfil].forEach((c) => c.classList.remove('is-invalid'));
+    campoDataMedicao.value = dataHojeIso();
+    instanciaModalPerfil.show();
+});
+
+formularioPerfil.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    let valido = true;
+
+    campoDataMedicao.classList.remove('is-invalid');
+    campoOrigemPerfil.classList.remove('is-invalid');
+
+    if (!campoPreenchido(campoDataMedicao.value)) {
+        campoDataMedicao.classList.add('is-invalid');
+        document.getElementById('erro-data-medicao').textContent = 'Informe a data da medição.';
+        valido = false;
+    } else if (!dataNaoFutura(campoDataMedicao.value)) {
+        campoDataMedicao.classList.add('is-invalid');
+        document.getElementById('erro-data-medicao').textContent = 'A data da medição não pode ser futura.';
+        valido = false;
+    }
+    if (!campoPreenchido(campoOrigemPerfil.value)) {
+        campoOrigemPerfil.classList.add('is-invalid');
+        document.getElementById('erro-origem-perfil').textContent = 'Selecione a origem.';
+        valido = false;
+    }
+    if (!valido) return;
+
+    const textoOriginal = botaoSalvarPerfil.textContent;
+    botaoSalvarPerfil.disabled = true;
+    botaoSalvarPerfil.textContent = 'Salvando...';
+
+    try {
+        await criarPerfil({
+            id_colaborador: idColaborador,
+            altura_cm: campoAltura.value ? Number(campoAltura.value) : null,
+            peso_kg: campoPeso.value ? Number(campoPeso.value) : null,
+            mao_dominante: campoMaoDominante.value || null,
+            data_medicao: campoDataMedicao.value,
+            origem: campoOrigemPerfil.value,
+        });
+        mostrarNotificacao('Perfil antropométrico registrado com sucesso.', 'sucesso');
+        instanciaModalPerfil.hide();
+        await carregarPerfis();
+    } catch (error) {
+        console.error('Erro ao criar perfil antropométrico:', error);
+        mostrarNotificacao('Não foi possível salvar o perfil antropométrico.', 'erro');
+    } finally {
+        botaoSalvarPerfil.disabled = false;
+        botaoSalvarPerfil.textContent = textoOriginal;
+    }
+});
+
+// --- Funcoes do vinculo -------------------------------------------------------
+function renderizarFuncoesVinculo(funcoes) {
+    listaFuncoesVinculo.innerHTML = '';
+    if (funcoes.length === 0) {
+        const vazio = document.createElement('li');
+        vazio.className = 'list-group-item text-muted small';
+        vazio.textContent = 'Nenhuma função associada ainda.';
+        listaFuncoesVinculo.appendChild(vazio);
+        return;
+    }
+    funcoes.forEach((funcao) => {
+        const item = document.createElement('li');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center';
+        const nome = document.createElement('span');
+        nome.textContent = funcao.nome;
+        if (funcao.principal) {
+            const badge = document.createElement('span');
+            badge.className = 'badge text-bg-primary ms-2';
+            badge.textContent = 'Principal';
+            nome.appendChild(badge);
+        }
+        const botaoRemover = document.createElement('button');
+        botaoRemover.type = 'button';
+        botaoRemover.className = 'btn btn-sm btn-outline-danger';
+        botaoRemover.title = 'Encerrar associação';
+        botaoRemover.innerHTML = '<i class="bi bi-x-lg" aria-hidden="true"></i>';
+        botaoRemover.addEventListener('click', async () => {
+            try {
+                await removerFuncaoDoVinculo(funcao.id_vinculo_funcao, dataHojeIso());
+                mostrarNotificacao('Função removida do vínculo.', 'sucesso');
+                await abrirModalFuncoes(Number(campoIdVinculoFuncoes.value));
+            } catch (error) {
+                console.error('Erro ao remover função do vínculo:', error);
+                mostrarNotificacao('Não foi possível remover a função.', 'erro');
+            }
+        });
+        item.append(nome, botaoRemover);
+        listaFuncoesVinculo.appendChild(item);
+    });
+}
+
+async function popularSelectNovaFuncao(funcoesJaAssociadas) {
+    const idsJaAssociados = new Set(funcoesJaAssociadas.map((f) => f.id_funcao));
+    campoNovaFuncao.innerHTML = '<option value="">Selecione uma função...</option>';
+    funcoesCatalogo
+        .filter((funcao) => !idsJaAssociados.has(funcao.id_funcao))
+        .forEach((funcao) => {
+            const opcao = document.createElement('option');
+            opcao.value = funcao.id_funcao;
+            opcao.textContent = funcao.nome;
+            campoNovaFuncao.appendChild(opcao);
+        });
+}
+
+async function abrirModalFuncoes(idVinculo) {
+    campoIdVinculoFuncoes.value = idVinculo;
+    try {
+        const funcoesDoVinculo = await listarFuncoesPorVinculo(idVinculo);
+        renderizarFuncoesVinculo(funcoesDoVinculo);
+        await popularSelectNovaFuncao(funcoesDoVinculo);
+        instanciaModalFuncoes.show();
+    } catch (error) {
+        console.error('Erro ao carregar funções do vínculo:', error);
+        mostrarNotificacao('Não foi possível carregar as funções deste vínculo.', 'erro');
+    }
+}
+
+botaoAssociarFuncao.addEventListener('click', async () => {
+    if (!campoNovaFuncao.value) return;
+    const idVinculo = Number(campoIdVinculoFuncoes.value);
+    const textoOriginal = botaoAssociarFuncao.textContent;
+    botaoAssociarFuncao.disabled = true;
+    botaoAssociarFuncao.textContent = 'Associando...';
+
+    try {
+        const funcoesAtuais = await listarFuncoesPorVinculo(idVinculo);
+        await associarFuncaoAoVinculo({
+            id_vinculo: idVinculo,
+            id_funcao: Number(campoNovaFuncao.value),
+            data_inicio: dataHojeIso(),
+            // Primeira funcao do vinculo vira principal automaticamente -
+            // evita expor esse detalhe como uma decisao extra no formulario
+            // minimo desta tela.
+            principal: funcoesAtuais.length === 0,
+        });
+        mostrarNotificacao('Função associada com sucesso.', 'sucesso');
+        await abrirModalFuncoes(idVinculo);
+    } catch (error) {
+        console.error('Erro ao associar função ao vínculo:', error);
+        mostrarNotificacao(mensagemErroAmigavelVinculo(error), 'erro');
+    } finally {
+        botaoAssociarFuncao.disabled = false;
+        botaoAssociarFuncao.textContent = textoOriginal;
+    }
+});
+
 // --- Traducao de erros do Supabase/PostgreSQL e das regras de negocio -----
 function mensagemErroAmigavelVinculo(error) {
     const codigo = error?.code;
@@ -509,11 +769,17 @@ function mensagemErroAmigavelVinculo(error) {
         if (mensagem.includes('uq_colaborador_vinculo_principal_vigente')) {
             return 'Este colaborador já possui um vínculo principal ativo e vigente.';
         }
+        if (mensagem.includes('uq_vinculo_funcao_principal_vigente')) {
+            return 'Este vínculo já possui uma função principal vigente.';
+        }
+        if (mensagem.includes('vinculo_funcao')) {
+            return 'Esta função já está associada a este vínculo.';
+        }
         return 'Já existe um vínculo com esses mesmos dados para este colaborador.';
     }
 
     if (codigo === '23503') {
-        return 'Não foi possível localizar o setor ou cargo selecionado.';
+        return 'Não foi possível localizar o setor, cargo ou função selecionado.';
     }
 
     if (codigo === '23514') {

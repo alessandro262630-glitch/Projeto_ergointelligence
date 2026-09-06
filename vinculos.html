@@ -6,6 +6,7 @@
     <title>Vínculos do colaborador - ErgoIntelligence</title>
     <link rel="icon" type="image/png" href="assets/logo/logo-marca.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
@@ -127,6 +128,36 @@
                         </div>
                     </div>
 
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h2 class="fs-6 fw-semibold mb-0">Perfil antropométrico</h2>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="botao-novo-perfil">
+                                    + Novo perfil
+                                </button>
+                            </div>
+                            <p class="text-muted small mb-0" id="texto-sem-perfil">
+                                Nenhum perfil antropométrico registrado ainda. Sem ele, o campo "Perfil antropométrico"
+                                fica vazio na Nova Avaliação (é opcional, mas ajuda a contextualizar a análise).
+                            </p>
+                            <div id="area-perfis" class="table-responsive" hidden>
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Altura</th>
+                                            <th>Peso</th>
+                                            <th>Mão dominante</th>
+                                            <th>Data da medição</th>
+                                            <th>Origem</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="corpo-tabela-perfis"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-body">
                             <h2 class="fs-6 fw-semibold mb-3">Histórico de vínculos</h2>
@@ -236,6 +267,87 @@
                         <button type="submit" class="btn btn-outline-danger" id="botao-confirmar-encerrar">Confirmar encerramento</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de novo perfil antropometrico -->
+    <div class="modal fade" id="modal-perfil" tabindex="-1" aria-labelledby="modal-perfil-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-perfil-titulo">Novo perfil antropométrico</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-perfil" novalidate>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="campo-altura" class="form-label">Altura (cm) <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="number" id="campo-altura" class="form-control" min="1" step="0.1">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-peso" class="form-label">Peso (kg) <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="number" id="campo-peso" class="form-control" min="1" step="0.1">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-mao-dominante" class="form-label">Mão dominante <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select id="campo-mao-dominante" class="form-select">
+                                    <option value="">Não informado</option>
+                                    <option value="DIREITA">Direita</option>
+                                    <option value="ESQUERDA">Esquerda</option>
+                                    <option value="AMBIDESTRO">Ambidestro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-medicao" class="form-label">Data da medição *</label>
+                                <input type="date" id="campo-data-medicao" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-medicao"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-origem-perfil" class="form-label">Origem *</label>
+                                <select id="campo-origem-perfil" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="MEDIDO">Medido</option>
+                                    <option value="AUTODECLARADO">Autodeclarado</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-origem-perfil"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-perfil">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de gestao de funcoes do vinculo -->
+    <div class="modal fade" id="modal-funcoes" tabindex="-1" aria-labelledby="modal-funcoes-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-funcoes-titulo">Funções do vínculo</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="campo-id-vinculo-funcoes">
+                    <p class="text-muted small">
+                        Funções associadas ficam disponíveis para seleção (opcional) na Nova Avaliação deste vínculo.
+                    </p>
+                    <ul class="list-group mb-3" id="lista-funcoes-vinculo"></ul>
+                    <div class="input-group">
+                        <select id="campo-nova-funcao" class="form-select">
+                            <option value="">Selecione uma função...</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary" id="botao-associar-funcao">Associar</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
