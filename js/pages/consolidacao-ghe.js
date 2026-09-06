@@ -258,4 +258,7 @@ async function carregarPagina() {
     }
 }
 
+// --- Popovers de ajuda ("Saiba mais") -------------------------------------------
+document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
+
 carregarPagina();

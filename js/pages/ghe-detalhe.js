@@ -751,5 +751,11 @@ botaoAlternarStatusGhe.addEventListener('click', async () => {
     }
 });
 
+// --- Popovers de ajuda ("Saiba mais") -------------------------------------------
+// Substituem paragrafos explicativos longos que ficavam sempre visiveis na
+// tela - o texto completo mora no data-bs-content de cada botao no HTML,
+// nao ha logica de negocio aqui.
+document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
+
 // --- Carga inicial -------------------------------------------------------------
 carregarPagina();

@@ -107,14 +107,22 @@
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
                     <div id="area-conteudo" hidden>
-                        <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
-                            <div>
+                        <div class="alert alert-warning d-flex align-items-center justify-content-between gap-2" role="alert">
+                            <span class="d-flex align-items-center gap-2">
+                                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
                                 <strong>Resultado demonstrativo — metodologia não validada para uso profissional.</strong>
-                                Os critérios e limites utilizados são fictícios e servem exclusivamente para
-                                apresentação das funcionalidades do sistema. Não representam conformidade legal,
-                                validação NR-17, diagnóstico ergonômico, laudo técnico ou classificação oficial.
-                            </div>
+                            </span>
+                            <button
+                                type="button"
+                                class="btn btn-link btn-sm p-0 flex-shrink-0"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="focus"
+                                data-bs-placement="bottom"
+                                data-bs-title="Por que este resultado é demonstrativo?"
+                                data-bs-content="Os critérios e limites utilizados são fictícios e servem exclusivamente para apresentação das funcionalidades do sistema. Não representam conformidade legal, validação NR-17, diagnóstico ergonômico, laudo técnico ou classificação oficial."
+                            >
+                                <i class="bi bi-info-circle" aria-hidden="true"></i> Saiba mais
+                            </button>
                         </div>
 
                         <div id="alerta-amostra-incompleta" class="alert alert-info" hidden></div>

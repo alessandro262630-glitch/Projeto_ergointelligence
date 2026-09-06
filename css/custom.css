@@ -3,6 +3,23 @@
    componentes nativos do Bootstrap direto no HTML; aqui ficam apenas os
    pontos que o tema padrao nao cobre. */
 
+/* Botao "Saiba mais" (icone + rotulo curto) que abre um popover do
+   Bootstrap com a explicacao completa de uma funcionalidade - substitui
+   paragrafos longos que ficavam sempre visiveis na tela (ex.:
+   ghe-detalhe.html, consolidacao-ghe.html, resultado-ghe.html). O texto
+   completo fica no atributo data-bs-content de cada botao; nenhum HTML
+   extra e necessario alem de inicializar o popover na pagina. */
+.btn-ajuda-info {
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color, #6c757d);
+    text-decoration: none;
+}
+
+.btn-ajuda-info:hover,
+.btn-ajuda-info:focus {
+    color: var(--eg-teal-dark, #0B5866);
+}
+
 /* =====================================================================
    PALETA DA MARCA (extraida de assets/logo/logo-marca.png)
    =====================================================================

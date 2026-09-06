@@ -104,10 +104,19 @@
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
                     <div id="area-conteudo" hidden>
-                        <div class="alert alert-info" role="alert">
-                            <strong>Resultados descritivos da amostra.</strong> A classificação do risco do GHE será
-                            realizada conforme metodologia específica de avaliação, em uma etapa futura. Os dados
-                            abaixo não representam uma pontuação ou classificação de risco.
+                        <div class="alert alert-info d-flex align-items-center justify-content-between gap-2" role="alert">
+                            <strong>Resultados descritivos da amostra.</strong>
+                            <button
+                                type="button"
+                                class="btn btn-link btn-sm p-0 flex-shrink-0"
+                                data-bs-toggle="popover"
+                                data-bs-trigger="focus"
+                                data-bs-placement="bottom"
+                                data-bs-title="O que significam estes resultados?"
+                                data-bs-content="A classificação do risco do GHE será realizada conforme metodologia específica de avaliação, em uma etapa futura. Os dados abaixo não representam uma pontuação ou classificação de risco."
+                            >
+                                <i class="bi bi-info-circle" aria-hidden="true"></i> Saiba mais
+                            </button>
                         </div>
 
                         <div id="alerta-amostra-incompleta" class="alert alert-warning" hidden></div>

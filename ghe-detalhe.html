@@ -159,11 +159,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p class="small text-muted mt-3 mb-0">
-                                    Percentual descritivo (amostra planejada ÷ universo). A metodologia de amostragem
-                                    deve ser definida pelo profissional responsável — não representa validade
-                                    estatística garantida.
-                                </p>
+                                <button
+                                    type="button"
+                                    class="btn btn-link btn-sm btn-ajuda-info p-0 mt-3 d-inline-flex align-items-center gap-1"
+                                    data-bs-toggle="popover"
+                                    data-bs-trigger="focus"
+                                    data-bs-placement="top"
+                                    data-bs-title="Sobre estes números"
+                                    data-bs-content="Percentual descritivo (amostra planejada ÷ universo). A metodologia de amostragem deve ser definida pelo profissional responsável — não representa validade estatística garantida."
+                                >
+                                    <i class="bi bi-info-circle" aria-hidden="true"></i> Sobre estes números
+                                </button>
                             </div>
                         </div>
 
@@ -239,7 +245,21 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
                                     <div>
-                                        <h2 class="fs-6 fw-semibold mb-1">Avaliação do GHE</h2>
+                                        <h2 class="fs-6 fw-semibold mb-1 d-flex align-items-center gap-1">
+                                            Avaliação do GHE
+                                            <button
+                                                type="button"
+                                                class="btn btn-link btn-sm btn-ajuda-info p-0"
+                                                data-bs-toggle="popover"
+                                                data-bs-trigger="focus"
+                                                data-bs-placement="right"
+                                                data-bs-title="O que é isto?"
+                                                data-bs-content="A avaliação do GHE reúne coletas descritivas dos participantes da amostra. A classificação de risco do GHE será calculada por uma metodologia específica em uma etapa futura."
+                                                aria-label="Saiba mais sobre a Avaliação do GHE"
+                                            >
+                                                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                            </button>
+                                        </h2>
                                         <p class="text-muted small mb-0" id="texto-avaliacao-ghe-status">-</p>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2">
@@ -248,11 +268,6 @@
                                         <a href="#" class="btn btn-outline-secondary btn-sm" id="link-ver-consolidacao-ghe" hidden>Ver Consolidação</a>
                                     </div>
                                 </div>
-                                <p class="text-muted small mb-0">
-                                    A avaliação do GHE reúne coletas descritivas dos participantes da amostra. A
-                                    classificação de risco do GHE será calculada por uma metodologia específica em
-                                    uma etapa futura.
-                                </p>
                             </div>
                         </div>
 
