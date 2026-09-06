@@ -5,7 +5,14 @@ import {
     listarResultadosGhe,
     buscarRastreabilidadeResultado,
 } from '../services/motorRiscoGheService.js';
+import {
+    listarInventariosRascunhoDaEmpresa,
+    listarResultadosProcessamento,
+    prepararImportacaoResultado,
+    importarResultadosGhe,
+} from '../services/inventarioIntegracaoService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
+import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
 
 // MVP-08C - Resultado de Risco do GHE (exclusivamente metodologia
 // demonstrativa). So interface/eventos - todo o calculo/persistencia ja
@@ -40,6 +47,40 @@ const modalEntendaPorQueEl = document.getElementById('modal-entenda-por-que');
 const corpoModalEntendaPorQue = document.getElementById('corpo-modal-entenda-por-que');
 const instanciaModalEntendaPorQue = new bootstrap.Modal(modalEntendaPorQueEl);
 
+const areaNotificacoes = document.getElementById('area-notificacoes');
+const botaoAdicionarInventario = document.getElementById('botao-adicionar-inventario');
+
+// --- Modal "Adicionar ao Inventario" (MVP-09C) ------------------------------
+const modalImportarEl = document.getElementById('modal-importar-inventario');
+const instanciaModalImportar = new bootstrap.Modal(modalImportarEl);
+const passoInventario = document.getElementById('passo-inventario');
+const passoRiscos = document.getElementById('passo-riscos');
+const passoPreview = document.getElementById('passo-preview');
+const passoResultado = document.getElementById('passo-resultado');
+const areaSemInventarios = document.getElementById('area-sem-inventarios');
+const listaInventariosDestino = document.getElementById('lista-inventarios-destino');
+const listaRiscosImportar = document.getElementById('lista-riscos-importar');
+const botaoSelecionarTodosRiscos = document.getElementById('botao-selecionar-todos-riscos');
+const avisoDemonstrativaPreview = document.getElementById('aviso-demonstrativa-preview');
+const corpoTabelaPreview = document.getElementById('corpo-tabela-preview');
+const listaResultadoImportacao = document.getElementById('lista-resultado-importacao');
+const botaoVoltarImportar = document.getElementById('botao-voltar-importar');
+const botaoCancelarImportar = document.getElementById('botao-cancelar-importar');
+const botaoAvancarImportar = document.getElementById('botao-avancar-importar');
+const botaoConfirmarImportar = document.getElementById('botao-confirmar-importar');
+const botaoFecharResultado = document.getElementById('botao-fechar-resultado');
+const linkIrInventario = document.getElementById('link-ir-inventario');
+
+const PASSOS_IMPORTACAO = ['inventario', 'riscos', 'preview', 'resultado'];
+let passoAtual = 'inventario';
+let inventarioSelecionado = null;
+let resultadosDoProcessamento = [];
+let idsRiscoSelecionados = new Set();
+
+function mostrarNotificacao(texto, tipo = 'info') {
+    mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
+}
+
 function definirEstado(tipo, mensagem) {
     if (tipo === 'pronto') {
         areaEstado.hidden = true;
@@ -57,6 +98,11 @@ function formatarNumero(valor, casas = 1) {
     return Number(valor).toFixed(casas).replace('.', ',');
 }
 
+// Preenchidos por carregarPagina() - reaproveitados pelo wizard "Adicionar
+// ao Inventario" (secao 8/9 do prompt MVP-09C) para nao refazer as mesmas
+// consultas ja feitas ao abrir a pagina.
+let processamentoAtual = null;
+
 async function carregarPagina() {
     if (!idProcessamento) {
         definirEstado('erro', 'Processamento não encontrado.');
@@ -66,6 +112,7 @@ async function carregarPagina() {
 
     try {
         const processamento = await buscarProcessamento(idProcessamento);
+        processamentoAtual = processamento;
         const [avaliacaoGhe, resultados] = await Promise.all([
             buscarAvaliacaoGhePorId(processamento.id_avaliacao_ghe),
             listarResultadosGhe(idProcessamento),
@@ -76,6 +123,11 @@ async function carregarPagina() {
         ]);
 
         linkVoltarAvaliacao.href = `avaliacao-ghe.html?id_avaliacao_ghe=${avaliacaoGhe.id_avaliacao_ghe}`;
+
+        // So processamento CONCLUIDO pode virar item do Inventario (secao 4
+        // do prompt MVP-09C) - PROCESSANDO/ERRO/CANCELADO nunca oferecem o
+        // botao, mesmo que a URL seja aberta diretamente.
+        botaoAdicionarInventario.hidden = processamento.status !== 'CONCLUIDO';
 
         textoGheNome.textContent = ghe.nome;
         textoSetor.textContent = ghe.setor || 'Não especificado';
@@ -239,5 +291,246 @@ async function abrirEntendaPorQue(resultado) {
         corpoModalEntendaPorQue.innerHTML = '<p class="text-danger text-center py-4">Não foi possível carregar a rastreabilidade deste resultado.</p>';
     }
 }
+
+// =====================================================================
+// "Adicionar ao Inventario" (MVP-09C) - wizard de 4 passos dentro de um
+// unico modal: selecionar inventario (RASCUNHO) -> selecionar riscos ->
+// pre-visualizar -> importar. So orquestra chamadas a
+// inventarioIntegracaoService.js (nenhum calculo/regra e refeito aqui,
+// secao 17 do prompt).
+// =====================================================================
+
+function mostrarPasso(passo) {
+    passoAtual = passo;
+    passoInventario.hidden = passo !== 'inventario';
+    passoRiscos.hidden = passo !== 'riscos';
+    passoPreview.hidden = passo !== 'preview';
+    passoResultado.hidden = passo !== 'resultado';
+
+    botaoVoltarImportar.hidden = passo === 'inventario' || passo === 'resultado';
+    botaoCancelarImportar.hidden = passo === 'resultado';
+    botaoAvancarImportar.hidden = passo === 'preview' || passo === 'resultado';
+    botaoConfirmarImportar.hidden = passo !== 'preview';
+    botaoFecharResultado.hidden = passo !== 'resultado';
+    linkIrInventario.hidden = passo !== 'resultado';
+
+    atualizarBotaoAvancar();
+}
+
+function atualizarBotaoAvancar() {
+    if (passoAtual === 'inventario') {
+        botaoAvancarImportar.disabled = !inventarioSelecionado;
+    } else if (passoAtual === 'riscos') {
+        botaoAvancarImportar.disabled = idsRiscoSelecionados.size === 0;
+    }
+}
+
+async function abrirWizardImportacao() {
+    idsRiscoSelecionados = new Set();
+    inventarioSelecionado = null;
+
+    listaInventariosDestino.innerHTML = '<p class="text-muted small mb-0">Carregando...</p>';
+    mostrarPasso('inventario');
+    instanciaModalImportar.show();
+
+    try {
+        const inventarios = await listarInventariosRascunhoDaEmpresa();
+        renderizarListaInventarios(inventarios);
+    } catch (error) {
+        console.error('Erro ao carregar inventários em rascunho:', error);
+        listaInventariosDestino.innerHTML = '';
+        mostrarNotificacao('Não foi possível carregar os inventários disponíveis.', 'erro');
+    }
+}
+
+function renderizarListaInventarios(inventarios) {
+    listaInventariosDestino.innerHTML = '';
+    if (inventarios.length === 0) {
+        areaSemInventarios.hidden = false;
+        return;
+    }
+    areaSemInventarios.hidden = true;
+
+    inventarios.forEach((inventario) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+        item.innerHTML = `
+            <span><strong>${inventario.titulo}</strong> — versão ${inventario.numero_versao}</span>
+            <span class="badge text-bg-secondary">Rascunho</span>
+        `;
+        item.addEventListener('click', () => {
+            inventarioSelecionado = inventario;
+            Array.from(listaInventariosDestino.children).forEach((el) => el.classList.remove('active'));
+            item.classList.add('active');
+            atualizarBotaoAvancar();
+        });
+        listaInventariosDestino.appendChild(item);
+    });
+}
+
+async function carregarPassoRiscos() {
+    listaRiscosImportar.innerHTML = '<p class="text-muted small mb-0">Carregando resultados do processamento...</p>';
+    mostrarPasso('riscos');
+
+    try {
+        resultadosDoProcessamento = await listarResultadosProcessamento(idProcessamento, inventarioSelecionado.id_inventario);
+        renderizarListaRiscos();
+    } catch (error) {
+        console.error('Erro ao carregar resultados do processamento:', error);
+        listaRiscosImportar.innerHTML = '';
+        mostrarNotificacao('Não foi possível carregar os riscos deste processamento.', 'erro');
+    }
+}
+
+function renderizarListaRiscos() {
+    listaRiscosImportar.innerHTML = '';
+
+    resultadosDoProcessamento.forEach((resultado) => {
+        const item = document.createElement('label');
+        item.className = 'list-group-item d-flex align-items-start gap-2';
+
+        const desabilitado = resultado.jaImportado || !resultado.perigo;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'form-check-input mt-1';
+        checkbox.disabled = desabilitado;
+        checkbox.checked = idsRiscoSelecionados.has(resultado.id_avaliacao_ghe_risco);
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                idsRiscoSelecionados.add(resultado.id_avaliacao_ghe_risco);
+            } else {
+                idsRiscoSelecionados.delete(resultado.id_avaliacao_ghe_risco);
+            }
+            atualizarBotaoAvancar();
+        });
+
+        const info = document.createElement('div');
+        info.className = 'flex-grow-1';
+
+        const linhaTitulo = document.createElement('div');
+        linhaTitulo.className = 'd-flex align-items-center gap-2';
+        const nome = document.createElement('span');
+        nome.className = 'fw-semibold';
+        nome.textContent = resultado.risco_nome;
+        const badgeClassificacao = document.createElement('span');
+        badgeClassificacao.className = 'badge';
+        badgeClassificacao.style.backgroundColor = resultado.classificacao_cor_hex || '#6c757d';
+        badgeClassificacao.style.color = '#fff';
+        badgeClassificacao.textContent = `${resultado.classificacao_nome || '-'} — DEMONSTRATIVO`;
+        linhaTitulo.append(nome, badgeClassificacao);
+        info.appendChild(linhaTitulo);
+
+        const detalhe = document.createElement('div');
+        detalhe.className = 'small text-muted';
+        if (resultado.jaImportado) {
+            detalhe.textContent = 'Já importado para este inventário.';
+        } else if (!resultado.perigo) {
+            detalhe.textContent = 'Este risco ainda não possui um perigo ocupacional associado.';
+        } else {
+            detalhe.textContent = `Perigo: ${resultado.perigo.nome} · Pontuação: ${formatarNumero(resultado.pontuacao, 2)}`;
+        }
+        info.appendChild(detalhe);
+
+        item.append(checkbox, info);
+        listaRiscosImportar.appendChild(item);
+    });
+}
+
+botaoSelecionarTodosRiscos.addEventListener('click', () => {
+    resultadosDoProcessamento
+        .filter((resultado) => !resultado.jaImportado && resultado.perigo)
+        .forEach((resultado) => idsRiscoSelecionados.add(resultado.id_avaliacao_ghe_risco));
+    renderizarListaRiscos();
+    atualizarBotaoAvancar();
+});
+
+async function carregarPassoPreview() {
+    corpoTabelaPreview.innerHTML = '<tr><td colspan="7" class="text-muted small">Carregando pré-visualização...</td></tr>';
+    mostrarPasso('preview');
+
+    try {
+        const previews = await Promise.all(
+            [...idsRiscoSelecionados].map((id) => prepararImportacaoResultado(id, inventarioSelecionado.id_inventario)),
+        );
+        corpoTabelaPreview.innerHTML = '';
+        const algumaDemonstrativa = previews.some((p) => p.metodologia_status_validacao === 'DEMONSTRATIVA');
+        avisoDemonstrativaPreview.hidden = !algumaDemonstrativa;
+
+        previews.forEach((preview) => {
+            const linha = document.createElement('tr');
+            linha.innerHTML = `
+                <td>${preview.inventario.titulo} (v${preview.inventario.numero_versao})</td>
+                <td>${preview.ghe_nome}</td>
+                <td>${preview.risco_nome}</td>
+                <td>${preview.perigo?.nome ?? '-'}</td>
+                <td>${formatarNumero(preview.pontuacao, 2)}</td>
+                <td>${preview.classificacao_nome}</td>
+                <td>${preview.metodologia_codigo} v${preview.metodologia_versao}</td>
+            `;
+            corpoTabelaPreview.appendChild(linha);
+        });
+    } catch (error) {
+        console.error('Erro ao preparar pré-visualização da importação:', error);
+        corpoTabelaPreview.innerHTML = '';
+        mostrarNotificacao('Não foi possível preparar a pré-visualização.', 'erro');
+    }
+}
+
+const ROTULOS_STATUS_IMPORTACAO = {
+    IMPORTADO: { texto: 'Importado com sucesso', classe: 'text-bg-success' },
+    JA_IMPORTADO: { texto: 'Já importado anteriormente', classe: 'text-bg-secondary' },
+    SEM_MAPEAMENTO: { texto: 'Sem perigo mapeado', classe: 'text-bg-warning' },
+    ERRO: { texto: 'Erro ao importar', classe: 'text-bg-danger' },
+};
+
+async function confirmarImportacao() {
+    const textoOriginal = botaoConfirmarImportar.textContent;
+    botaoConfirmarImportar.disabled = true;
+    botaoConfirmarImportar.textContent = 'Importando...';
+
+    try {
+        const resultados = await importarResultadosGhe([...idsRiscoSelecionados], inventarioSelecionado.id_inventario);
+        listaResultadoImportacao.innerHTML = '';
+        resultados.forEach((resultado) => {
+            const rotulo = ROTULOS_STATUS_IMPORTACAO[resultado.status] || { texto: resultado.status, classe: 'text-bg-secondary' };
+            const item = document.createElement('li');
+            item.className = 'list-group-item d-flex justify-content-between align-items-center';
+            item.innerHTML = `
+                <span>${resultado.risco_nome || `#${resultado.id_avaliacao_ghe_risco}`}</span>
+                <span class="badge ${rotulo.classe}">${rotulo.texto}</span>
+            `;
+            listaResultadoImportacao.appendChild(item);
+        });
+        linkIrInventario.href = `inventario-detalhe.html?id_inventario=${inventarioSelecionado.id_inventario}`;
+        mostrarPasso('resultado');
+    } catch (error) {
+        console.error('Erro ao importar resultados para o inventário:', error);
+        mostrarNotificacao('Não foi possível concluir a importação.', 'erro');
+    } finally {
+        botaoConfirmarImportar.disabled = false;
+        botaoConfirmarImportar.textContent = textoOriginal;
+    }
+}
+
+botaoAdicionarInventario.addEventListener('click', abrirWizardImportacao);
+
+botaoAvancarImportar.addEventListener('click', () => {
+    if (passoAtual === 'inventario' && inventarioSelecionado) {
+        carregarPassoRiscos();
+    } else if (passoAtual === 'riscos' && idsRiscoSelecionados.size > 0) {
+        carregarPassoPreview();
+    }
+});
+
+botaoVoltarImportar.addEventListener('click', () => {
+    const indiceAtual = PASSOS_IMPORTACAO.indexOf(passoAtual);
+    if (indiceAtual > 0) {
+        mostrarPasso(PASSOS_IMPORTACAO[indiceAtual - 1]);
+    }
+});
+
+botaoConfirmarImportar.addEventListener('click', confirmarImportacao);
 
 carregarPagina();

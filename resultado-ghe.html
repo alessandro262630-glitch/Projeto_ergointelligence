@@ -93,7 +93,10 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Resultado de Risco do GHE</span>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="botao-adicionar-inventario" hidden>
+                        <i class="bi bi-journal-plus" aria-hidden="true"></i> Adicionar ao Inventário
+                    </button>
                     <a href="#" class="btn btn-outline-secondary btn-sm" id="link-voltar-avaliacao">&larr; Voltar à Avaliação</a>
                 </div>
             </nav>
@@ -183,6 +186,94 @@
                 </div>
                 <div class="modal-body" id="corpo-modal-entenda-por-que">
                     <!-- preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Adicionar ao Inventario (MVP-09C) -->
+    <div class="modal fade" id="modal-importar-inventario" tabindex="-1" aria-labelledby="modal-importar-titulo" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-importar-titulo">Adicionar ao Inventário de Riscos</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Passo 1: inventario de destino -->
+                    <div id="passo-inventario">
+                        <p class="text-muted small">
+                            Selecione o inventário de destino. Somente inventários em <strong>rascunho</strong> desta
+                            empresa podem receber novos itens.
+                        </p>
+                        <div id="area-sem-inventarios" class="alert alert-warning" hidden>
+                            Nenhum inventário em rascunho encontrado.
+                            <a href="inventarios.html">Crie um inventário</a> antes de importar este resultado.
+                        </div>
+                        <div id="lista-inventarios-destino" class="list-group"></div>
+                    </div>
+
+                    <!-- Passo 2: selecionar riscos -->
+                    <div id="passo-riscos" hidden>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <p class="text-muted small mb-0">Selecione os riscos deste processamento que deseja importar.</p>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="botao-selecionar-todos-riscos">
+                                Selecionar todos
+                            </button>
+                        </div>
+                        <div id="lista-riscos-importar" class="list-group"></div>
+                    </div>
+
+                    <!-- Passo 3: pre-visualizacao -->
+                    <div id="passo-preview" hidden>
+                        <div class="alert alert-warning small mb-3" id="aviso-demonstrativa-preview" hidden>
+                            Resultado proveniente de metodologia demonstrativa. Os critérios utilizados ainda
+                            requerem validação técnica para uso profissional.
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Inventário</th>
+                                        <th>GHE</th>
+                                        <th>Risco</th>
+                                        <th>Perigo</th>
+                                        <th>Pontuação</th>
+                                        <th>Classificação</th>
+                                        <th>Metodologia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpo-tabela-preview"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Passo 4: resultado da importacao -->
+                    <div id="passo-resultado" hidden>
+                        <ul class="list-group" id="lista-resultado-importacao"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="botao-voltar-importar" hidden>
+                        &larr; Voltar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-importar" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="botao-avancar-importar" disabled>
+                        Avançar &rarr;
+                    </button>
+                    <button type="button" class="btn btn-success" id="botao-confirmar-importar" hidden>
+                        Importar para o Inventário
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="botao-fechar-resultado" data-bs-dismiss="modal" hidden>
+                        Fechar
+                    </button>
+                    <a href="#" class="btn btn-primary" id="link-ir-inventario" hidden>
+                        Ir para o Inventário &rarr;
+                    </a>
                 </div>
             </div>
         </div>

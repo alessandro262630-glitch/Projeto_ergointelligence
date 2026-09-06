@@ -9,11 +9,11 @@ import {
     listarAtividadesDoItem,
     associarAtividade,
     removerAtividade,
-    buscarOrigemItem,
     validarInventarioPublicavel,
     publicarInventario,
     criarNovaVersao,
 } from '../services/inventarioRiscoService.js';
+import { buscarOrigemItemInventario, verificarAlgumaMetodologiaDemonstrativa } from '../services/inventarioIntegracaoService.js';
 import { listarGhes, buscarNomeEmpresa } from '../services/gheService.js';
 import { listarAmbientesPorSetor, listarPostosPorAmbiente } from '../services/ambienteService.js';
 import { listarAtividades } from '../services/avaliacaoService.js';
@@ -65,6 +65,7 @@ const botaoPublicarInventario = document.getElementById('botao-publicar-inventar
 const botaoCriarNovaVersaoDetalhe = document.getElementById('botao-criar-nova-versao');
 
 const areaPendenciasPublicacao = document.getElementById('area-pendencias-publicacao');
+const avisoMetodologiaDemonstrativa = document.getElementById('aviso-metodologia-demonstrativa');
 const listaPendenciasPublicacao = document.getElementById('lista-pendencias-publicacao');
 
 const areaSemItens = document.getElementById('area-sem-itens');
@@ -247,6 +248,34 @@ function renderizarCabecalho(nomeEmpresa) {
     } else {
         areaVersaoAnterior.hidden = true;
     }
+
+    // Fire-and-forget: renderizarCabecalho() nunca foi async para quem a
+    // chama (6 pontos de chamada) - o aviso so aparece/desaparece quando a
+    // consulta resolver, sem bloquear o restante do cabecalho.
+    atualizarAvisoMetodologiaDemonstrativa();
+}
+
+// Aviso obrigatorio do cabecalho quando QUALQUER item do inventario vem de
+// uma metodologia DEMONSTRATIVA (secao 21/45 do prompt MVP-09C) - nunca
+// reinterpreta o rotulo, so verifica o que ja esta gravado em
+// metodologia_risco a partir dos snapshots de cada item MOTOR_GHE.
+async function atualizarAvisoMetodologiaDemonstrativa() {
+    const itensMotorGhe = itensAtuais.filter((item) => item.origem_tipo === 'MOTOR_GHE');
+    if (itensMotorGhe.length === 0) {
+        avisoMetodologiaDemonstrativa.hidden = true;
+        return;
+    }
+
+    try {
+        const pares = itensMotorGhe.map((item) => ({
+            codigo: item.metodologia_codigo_snapshot,
+            versao: item.metodologia_versao_snapshot,
+        }));
+        const temMetodologiaDemonstrativa = await verificarAlgumaMetodologiaDemonstrativa(pares);
+        avisoMetodologiaDemonstrativa.hidden = !temMetodologiaDemonstrativa;
+    } catch (error) {
+        console.error('Erro ao verificar status de validação das metodologias:', error);
+    }
 }
 
 // Reforca no cliente o que o service ja bloqueia (secao 21 do prompt) -
@@ -388,21 +417,35 @@ async function recarregarItensERenderizar() {
 }
 
 // --- Origem do item --------------------------------------------------------------
+// Consulta apenas historico ja persistido (buscarOrigemItemInventario) -
+// nunca reprocessa o Motor GHE ao abrir esta modal (secao 34 do prompt
+// MVP-09C).
 async function abrirModalOrigem(item) {
     corpoModalOrigemItem.innerHTML = '<p class="text-muted mb-0">Carregando...</p>';
     instanciaModalOrigemItem.show();
     try {
-        const origem = await buscarOrigemItem(item.id_inventario_risco_item);
+        const origem = await buscarOrigemItemInventario(item.id_inventario_risco_item);
         if (!origem) {
             corpoModalOrigemItem.innerHTML = '<p class="text-muted mb-0">Este item não possui origem no Motor GHE.</p>';
             return;
         }
+        const avisoDemonstrativa = origem.metodologia_status_validacao === 'DEMONSTRATIVA'
+            ? `<div class="alert alert-warning small mb-3">
+                Resultado proveniente de metodologia demonstrativa. Os critérios utilizados ainda requerem
+                validação técnica para uso profissional.
+               </div>`
+            : '';
         corpoModalOrigemItem.innerHTML = `
+            ${avisoDemonstrativa}
             <dl class="row mb-0 small">
-                <dt class="col-5">Metodologia</dt><dd class="col-7">${origem.metodologia_codigo || '-'} v${origem.metodologia_versao || '-'}</dd>
+                <dt class="col-5">Origem</dt><dd class="col-7">Motor de Risco GHE</dd>
+                <dt class="col-5">GHE</dt><dd class="col-7">${origem.ghe_nome || '-'}</dd>
+                <dt class="col-5">Processamento</dt><dd class="col-7">#${origem.id_processamento_risco_ghe ?? '-'}</dd>
+                <dt class="col-5">Metodologia</dt><dd class="col-7">${origem.metodologia_codigo || '-'}</dd>
+                <dt class="col-5">Versão</dt><dd class="col-7">${origem.metodologia_versao || '-'}</dd>
                 <dt class="col-5">Processado em</dt><dd class="col-7">${origem.processado_em ? new Date(origem.processado_em).toLocaleString('pt-BR') : '-'}</dd>
-                <dt class="col-5">Pontuação</dt><dd class="col-7">${item.pontuacao_snapshot ?? '-'}</dd>
-                <dt class="col-5">Classificação</dt><dd class="col-7">${item.classificacao_nome_snapshot || '-'}</dd>
+                <dt class="col-5">Pontuação</dt><dd class="col-7">${origem.pontuacao ?? '-'}</dd>
+                <dt class="col-5">Classificação</dt><dd class="col-7">${origem.classificacao_nome || '-'}</dd>
             </dl>
             <a class="small" href="resultado-ghe.html?id_processamento=${origem.id_processamento_risco_ghe}">Ver resultado completo do processamento &rarr;</a>
         `;
