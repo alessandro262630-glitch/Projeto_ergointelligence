@@ -96,11 +96,10 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="ms-2 ms-lg-0">
-                    <span class="navbar-brand mb-0 h5 d-block">Dashboard Executivo</span>
-                    <span class="small text-muted">Visão geral ergonômica</span>
+                    <span class="pagina-titulo">Dashboard Executivo</span>
                 </div>
                 <div class="ms-auto d-flex align-items-center gap-2">
-                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo — dados fictícios</span>
+                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo</span>
                     <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" id="botao-atualizar">
                         <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Atualizar dados
                     </button>
@@ -117,7 +116,10 @@
                          (integracao e DASH-02, ver docs/dash01-dashboard-ghe-motor.md).
                          ============================================================ -->
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-                        <h2 class="fs-5 fw-semibold mb-0">GHE &amp; Motor de Risco</h2>
+                        <h2 class="dashboard-secao-titulo">
+                            <span class="dashboard-secao-titulo__icone"><i class="bi bi-diagram-3" aria-hidden="true"></i></span>
+                            GHE &amp; Motor de Risco
+                        </h2>
                         <button
                             type="button"
                             class="badge-demonstrativo"
@@ -190,7 +192,7 @@
                             <div class="col-lg-6">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h3 class="fs-6 fw-semibold mb-3">Riscos por Classificação</h3>
+                                        <h3 class="card-titulo mb-3"><i class="bi bi-pie-chart" aria-hidden="true"></i> Riscos por Classificação</h3>
                                         <div id="area-estado-ghe-classificacao" class="text-center text-muted py-5" hidden></div>
                                         <div id="grafico-ghe-classificacao" class="grafico-donut"></div>
                                     </div>
@@ -199,7 +201,7 @@
                             <div class="col-lg-6">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h3 class="fs-6 fw-semibold mb-3">Riscos por GHE</h3>
+                                        <h3 class="card-titulo mb-3"><i class="bi bi-bar-chart" aria-hidden="true"></i> Riscos por GHE</h3>
                                         <div id="area-estado-ghe-por-ghe" class="text-center text-muted py-5" hidden></div>
                                         <div id="grafico-ghe-por-ghe" class="grafico-padrao"></div>
                                     </div>
@@ -210,7 +212,7 @@
                         <!-- Linha 3: cobertura + GHEs monitorados (secao 22-27/33/45) -->
                         <div class="card mb-3">
                             <div class="card-body">
-                                <h3 class="fs-6 fw-semibold mb-3">Cobertura das Avaliações GHE</h3>
+                                <h3 class="card-titulo mb-3"><i class="bi bi-clipboard2-data" aria-hidden="true"></i> Cobertura das Avaliações GHE</h3>
                                 <div id="area-estado-cobertura" class="text-center text-muted py-4" hidden></div>
                                 <div id="area-cobertura-conteudo" hidden>
                                     <div class="row g-2 mb-3" id="area-ghes-monitorados"></div>
@@ -235,7 +237,7 @@
                         <!-- Linha 4: principais riscos (secao 28-32/45) -->
                         <div class="card mb-3">
                             <div class="card-body">
-                                <h3 class="fs-6 fw-semibold mb-3">Principais Riscos Identificados</h3>
+                                <h3 class="card-titulo mb-3"><i class="bi bi-list-stars" aria-hidden="true"></i> Principais Riscos Identificados</h3>
                                 <div id="area-estado-ghe-principais" class="text-center text-muted py-4" hidden></div>
                                 <div class="table-responsive" id="area-tabela-ghe-principais" hidden>
                                     <table class="table table-sm align-middle mb-0">
@@ -279,7 +281,10 @@
                          BLOCO AVALIACAO INDIVIDUAL (FEIRA-03, ja existente - mantido
                          sem alteracoes de logica, so reposicionado abaixo do GHE).
                          ============================================================ -->
-                    <h2 class="fs-5 fw-semibold mb-2">Avaliação Individual</h2>
+                    <h2 class="dashboard-secao-titulo mb-2">
+                        <span class="dashboard-secao-titulo__icone"><i class="bi bi-person-check" aria-hidden="true"></i></span>
+                        Avaliação Individual
+                    </h2>
 
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
@@ -374,7 +379,7 @@
                             <div class="col-lg-6">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h2 class="fs-6 fw-semibold mb-3">Riscos por Classificação <span class="fw-normal text-muted small">— clique para filtrar</span></h2>
+                                        <h2 class="card-titulo mb-3"><i class="bi bi-pie-chart" aria-hidden="true"></i> Riscos por Classificação <span class="fw-normal text-muted small">— clique para filtrar</span></h2>
                                         <div id="area-estado-classificacao" class="text-center text-muted py-5" hidden></div>
                                         <div id="grafico-classificacao" class="grafico-donut"></div>
                                     </div>
@@ -383,7 +388,7 @@
                             <div class="col-lg-6">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h2 class="fs-6 fw-semibold mb-3">Riscos por Setor <span class="fw-normal text-muted small">— clique para filtrar</span></h2>
+                                        <h2 class="card-titulo mb-3"><i class="bi bi-geo-alt" aria-hidden="true"></i> Riscos por Setor <span class="fw-normal text-muted small">— clique para filtrar</span></h2>
                                         <div id="area-estado-setor" class="text-center text-muted py-5" hidden></div>
                                         <div id="grafico-setor" class="grafico-padrao"></div>
                                     </div>
@@ -396,7 +401,7 @@
                             <div class="col-lg-6">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h2 class="fs-6 fw-semibold mb-3">Evolução das Avaliações</h2>
+                                        <h2 class="card-titulo mb-3"><i class="bi bi-graph-up" aria-hidden="true"></i> Evolução das Avaliações</h2>
                                         <div id="area-estado-evolucao" class="text-center text-muted py-5" hidden></div>
                                         <div id="grafico-evolucao" class="grafico-padrao"></div>
                                     </div>
@@ -405,7 +410,7 @@
                             <div class="col-lg-6">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h2 class="fs-6 fw-semibold mb-3">Status do Plano de Ação</h2>
+                                        <h2 class="card-titulo mb-3"><i class="bi bi-list-check" aria-hidden="true"></i> Status do Plano de Ação</h2>
                                         <div id="area-estado-plano" class="text-center text-muted py-5" hidden></div>
                                         <div id="grafico-plano" class="grafico-padrao"></div>
                                     </div>
@@ -416,7 +421,7 @@
                         <!-- Riscos que exigem atencao (HTML/CSS puro - secao 25) -->
                         <div class="card mb-3">
                             <div class="card-body">
-                                <h2 class="fs-6 fw-semibold mb-3">Riscos que Exigem Atenção</h2>
+                                <h2 class="card-titulo mb-3"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Riscos que Exigem Atenção</h2>
                                 <div id="area-estado-prioritarios" class="text-center text-muted py-4" hidden></div>
                                 <div class="table-responsive" id="area-tabela-prioritarios" hidden>
                                     <table class="table table-sm align-middle mb-0">

@@ -17,6 +17,7 @@ import {
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // FEIRA-04 - Plano de Acao MVP.
 // So LE resultado de risco/classificacao/recomendacoes ja persistidos -
@@ -126,7 +127,11 @@ function definirEstado(tipo, mensagem) {
     areaConteudo.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // --- Rotulos amigaveis (apenas exibicao - valores oficiais nunca mudam) -----------

@@ -9,6 +9,7 @@ import {
     agruparRiscosGhePorClassificacao,
     listarPrincipaisRiscosGhe,
 } from '../services/dashboardService.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // FEIRA-03 - Dashboard Executivo.
 // Responsabilidade: DOM + ECharts. NUNCA consulta o Supabase diretamente
@@ -88,7 +89,11 @@ function definirEstado(tipo, mensagem) {
     areaDashboard.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // Estado "sem dados" de um bloco individual (grafico ou lista) - o restante
@@ -665,9 +670,8 @@ function renderizarPrincipaisRiscosGhe(lista, mensagemVazio) {
 
 // --- Carga do bloco GHE ----------------------------------------------------------
 async function carregarDashboardGhe() {
-    areaEstadoGhe.hidden = true;
-    areaDashboardGhe.hidden = false;
-    areaEstadoGhe.textContent = 'Carregando indicadores do GHE...';
+    areaEstadoGhe.classList.remove('text-danger');
+    marcarComoCarregando(areaEstadoGhe, 'Carregando indicadores do GHE...');
     areaEstadoGhe.hidden = false;
     areaDashboardGhe.hidden = true;
 

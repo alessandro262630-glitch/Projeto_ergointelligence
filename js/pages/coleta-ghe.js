@@ -3,6 +3,7 @@ import { buscarAvaliacaoGhePorId, buscarColetaPorId, validarColetaParaFinalizaca
 import { carregarQuestionario } from '../services/perguntaService.js';
 import { carregarRespostasDaColeta, salvarRespostaColeta } from '../services/respostaColetaService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-07 - Coleta do GHE: reaproveita o MESMO catalogo de perguntas
 // (pergunta_avaliacao/opcao_resposta) e a MESMA logica de renderizacao de
@@ -62,7 +63,11 @@ function definirEstado(tipo, mensagem) {
     areaColeta.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // --- Carga inicial -------------------------------------------------------------

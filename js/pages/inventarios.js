@@ -3,6 +3,7 @@ import { listarUsuariosDaEmpresa } from '../services/planoAcaoService.js';
 import { obterIdEmpresaAtiva } from '../services/colaboradorService.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-09B - Listagem de versoes do Inventario de Riscos Ocupacionais. So
 // interface/eventos - toda regra de dominio fica em
@@ -48,7 +49,11 @@ function definirEstado(tipo, mensagem) {
     areaTabela.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 const ROTULOS_STATUS = { RASCUNHO: 'Rascunho', PUBLICADO: 'Publicado', CANCELADO: 'Cancelado' };

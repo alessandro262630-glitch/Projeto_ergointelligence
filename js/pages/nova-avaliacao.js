@@ -6,6 +6,7 @@ import { listarPerfisPorColaborador } from '../services/perfilAntropometricoServ
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // AVA-01 - Criar nova avaliacao ergonomica.
 // Esta pagina so registra o contexto inicial (RASCUNHO ou EM_ANDAMENTO).
@@ -59,7 +60,11 @@ function definirEstado(tipo, mensagem) {
     formulario.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // --- Carga inicial: apenas os colaboradores ativos (o restante do contexto

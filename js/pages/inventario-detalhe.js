@@ -21,6 +21,7 @@ import { listarUsuariosDaEmpresa } from '../services/planoAcaoService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-09B - Detalhe de UMA versao do Inventario de Riscos Ocupacionais:
 // cabecalho, itens e suas atividades. So interface/eventos - toda regra
@@ -153,7 +154,11 @@ function definirEstado(tipo, mensagem) {
     areaConteudo.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 const ROTULOS_STATUS = { RASCUNHO: 'Rascunho', PUBLICADO: 'Publicado', CANCELADO: 'Cancelado' };

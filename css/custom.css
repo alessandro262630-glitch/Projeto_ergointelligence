@@ -290,3 +290,96 @@
     border-left-style: solid;
     border-left-color: var(--bs-border-color);
 }
+
+/* =====================================================================
+   TITULO DA PAGINA (barra superior de cada tela interna)
+   =====================================================================
+   Substitui o .navbar-brand puro (peso/tamanho generico do Bootstrap,
+   sem nenhuma identidade visual) pelo titulo de cada tela: mais peso,
+   cor da marca e uma marca lateral em degrade nas cores do simbolo -
+   mesmo destaque em qualquer pagina interna do sistema. */
+.pagina-titulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--eg-navy);
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+
+.pagina-titulo::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 1.3rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--eg-cyan) 0%, var(--eg-teal) 55%, var(--eg-navy) 100%);
+    flex-shrink: 0;
+}
+
+/* Alinhada com o texto do titulo (nao com a marca lateral), nas paginas
+   que tem uma linha de subtitulo logo abaixo. */
+.pagina-subtitulo {
+    display: block;
+    margin-top: 0.15rem;
+    margin-left: calc(4px + 0.85rem);
+}
+
+/* =====================================================================
+   INDICADOR DE CARREGAMENTO COM A MARCA
+   =====================================================================
+   Usado em toda area de "estado" (carregando/vazio/erro) das paginas que
+   buscam dados no Supabase, no lugar de um simples texto "Carregando...".
+   Anel giratorio nas cores da marca em torno do simbolo da logo - o
+   simbolo gira no sentido contrario ao anel para permanecer visualmente
+   parado no centro. Ver js/utils/carregando.js (marcarComoCarregando). */
+.eg-carregando {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.eg-carregando__anel {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid var(--eg-teal-light);
+    border-top-color: var(--eg-navy);
+    border-right-color: var(--eg-teal);
+    animation: eg-girar 0.9s linear infinite;
+}
+
+.eg-carregando__logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    animation: eg-girar 0.9s linear infinite reverse;
+}
+
+.eg-carregando__texto {
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+}
+
+@keyframes eg-girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Usuarios com preferencia por menos movimento veem o anel parado (so a
+   cor/estrutura como indicativo visual), nunca a animacao completa. */
+@media (prefers-reduced-motion: reduce) {
+    .eg-carregando__anel,
+    .eg-carregando__logo {
+        animation: none;
+    }
+}

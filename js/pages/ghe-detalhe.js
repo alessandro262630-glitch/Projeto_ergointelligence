@@ -22,6 +22,7 @@ import { buscarAvaliacaoGheAtual, iniciarOuContinuarAvaliacaoGhe } from '../serv
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-06 - Detalhe do GHE: contexto, cargos relacionados, plano de
 // amostragem e participantes. So interface/eventos - toda regra de
@@ -130,7 +131,11 @@ function definirEstado(tipo, mensagem) {
     areaConteudo.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 const ROTULOS_STATUS_PLANO = { PLANEJADO: 'Planejado', EM_COLETA: 'Em coleta', CONCLUIDO: 'Concluído', CANCELADO: 'Cancelado' };

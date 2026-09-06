@@ -7,6 +7,7 @@ import {
 } from '../services/riscoService.js';
 import { processarOuObterRecomendacoes } from '../services/recomendacaoService.js';
 import { buscarPlanoPorAvaliacao } from '../services/planoAcaoService.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // INT-RSK-01 - Versao funcional minima da pagina de resultado.
 // So LE o que o Motor de Risco ja calculou/persistiu (avaliacao_ergonomica,
@@ -58,7 +59,11 @@ function definirEstado(tipo, mensagem, opcoes = {}) {
     areaResultado.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
     botaoCalcularResultado.hidden = !opcoes.mostrarBotaoCalcular;
 }
 

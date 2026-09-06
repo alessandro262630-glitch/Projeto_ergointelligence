@@ -12,6 +12,7 @@ import {
   dataNaoFutura,
 } from "../utils/validacoes.js";
 import { mostrarNotificacao as mostrarNotificacaoBase } from "../utils/notificacoes.js";
+import { marcarComoCarregando } from "../utils/carregando.js";
 
 // --- Referencias de DOM --------------------------------------------------
 const areaEstado = document.getElementById("area-estado");
@@ -54,7 +55,11 @@ function definirEstado(tipo, mensagem) {
   areaTabela.hidden = true;
   areaEstado.hidden = false;
   areaEstado.classList.toggle("text-danger", tipo === "erro");
-  areaEstado.textContent = mensagem;
+  if (tipo === "carregando") {
+    marcarComoCarregando(areaEstado, mensagem);
+  } else {
+    areaEstado.textContent = mensagem;
+  }
 }
 
 async function carregarColaboradores() {

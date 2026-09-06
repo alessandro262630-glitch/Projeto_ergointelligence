@@ -1,6 +1,7 @@
 import { listarGhes, buscarGhePorId, criarGhe, atualizarGhe, listarSetoresDaEmpresa } from '../services/gheService.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-06 - Listagem de GHEs. So interface/eventos - toda regra de dominio
 // fica em js/services/gheService.js.
@@ -36,7 +37,11 @@ function definirEstado(tipo, mensagem) {
     areaTabela.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 const ROTULOS_STATUS_PLANO = { PLANEJADO: 'Planejado', EM_COLETA: 'Em coleta', CONCLUIDO: 'Concluído', CANCELADO: 'Cancelado' };

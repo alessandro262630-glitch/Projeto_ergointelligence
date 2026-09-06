@@ -17,6 +17,7 @@ import { buscarAmbientePorId, buscarPostoPorId } from '../services/ambienteServi
 import { buscarPerfilPorId } from '../services/perfilAntropometricoService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // AVA-02 - Selecionar e completar o contexto da avaliacao.
 // A avaliacao ja existe (criada pela AVA-01): esta pagina so LE por id e
@@ -92,7 +93,11 @@ function definirEstado(tipo, mensagem) {
     conteudoContexto.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // Garante que uma referencia ja gravada na avaliacao (funcao/ambiente/

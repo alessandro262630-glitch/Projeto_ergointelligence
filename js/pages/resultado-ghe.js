@@ -13,6 +13,7 @@ import {
 } from '../services/inventarioIntegracaoService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-08C - Resultado de Risco do GHE (exclusivamente metodologia
 // demonstrativa). So interface/eventos - todo o calculo/persistencia ja
@@ -90,7 +91,11 @@ function definirEstado(tipo, mensagem) {
     areaConteudo.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 function formatarNumero(valor, casas = 1) {

@@ -1,5 +1,6 @@
 import { gerarConsolidacaoDaAvaliacao } from '../services/consolidacaoGheService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-07 - Consolidacao descritiva da Avaliacao do GHE: so leitura, so
 // interface/eventos - toda a matematica descritiva fica em
@@ -33,7 +34,11 @@ function definirEstado(tipo, mensagem) {
     areaConteudo.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 function formatarPercentual(valor) {

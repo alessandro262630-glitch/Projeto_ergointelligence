@@ -18,6 +18,7 @@ import { listarPerfisPorColaborador, criarPerfil, desativarPerfil } from '../ser
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido, dataNaoFutura } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // --- Contexto: id_colaborador vem da URL, nunca solicitado novamente ao
 // usuario (ver vinculos.html?id_colaborador=...) -------------------------
@@ -100,7 +101,11 @@ function definirEstado(tipo, mensagem) {
     areaTabela.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // --- Carga inicial: colaborador (contexto) + catalogos + vinculos --------

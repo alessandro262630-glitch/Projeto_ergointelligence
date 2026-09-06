@@ -12,6 +12,7 @@ import {
     listarProcessamentos,
 } from '../services/motorRiscoGheService.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // MVP-07 - Avaliacao do GHE: visao de progresso das coletas de TODOS os
 // participantes registrados no plano de amostragem (mesmo os que ainda nao
@@ -70,7 +71,11 @@ function definirEstado(tipo, mensagem) {
     areaConteudo.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 function mensagemErroAmigavel(error) {

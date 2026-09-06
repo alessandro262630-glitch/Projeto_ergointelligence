@@ -11,6 +11,49 @@
     box-shadow: 0 1px 3px rgba(16, 38, 59, 0.06);
 }
 
+/* Titulo das duas grandes secoes do dashboard (GHE & Motor de Risco /
+   Avaliacao Individual) - selo de icone + texto em navy, para separar
+   visualmente os dois blocos com mais peso do que um h2 simples. */
+.dashboard-secao-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--eg-navy);
+    margin: 0;
+}
+
+.dashboard-secao-titulo__icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.6rem;
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--eg-teal);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+/* Titulo de cada card de grafico/tabela dentro do dashboard - cor da
+   marca + icone discreto no lugar do preto/cinza padrao do Bootstrap
+   para headings fs-6. */
+.card-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--eg-navy);
+}
+
+.card-titulo i {
+    color: var(--eg-teal);
+    font-size: 1rem;
+}
+
 .kpi-card {
     border: 1px solid var(--bs-border-color-translucent, #e9ecef);
     border-left: 4px solid var(--bs-primary);

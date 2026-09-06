@@ -3,6 +3,7 @@ import { carregarQuestionario } from '../services/perguntaService.js';
 import { carregarRespostasDaAvaliacao, salvarResposta } from '../services/respostaService.js';
 import { listarResultadosRiscoDaAvaliacao, processarOuObterResultadoRisco } from '../services/riscoService.js';
 import { formatarCategoria } from '../utils/formatadores.js';
+import { marcarComoCarregando } from '../utils/carregando.js';
 
 // AVA-03 - Carrega o questionario ergonomico dinamicamente.
 // AVA-04 - Evolui a mesma pagina/estado para persistir as respostas em
@@ -77,7 +78,11 @@ function definirEstado(tipo, mensagem) {
     areaQuestionario.hidden = true;
     areaEstado.hidden = false;
     areaEstado.classList.toggle('text-danger', tipo === 'erro');
-    areaEstado.textContent = mensagem;
+    if (tipo === 'carregando') {
+        marcarComoCarregando(areaEstado, mensagem);
+    } else {
+        areaEstado.textContent = mensagem;
+    }
 }
 
 // --- Carga inicial -------------------------------------------------------------
