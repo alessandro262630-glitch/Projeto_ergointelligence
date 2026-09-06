@@ -111,6 +111,176 @@
                 <div class="container-fluid p-3 p-md-4">
                     <p class="small text-muted mb-3" id="texto-atualizado-em"></p>
 
+                    <!-- ============================================================
+                         BLOCO GHE + MOTOR DE RISCO (DASH-01) - porta de entrada da
+                         demonstracao. Inventario de Riscos fica fora desta etapa
+                         (integracao e DASH-02, ver docs/dash01-dashboard-ghe-motor.md).
+                         ============================================================ -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <h2 class="fs-5 fw-semibold mb-0">GHE &amp; Motor de Risco</h2>
+                        <button
+                            type="button"
+                            class="badge-demonstrativo"
+                            id="badge-metodologia-demonstrativa"
+                            data-bs-toggle="popover"
+                            data-bs-trigger="focus"
+                            data-bs-placement="left"
+                            data-bs-title="Resultados demonstrativos"
+                            data-bs-content="Os critérios utilizados ainda requerem validação técnica para uso profissional."
+                            hidden
+                        >
+                            <i class="bi bi-info-circle" aria-hidden="true"></i> Resultados demonstrativos
+                        </button>
+                    </div>
+
+                    <div id="area-estado-ghe" class="text-center text-muted py-5"></div>
+
+                    <div id="area-dashboard-ghe" hidden>
+                        <!-- Linha 1: KPIs (secao 9-12/45) -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-6 col-lg-3">
+                                <div class="card h-100 kpi-card">
+                                    <div class="card-body d-flex align-items-start gap-3">
+                                        <div class="kpi-icone"><i class="bi bi-people" aria-hidden="true"></i></div>
+                                        <div>
+                                            <div class="kpi-rotulo">Trabalhadores abrangidos</div>
+                                            <div class="kpi-valor" id="kpi-ghe-trabalhadores">—</div>
+                                            <div class="small text-muted mt-1" id="kpi-ghe-trabalhadores-contexto"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="card h-100 kpi-card">
+                                    <div class="card-body d-flex align-items-start gap-3">
+                                        <div class="kpi-icone"><i class="bi bi-diagram-3" aria-hidden="true"></i></div>
+                                        <div>
+                                            <div class="kpi-rotulo">GHEs ativos</div>
+                                            <div class="kpi-valor" id="kpi-ghe-total">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="card h-100 kpi-card">
+                                    <div class="card-body d-flex align-items-start gap-3">
+                                        <div class="kpi-icone"><i class="bi bi-clipboard2-data" aria-hidden="true"></i></div>
+                                        <div>
+                                            <div class="kpi-rotulo">Avaliações GHE</div>
+                                            <div class="kpi-valor" id="kpi-ghe-avaliacoes">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="card h-100 kpi-card">
+                                    <div class="card-body d-flex align-items-start gap-3">
+                                        <div class="kpi-icone"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></div>
+                                        <div>
+                                            <div class="kpi-rotulo">Riscos identificados</div>
+                                            <div class="kpi-valor" id="kpi-ghe-riscos">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Linha 2: distribuicao (secao 17/20/45) -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-lg-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h3 class="fs-6 fw-semibold mb-3">Riscos por Classificação</h3>
+                                        <div id="area-estado-ghe-classificacao" class="text-center text-muted py-5" hidden></div>
+                                        <div id="grafico-ghe-classificacao" class="grafico-donut"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h3 class="fs-6 fw-semibold mb-3">Riscos por GHE</h3>
+                                        <div id="area-estado-ghe-por-ghe" class="text-center text-muted py-5" hidden></div>
+                                        <div id="grafico-ghe-por-ghe" class="grafico-padrao"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Linha 3: cobertura + GHEs monitorados (secao 22-27/33/45) -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h3 class="fs-6 fw-semibold mb-3">Cobertura das Avaliações GHE</h3>
+                                <div id="area-estado-cobertura" class="text-center text-muted py-4" hidden></div>
+                                <div id="area-cobertura-conteudo" hidden>
+                                    <div class="row g-2 mb-3" id="area-ghes-monitorados"></div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>GHE</th>
+                                                    <th class="text-end">Universo</th>
+                                                    <th class="text-end">Amostra planejada</th>
+                                                    <th class="text-end">Coletas concluídas</th>
+                                                    <th style="width: 180px;">Cobertura</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="corpo-tabela-cobertura"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Linha 4: principais riscos (secao 28-32/45) -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h3 class="fs-6 fw-semibold mb-3">Principais Riscos Identificados</h3>
+                                <div id="area-estado-ghe-principais" class="text-center text-muted py-4" hidden></div>
+                                <div class="table-responsive" id="area-tabela-ghe-principais" hidden>
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Risco</th>
+                                                <th>GHE</th>
+                                                <th class="text-end">Pontuação</th>
+                                                <th>Classificação</th>
+                                                <th>Metodologia</th>
+                                                <th>Processado em</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="corpo-tabela-ghe-principais"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Linha 5: acesso rapido (secao 34/45) -->
+                        <div class="card mb-4">
+                            <div class="card-body d-flex flex-wrap align-items-center gap-2">
+                                <span class="small text-uppercase text-muted fw-semibold me-2">Acesso rápido</span>
+                                <a href="ghes.html" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-diagram-3" aria-hidden="true"></i> Ver GHEs
+                                </a>
+                                <a href="ghes.html" class="btn btn-outline-primary btn-sm" title="Selecione um GHE para iniciar uma nova avaliação">
+                                    <i class="bi bi-clipboard2-plus" aria-hidden="true"></i> Nova Avaliação GHE
+                                </a>
+                                <a href="inventarios.html" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-journal-text" aria-hidden="true"></i> Ver Inventários
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- ============================================================
+                         BLOCO AVALIACAO INDIVIDUAL (FEIRA-03, ja existente - mantido
+                         sem alteracoes de logica, so reposicionado abaixo do GHE).
+                         ============================================================ -->
+                    <h2 class="fs-5 fw-semibold mb-2">Avaliação Individual</h2>
+
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
                     <div id="area-dashboard" hidden>
@@ -268,8 +438,8 @@
             </main>
 
             <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
-                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
-                <span>MVP de demonstração &middot; dados fictícios</span>
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
+                <span>MVP de demonstração</span>
             </footer>
         </div>
     </div>

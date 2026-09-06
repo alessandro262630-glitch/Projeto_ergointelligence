@@ -150,3 +150,135 @@
 .filtro-bar__limpar {
     border-radius: 999px;
 }
+
+/* =====================================================================
+   DASH-01 - Bloco GHE + Motor de Risco
+   ===================================================================== */
+
+/* Indicador discreto de metodologia demonstrativa (secao 19) - nunca um
+   alerta grande, so um selo clicavel com o aviso completo no popover. */
+.badge-demonstrativo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--bs-warning-border-subtle, #ffe69c);
+    background-color: var(--bs-warning-bg-subtle, #fff3cd);
+    color: var(--bs-warning-text-emphasis, #664d03);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+}
+
+/* Card compacto de "GHE monitorado" (secao 33) - mesma linguagem visual
+   dos kpi-card (borda + sombra leve + hover sutil), denso o suficiente
+   para caber varios lado a lado. */
+.ghe-resumo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    border: 1px solid var(--bs-border-color-translucent, #e9ecef);
+    border-radius: 0.75rem;
+    padding: 0.85rem 0.9rem;
+    height: 100%;
+    background-color: var(--bs-body-bg, #fff);
+    box-shadow: 0 1px 3px rgba(16, 38, 59, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ghe-resumo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(16, 38, 59, 0.1);
+}
+
+.ghe-resumo-card__cabecalho {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+}
+
+.ghe-resumo-card__icone {
+    flex: 0 0 auto;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-primary);
+}
+
+.ghe-resumo-card__titulo {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.ghe-resumo-card__nome {
+    font-weight: 600;
+    font-size: 0.85rem;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Selo de cobertura no cabecalho do card - mesma cor neutra da barra
+   (nunca verde/amarelo/vermelho, secao 27) para nao sugerir julgamento
+   de bom/ruim so pelo numero. */
+.ghe-resumo-card__selo {
+    display: inline-block;
+    margin-top: 0.2rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--eg-teal-dark, var(--eg-teal, #0F7B8C));
+    background-color: rgba(15, 123, 140, 0.1);
+    border-radius: 999px;
+    padding: 0.12rem 0.55rem;
+}
+
+.ghe-resumo-card__grade {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem 0.5rem;
+    border-top: 1px solid var(--bs-border-color-translucent, #e9ecef);
+    padding-top: 0.65rem;
+}
+
+.ghe-resumo-card__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.ghe-resumo-card__stat-valor {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--bs-emphasis-color, #10263B);
+    line-height: 1.15;
+}
+
+.ghe-resumo-card__stat-rotulo {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--bs-secondary-color);
+}
+
+/* Barra de cobertura (secao 27): representa APENAS quantidade coletada,
+   sempre na cor de destaque da marca - nunca verde/amarelo/vermelho, que
+   implicaria um julgamento de "bom/ruim" sem base metodologica. */
+.cobertura-barra {
+    height: 0.5rem;
+    border-radius: 999px;
+    background-color: var(--bs-tertiary-bg, #f3f5f7);
+    overflow: hidden;
+}
+
+.cobertura-barra__preenchimento {
+    height: 100%;
+    background-color: var(--eg-teal, #0F7B8C);
+    border-radius: 999px;
+}
