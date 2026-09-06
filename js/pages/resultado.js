@@ -194,10 +194,16 @@ async function renderizarResultado(resultados) {
 
 function criarCardRisco(risco) {
     const card = document.createElement('div');
-    card.className = 'card mb-3';
+    card.className = 'card card-risco shadow-sm mb-4';
+    // Faixa lateral na mesma cor da classificacao (secao 40 - cor nunca
+    // sozinha, o nome do badge continua exibido) - so estetico, nao
+    // recalcula nem reinterpreta a classificacao.
+    if (risco.classificacao?.cor_hex) {
+        card.style.borderLeftColor = risco.classificacao.cor_hex;
+    }
 
     const corpo = document.createElement('div');
-    corpo.className = 'card-body';
+    corpo.className = 'card-body p-4';
 
     const cabecalho = document.createElement('div');
     cabecalho.className = 'd-flex justify-content-between align-items-start flex-wrap gap-2 mb-2';

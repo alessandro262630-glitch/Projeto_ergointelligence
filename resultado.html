@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultado da Avaliação - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
@@ -93,7 +94,20 @@
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-3 p-md-4" style="max-width: 760px;">
+                <div class="container-fluid p-4 p-md-5" style="max-width: 840px;">
+                    <div class="cabecalho-pagina">
+                        <div class="cabecalho-pagina__icone">
+                            <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h1 class="h4 cabecalho-pagina__titulo">Resultado da Avaliação</h1>
+                            <p class="cabecalho-pagina__descricao">
+                                Classificação, pontuação e a justificativa de cada risco identificado, com acesso à
+                                rastreabilidade completa das regras aplicadas.
+                            </p>
+                        </div>
+                    </div>
+
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
                     <div class="text-center mb-4">
@@ -101,17 +115,17 @@
                     </div>
 
                     <div id="area-resultado" hidden>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h1 class="fs-5 fw-semibold mb-3">Resultado da Avaliação</h1>
-                                <div class="row g-3">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h2 class="small text-uppercase text-muted fw-semibold mb-3">Resumo da avaliação</h2>
+                                <div class="row g-4">
                                     <div class="col-6 col-md-3">
                                         <div class="small text-uppercase text-muted">Classificação geral</div>
-                                        <div class="fw-semibold" id="texto-classificacao-geral"></div>
+                                        <div class="fw-semibold fs-5" id="texto-classificacao-geral"></div>
                                     </div>
                                     <div class="col-6 col-md-3">
                                         <div class="small text-uppercase text-muted">Pontuação total</div>
-                                        <div class="fw-semibold" id="texto-pontuacao-total"></div>
+                                        <div class="fw-semibold fs-5" id="texto-pontuacao-total"></div>
                                     </div>
                                     <div class="col-6 col-md-3">
                                         <div class="small text-uppercase text-muted">Versão do motor</div>
@@ -125,7 +139,10 @@
                             </div>
                         </div>
 
-                        <h2 class="fs-6 fw-semibold mb-3">Riscos identificados</h2>
+                        <h2 class="fs-6 fw-semibold mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle text-primary" aria-hidden="true"></i>
+                            Riscos identificados
+                        </h2>
                         <div id="lista-riscos"></div>
 
                         <p class="text-muted small mb-3" id="texto-sem-recomendacoes" hidden>
@@ -140,8 +157,8 @@
                         </div>
 
                         <!-- Acesso ao Plano de Acao (FEIRA-04, secao 14-16) -->
-                        <div class="card mb-3">
-                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="card shadow-sm mb-4 mt-4">
+                            <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div>
                                     <h2 class="fs-6 fw-semibold mb-1">Plano de Ação</h2>
                                     <p class="text-muted small mb-0" id="texto-status-plano-acao">Verificando plano de ação...</p>
@@ -150,7 +167,10 @@
                             </div>
                         </div>
 
-                        <a href="colaboradores.html" class="small fw-semibold text-decoration-none">&larr; Voltar para Colaboradores</a>
+                        <a href="colaboradores.html" class="small fw-semibold text-decoration-none d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                            Voltar para Colaboradores
+                        </a>
                     </div>
                 </div>
             </main>

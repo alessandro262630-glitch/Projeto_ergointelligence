@@ -23,7 +23,7 @@ export async function listarResultadosRiscoDaAvaliacao(idAvaliacao) {
         .from('avaliacao_risco')
         .select(
             'id_avaliacao_risco, id_risco, pontuacao, justificativa, versao_motor_regras, calculado_em, '
-            + 'risco_ergonomico(codigo, nome), classificacao_risco(id_classificacao, codigo, nome, prioridade)',
+            + 'risco_ergonomico(codigo, nome), classificacao_risco(id_classificacao, codigo, nome, prioridade, cor_hex)',
         )
         .eq('id_avaliacao', idAvaliacao);
 

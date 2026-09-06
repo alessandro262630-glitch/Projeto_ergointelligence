@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Avaliação - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
@@ -100,107 +101,126 @@
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-4" style="max-width: 860px;">
-                    <p class="text-muted">
-                        Registre o contexto inicial da avaliação ergonômica. O questionário, o cálculo de risco e as
-                        recomendações são preenchidos em etapas posteriores.
-                    </p>
+                <div class="container-fluid p-4 p-md-5" style="max-width: 920px;">
+                    <div class="cabecalho-pagina">
+                        <div class="cabecalho-pagina__icone">
+                            <i class="bi bi-clipboard-plus" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h1 class="h4 cabecalho-pagina__titulo">Nova Avaliação</h1>
+                            <p class="cabecalho-pagina__descricao">
+                                Registre o contexto inicial da avaliação ergonômica. O questionário, o cálculo de
+                                risco e as recomendações são preenchidos em etapas posteriores.
+                            </p>
+                        </div>
+                    </div>
 
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
-                    <form id="formulario-avaliacao" class="card" novalidate hidden>
-                        <div class="card-body">
-                            <h2 class="fs-6 fw-semibold mb-3">Contexto do colaborador</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-colaborador" class="form-label">Colaborador *</label>
-                                    <select id="campo-colaborador" class="form-select" required>
-                                        <option value="">Selecione...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-colaborador"></div>
+                    <form id="formulario-avaliacao" class="card shadow-sm" novalidate hidden>
+                        <div class="card-body p-4 p-md-5">
+                            <div class="form-secao">
+                                <div class="form-secao__cabecalho">
+                                    <span class="form-secao__numero">1</span>
+                                    <h2 class="fs-6 fw-semibold mb-0">Contexto do colaborador</h2>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="campo-vinculo" class="form-label">Vínculo *</label>
-                                    <select id="campo-vinculo" class="form-select" required disabled>
-                                        <option value="">Selecione o colaborador primeiro...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-vinculo"></div>
-                                </div>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label for="campo-colaborador" class="form-label">Colaborador *</label>
+                                        <select id="campo-colaborador" class="form-select" required>
+                                            <option value="">Selecione...</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="erro-colaborador"></div>
+                                    </div>
 
-                                <div class="col-md-6">
-                                    <label for="campo-funcao" class="form-label">Função</label>
-                                    <select id="campo-funcao" class="form-select" disabled>
-                                        <option value="">Selecione o vínculo primeiro...</option>
-                                    </select>
-                                </div>
+                                    <div class="col-md-6">
+                                        <label for="campo-vinculo" class="form-label">Vínculo *</label>
+                                        <select id="campo-vinculo" class="form-select" required disabled>
+                                            <option value="">Selecione o colaborador primeiro...</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="erro-vinculo"></div>
+                                    </div>
 
-                                <div class="col-md-6">
-                                    <label for="campo-perfil" class="form-label">Perfil antropométrico</label>
-                                    <select id="campo-perfil" class="form-select" disabled>
-                                        <option value="">Selecione o colaborador primeiro...</option>
-                                    </select>
-                                </div>
-                            </div>
+                                    <div class="col-md-6">
+                                        <label for="campo-funcao" class="form-label">Função</label>
+                                        <select id="campo-funcao" class="form-select" disabled>
+                                            <option value="">Selecione o vínculo primeiro...</option>
+                                        </select>
+                                    </div>
 
-                            <hr class="my-4">
-
-                            <h2 class="fs-6 fw-semibold mb-3">Local de trabalho</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-ambiente" class="form-label">Ambiente *</label>
-                                    <select id="campo-ambiente" class="form-select" required disabled>
-                                        <option value="">Selecione o vínculo primeiro...</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-ambiente"></div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="campo-posto" class="form-label">Posto</label>
-                                    <select id="campo-posto" class="form-select" disabled>
-                                        <option value="">Selecione o ambiente primeiro...</option>
-                                    </select>
+                                    <div class="col-md-6">
+                                        <label for="campo-perfil" class="form-label">Perfil antropométrico</label>
+                                        <select id="campo-perfil" class="form-select" disabled>
+                                            <option value="">Selecione o colaborador primeiro...</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
-                            <hr class="my-4">
-
-                            <h2 class="fs-6 fw-semibold mb-3">Dados da avaliação</h2>
-
-                            <div class="row g-3 mb-1">
-                                <div class="col-md-6">
-                                    <label for="campo-tipo-avaliacao" class="form-label">Tipo de avaliação *</label>
-                                    <select id="campo-tipo-avaliacao" class="form-select" required>
-                                        <option value="">Selecione...</option>
-                                        <option value="INICIAL">Inicial</option>
-                                        <option value="ACOMPANHAMENTO">Acompanhamento</option>
-                                        <option value="POS_INTERVENCAO">Pós-intervenção</option>
-                                        <option value="AEP">AEP</option>
-                                    </select>
-                                    <div class="invalid-feedback" id="erro-tipo-avaliacao"></div>
+                            <div class="form-secao">
+                                <div class="form-secao__cabecalho">
+                                    <span class="form-secao__numero">2</span>
+                                    <h2 class="fs-6 fw-semibold mb-0">Local de trabalho</h2>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label for="campo-data-avaliacao" class="form-label">Data da avaliação *</label>
-                                    <input type="datetime-local" id="campo-data-avaliacao" class="form-control" required>
-                                    <div class="invalid-feedback" id="erro-data-avaliacao"></div>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label for="campo-ambiente" class="form-label">Ambiente *</label>
+                                        <select id="campo-ambiente" class="form-select" required disabled>
+                                            <option value="">Selecione o vínculo primeiro...</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="erro-ambiente"></div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="campo-posto" class="form-label">Posto</label>
+                                        <select id="campo-posto" class="form-select" disabled>
+                                            <option value="">Selecione o ambiente primeiro...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-secao">
+                                <div class="form-secao__cabecalho">
+                                    <span class="form-secao__numero">3</span>
+                                    <h2 class="fs-6 fw-semibold mb-0">Dados da avaliação</h2>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Avaliador</label>
-                                    <input type="text" class="form-control" id="campo-avaliador" readonly>
-                                    <div class="invalid-feedback" id="erro-avaliador"></div>
-                                </div>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label for="campo-tipo-avaliacao" class="form-label">Tipo de avaliação *</label>
+                                        <select id="campo-tipo-avaliacao" class="form-select" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="INICIAL">Inicial</option>
+                                            <option value="ACOMPANHAMENTO">Acompanhamento</option>
+                                            <option value="POS_INTERVENCAO">Pós-intervenção</option>
+                                            <option value="AEP">AEP</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="erro-tipo-avaliacao"></div>
+                                    </div>
 
-                                <div class="col-12">
-                                    <label for="campo-observacoes" class="form-label">Observações</label>
-                                    <textarea id="campo-observacoes" class="form-control" rows="3" maxlength="2000"></textarea>
+                                    <div class="col-md-6">
+                                        <label for="campo-data-avaliacao" class="form-label">Data da avaliação *</label>
+                                        <input type="datetime-local" id="campo-data-avaliacao" class="form-control" required>
+                                        <div class="invalid-feedback" id="erro-data-avaliacao"></div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Avaliador</label>
+                                        <input type="text" class="form-control" id="campo-avaliador" readonly>
+                                        <div class="invalid-feedback" id="erro-avaliador"></div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="campo-observacoes" class="form-label">Observações</label>
+                                        <textarea id="campo-observacoes" class="form-control" rows="3" maxlength="2000"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer d-flex flex-wrap justify-content-end gap-2 bg-white">
+                        <div class="card-footer d-flex flex-wrap justify-content-end gap-2 bg-white p-3 p-md-4">
                             <button type="button" class="btn btn-outline-secondary" id="botao-salvar-rascunho">Salvar rascunho</button>
                             <button type="button" class="btn btn-primary" id="botao-iniciar-avaliacao">Iniciar avaliação</button>
                         </div>
