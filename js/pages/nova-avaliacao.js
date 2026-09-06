@@ -459,5 +459,8 @@ function mensagemErroAmigavel(error) {
     return 'Não foi possível salvar a avaliação. Tente novamente.';
 }
 
+// --- Popovers de ajuda ("Saiba mais") -------------------------------------------
+document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
+
 // --- Carga inicial -------------------------------------------------------------
 carregarPagina();

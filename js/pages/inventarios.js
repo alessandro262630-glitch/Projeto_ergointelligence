@@ -298,5 +298,8 @@ formularioNovaVersao.addEventListener('submit', async (event) => {
 
 document.getElementById('botao-novo-inventario').addEventListener('click', abrirFormularioCriacao);
 
+// --- Popovers de ajuda ("Saiba mais") -------------------------------------------
+document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
+
 carregarUsuariosSelects();
 carregarInventarios();

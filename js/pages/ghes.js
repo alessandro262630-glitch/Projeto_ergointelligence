@@ -241,5 +241,8 @@ formularioGhe.addEventListener('submit', async (event) => {
 
 document.getElementById('botao-novo-ghe').addEventListener('click', abrirFormularioCriacao);
 
+// --- Popovers de ajuda ("Saiba mais") -------------------------------------------
+document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
+
 carregarSetoresSelect();
 carregarGhes();

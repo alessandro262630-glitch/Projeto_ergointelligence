@@ -104,10 +104,17 @@
             <main class="flex-grow-1 overflow-auto">
                 <div class="container-fluid p-3 p-md-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <p class="text-muted small mb-0">
-                            Um GHE reúne trabalhadores com exposição semelhante — não é necessariamente um único cargo
-                            ou colaborador. Cadastre o universo declarado do grupo e planeje a amostra a ser coletada.
-                        </p>
+                        <button
+                            type="button"
+                            class="btn btn-link btn-sm btn-ajuda-info p-0 d-inline-flex align-items-center gap-1"
+                            data-bs-toggle="popover"
+                            data-bs-trigger="focus"
+                            data-bs-placement="right"
+                            data-bs-title="O que é um GHE?"
+                            data-bs-content="Um GHE reúne trabalhadores com exposição semelhante — não é necessariamente um único cargo ou colaborador. Cadastre o universo declarado do grupo e planeje a amostra a ser coletada."
+                        >
+                            <i class="bi bi-info-circle" aria-hidden="true"></i> Sobre esta página
+                        </button>
                         <button type="button" class="btn btn-primary text-nowrap ms-3" id="botao-novo-ghe">
                             <i class="bi bi-plus-lg" aria-hidden="true"></i>
                             Novo GHE
