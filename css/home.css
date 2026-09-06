@@ -106,6 +106,33 @@
     }
 }
 
+/* --- Modulos da plataforma ------------------------------------------------ */
+.home-modulo {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+a.home-modulo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.25rem rgba(11, 53, 72, 0.1);
+    border-color: var(--eg-teal);
+}
+
+.home-modulo--em-breve {
+    background-color: #fbfbfb;
+}
+
+.home-modulo__icone {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.35rem;
+}
+
 /* --- Animacoes discretas ------------------------------------------------ */
 .home-fade-in {
     animation: home-fade-in 0.5s ease-out both;

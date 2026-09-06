@@ -11,59 +11,76 @@
 </head>
 <body>
     <div class="d-flex vh-100">
-        <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 240px;">
-            <div class="sidebar-brand d-flex align-items-center justify-content-between border-bottom py-3 px-3">
-                <a href="colaboradores.html" class="d-flex align-items-center text-decoration-none text-dark">
+        <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 260px;">
+            <div class="sidebar-brand d-flex align-items-center justify-content-between py-3 px-3">
+                <a href="index.html" class="d-flex align-items-center text-decoration-none">
                     <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
-                    <span class="fw-bold">ErgoIntelligence</span>
+                    <span class="fw-bold sidebar-brand__nome">ErgoIntelligence</span>
                 </a>
-                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
             </div>
             <div class="offcanvas-body p-2">
                 <nav class="nav nav-pills flex-column gap-1">
+                    <a class="nav-link d-flex align-items-center gap-2" href="index.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5L12 4l8 7.5"></path><path d="M6 10v9a1 1 0 001 1h3v-6h4v6h3a1 1 0 001-1v-9"></path></svg>
+                        Início
+                    </a>
                     <a class="nav-link d-flex align-items-center gap-2" href="dashboard.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
                         Dashboard
+                    </a>
+
+                    <span class="nav-section-label">Avaliação Individual</span>
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
+                        Colaboradores
                     </a>
                     <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
-                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
-                        Colaboradores
-                    </a>
+
+                    <span class="nav-section-label">GHE &amp; Riscos Coletivos</span>
                     <a class="nav-link active d-flex align-items-center gap-2" href="ghes.html" aria-current="page">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"></circle><circle cx="16" cy="8" r="2.6"></circle><circle cx="12" cy="15" r="2.6"></circle><path d="M8 10.6V13M16 10.6V13M9.6 16.4h4.8"></path></svg>
                         GHE
-                    </a>
-                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
-                        Cadastros
-                    </span>
-                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
-                        Riscos
-                    </span>
-                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
-                        Recomendações
-                    </span>
-                    <a class="nav-link d-flex align-items-center gap-2" href="plano-acao.html">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
-                        Planos de Ação
                     </a>
                     <a class="nav-link d-flex align-items-center gap-2" href="inventarios.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"></rect><path d="M9 3.5V6h6V3.5"></path><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"></path></svg>
                         Inventário de Riscos
                     </a>
+
+                    <span class="nav-section-label">Gestão</span>
+                    <a class="nav-link d-flex align-items-center gap-2" href="plano-acao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
+                        Planos de Ação
+                    </a>
+
+                    <span class="nav-section-label">Em breve</span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
+                        Cadastros
+                        <span class="badge-em-breve ms-auto">em breve</span>
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
+                        Riscos
+                        <span class="badge-em-breve ms-auto">em breve</span>
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
+                        Recomendações
+                        <span class="badge-em-breve ms-auto">em breve</span>
+                    </span>
                     <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"></path><path d="M12 20V4"></path><path d="M20 20v-6.5"></path></svg>
                         Relatórios
+                        <span class="badge-em-breve ms-auto">em breve</span>
                     </span>
                     <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
                         Configurações
+                        <span class="badge-em-breve ms-auto">em breve</span>
                     </span>
                 </nav>
             </div>

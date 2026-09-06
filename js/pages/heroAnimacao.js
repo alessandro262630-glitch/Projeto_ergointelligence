@@ -14,8 +14,8 @@ if (canvas && !preferemMenosMovimento) {
     const ctx = canvas.getContext('2d');
     const hero = canvas.closest('.home-hero');
 
-    const COR_PONTO = 'rgba(13, 110, 253, 0.85)'; // azul primario (Bootstrap)
-    const COR_LINHA = 'rgba(14, 163, 148, 0.35)'; // teal ja usado no Dashboard
+    const COR_PONTO = 'rgba(34, 211, 199, 0.9)'; // ciano da marca (glow da coluna no logo)
+    const COR_LINHA = 'rgba(15, 123, 140, 0.35)'; // teal da marca
     const DISTANCIA_MAXIMA_LINHA = 170;
     const VELOCIDADE_MAXIMA = 0.35;
 

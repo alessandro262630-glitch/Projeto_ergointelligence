@@ -3,17 +3,177 @@
    componentes nativos do Bootstrap direto no HTML; aqui ficam apenas os
    pontos que o tema padrao nao cobre. */
 
+/* =====================================================================
+   PALETA DA MARCA (extraida de assets/logo/logo-marca.png)
+   =====================================================================
+   O simbolo combina um azul-petroleo profundo (silhueta/coluna), um
+   ciano tecnico (circuitos/pontos luminosos da coluna) e um verde-folha
+   (crescimento/sustentabilidade). Esta e a UNICA fonte de cor de marca
+   do projeto - qualquer novo componente deve reutilizar estas variaveis
+   em vez de introduzir um tom novo.
+
+   Cores semanticas do Bootstrap (success/warning/danger) permanecem
+   intocadas - representam estado (ok/atencao/erro), nao identidade
+   visual, e ja sao proximas o suficiente da paleta da marca. */
+:root {
+    --eg-navy: #0B3548;
+    --eg-navy-dark: #082530;
+    --eg-teal: #0F7B8C;
+    --eg-teal-dark: #0B5866;
+    --eg-teal-light: #E3F5F3;
+    --eg-cyan: #22D3C7;
+    --eg-green: #3FBF63;
+    --eg-green-light: #E3F8E6;
+
+    --bs-primary: var(--eg-teal);
+    --bs-primary-rgb: 15, 123, 140;
+    --bs-primary-bg-subtle: var(--eg-teal-light);
+    --bs-primary-border-subtle: #A9DDD6;
+    --bs-primary-text-emphasis: var(--eg-teal-dark);
+    --bs-link-color: var(--eg-teal);
+    --bs-link-color-rgb: 15, 123, 140;
+    --bs-link-hover-color: var(--eg-teal-dark);
+    --bs-link-hover-color-rgb: 11, 88, 102;
+}
+
+/* .text-primary/.bg-primary/.text-bg-primary/.bg-primary-subtle ja
+   herdam as variaveis acima automaticamente (Bootstrap 5.3 as usa
+   internamente). .btn-primary, .btn-outline-primary, .nav-pills,
+   focus de formulario e .progress-bar NAO herdam - o Bootstrap gera
+   essas classes com a cor ja fixada em variaveis proprias do
+   componente, entao precisam de override explicito abaixo. */
+.btn-primary {
+    --bs-btn-bg: var(--eg-teal);
+    --bs-btn-border-color: var(--eg-teal);
+    --bs-btn-hover-bg: var(--eg-teal-dark);
+    --bs-btn-hover-border-color: var(--eg-teal-dark);
+    --bs-btn-active-bg: var(--eg-teal-dark);
+    --bs-btn-active-border-color: var(--eg-teal-dark);
+    --bs-btn-disabled-bg: var(--eg-teal);
+    --bs-btn-disabled-border-color: var(--eg-teal);
+    --bs-btn-focus-shadow-rgb: 15, 123, 140;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--eg-teal);
+    --bs-btn-border-color: var(--eg-teal);
+    --bs-btn-hover-bg: var(--eg-teal);
+    --bs-btn-hover-border-color: var(--eg-teal);
+    --bs-btn-active-bg: var(--eg-teal);
+    --bs-btn-active-border-color: var(--eg-teal);
+    --bs-btn-disabled-color: var(--eg-teal);
+    --bs-btn-disabled-border-color: var(--eg-teal);
+    --bs-btn-focus-shadow-rgb: 15, 123, 140;
+}
+
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--eg-teal);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #7FC4C2;
+    box-shadow: 0 0 0 0.25rem rgba(15, 123, 140, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--eg-teal);
+    border-color: var(--eg-teal);
+}
+
+.progress {
+    --bs-progress-bar-bg: var(--eg-teal);
+}
+
 .sidebar-logo {
     height: 34px;
     width: auto;
     object-fit: contain;
 }
 
-/* Itens de navegacao de telas ainda nao implementadas (Dashboard,
-   Avaliacoes, Cadastros, Riscos, Recomendacoes, Planos de Acao,
-   Relatorios, Configuracoes). */
+/* Nome da marca bicolor, replicando assets/logo/logo do projeto.png:
+   "Ergo" em azul-petroleo solido, "Intelligence" em degrade verde/teal.
+   Uso: <span class="marca-nome-ergo">Ergo</span><span
+   class="marca-nome-intelligence">Intelligence</span>. */
+.marca-nome-ergo {
+    color: var(--eg-navy);
+}
+
+.marca-nome-intelligence {
+    color: var(--eg-teal); /* fallback para navegadores sem suporte a background-clip: text */
+    background: linear-gradient(90deg, var(--eg-green) 0%, var(--eg-teal) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* =====================================================================
+   MENU LATERAL (sidebar)
+   ===================================================================== */
+.sidebar-brand {
+    background: linear-gradient(135deg, var(--eg-navy) 0%, var(--eg-teal) 100%);
+}
+
+.sidebar-brand a {
+    color: #fff;
+}
+
+.sidebar-brand__nome {
+    color: #fff;
+    letter-spacing: 0.01em;
+}
+
+/* Pequena etiqueta de secao (ex.: "GHE & Riscos Coletivos") - organiza
+   visualmente os links do menu por area do produto, em vez de uma lista
+   plana unica. */
+.nav-section-label {
+    display: block;
+    margin-top: 0.6rem;
+    padding: 0.35rem 0.75rem 0.15rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7C8B92;
+}
+
+.nav-section-label:first-child {
+    margin-top: 0;
+}
+
+.offcanvas-body .nav-link {
+    color: #33454D;
+    font-size: 0.92rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.offcanvas-body .nav-link:hover:not(.disabled) {
+    background-color: var(--eg-teal-light);
+    color: var(--eg-teal-dark);
+}
+
+.offcanvas-body .nav-link.active {
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(11, 88, 102, 0.3);
+}
+
+/* Itens de navegacao de telas ainda nao implementadas (Cadastros,
+   Riscos, Recomendacoes, Relatorios, Configuracoes). */
 .nav-link.disabled {
     cursor: default;
+    color: #A3AFB4;
+}
+
+.badge-em-breve {
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #8B9AA1;
+    background-color: #EEF1F2;
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
 }
 
 /* Badges de risco (baixo/moderado/alto/critico) - reservados para as
