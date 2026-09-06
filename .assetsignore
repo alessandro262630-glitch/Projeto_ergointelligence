@@ -1,0 +1,14 @@
+# Cloudflare Workers/Pages - arquivos que NUNCA devem ser publicados como
+# asset estatico do site, mesmo existindo fisicamente na pasta de build
+# (equivalente ao .gitignore, mas para a etapa de deploy do Wrangler).
+#
+# Causa original deste arquivo: o Wrangler instala suas proprias
+# ferramentas (ex.: node_modules/workerd, ~147 MB) dentro do proprio
+# checkout do repositorio durante o build. Como o "build output directory"
+# deste projeto e a raiz do repo (nao ha bundler/pasta dist separada),
+# sem este arquivo o Cloudflare tentava publicar node_modules inteiro
+# como asset e falhava (limite de 25 MiB por arquivo).
+node_modules/
+.git/
+.wrangler/
+*.log
