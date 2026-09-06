@@ -75,7 +75,7 @@
 }
 
 .home-hero__logo {
-    height: clamp(64px, 10vw, 96px);
+    height: clamp(96px, 14vw, 160px);
     width: auto;
     object-fit: contain;
 }
