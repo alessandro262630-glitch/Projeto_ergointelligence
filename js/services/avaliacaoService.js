@@ -174,6 +174,37 @@ export async function buscarAvaliacaoPorId(idAvaliacao) {
     return data;
 }
 
+// vinculos.html (historico de vinculos do colaborador) - permite oferecer
+// um botao "Ver Resultado" por vinculo sem depender de o usuario lembrar o
+// id_avaliacao. So retorna avaliacoes FINALIZADA (RASCUNHO/EM_ANDAMENTO
+// ainda nao tem resultado; CANCELADA nunca tera). Quando um vinculo tiver
+// mais de uma avaliacao finalizada ao longo do tempo, mantem apenas a mais
+// recente - o historico completo por vinculo fica para uma tela futura.
+export async function listarUltimasAvaliacoesFinalizadasPorVinculos(idsVinculo) {
+    if (!idsVinculo || idsVinculo.length === 0) {
+        return {};
+    }
+
+    const { data, error } = await supabase
+        .from('avaliacao_ergonomica')
+        .select('id_avaliacao, id_vinculo, data_finalizacao')
+        .in('id_vinculo', idsVinculo)
+        .eq('status', 'FINALIZADA')
+        .order('data_finalizacao', { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+
+    const maisRecentePorVinculo = {};
+    (data || []).forEach((avaliacao) => {
+        if (!maisRecentePorVinculo[avaliacao.id_vinculo]) {
+            maisRecentePorVinculo[avaliacao.id_vinculo] = avaliacao;
+        }
+    });
+    return maisRecentePorVinculo;
+}
+
 // Usuario avaliador do MVP: sem autenticacao definitiva ainda, usa-se o
 // usuario ativo mais antigo da empresa do colaborador (o seed cadastra um
 // unico "Avaliador SST Demo" por empresa). Retorna null quando a empresa

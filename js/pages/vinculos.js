@@ -8,6 +8,7 @@ import {
     listarSetores,
     listarCargos,
 } from '../services/vinculoService.js';
+import { listarUltimasAvaliacoesFinalizadasPorVinculos } from '../services/avaliacaoService.js';
 import { buscarColaboradorPorId } from '../services/colaboradorService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido, dataNaoFutura } from '../utils/validacoes.js';
@@ -53,6 +54,7 @@ const instanciaModalEncerrar = new bootstrap.Modal(modalEncerrar);
 
 // --- Estado local da pagina ------------------------------------------------
 let vinculos = [];
+let avaliacoesFinalizadasPorVinculo = {};
 
 function mostrarNotificacao(texto, tipo = 'info') {
     mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
@@ -103,6 +105,9 @@ async function carregarVinculos() {
             buscarVinculoAtual(idColaborador),
         ]);
         vinculos = listaVinculos;
+        avaliacoesFinalizadasPorVinculo = await listarUltimasAvaliacoesFinalizadasPorVinculos(
+            vinculos.map((v) => v.id_vinculo),
+        );
         renderizarVinculoAtual(vinculoAtual);
         renderizarHistorico();
     } catch (error) {
@@ -225,6 +230,20 @@ function criarLinhaVinculo(vinculo) {
 
     const celulaAcoes = document.createElement('td');
     celulaAcoes.className = 'text-nowrap';
+
+    // Disponivel mesmo para vinculo encerrado - o resultado de uma
+    // avaliacao ja finalizada e um registro permanente, independente do
+    // vinculo continuar vigente ou nao.
+    const avaliacaoFinalizada = avaliacoesFinalizadasPorVinculo[vinculo.id_vinculo];
+    if (avaliacaoFinalizada) {
+        const linkVerResultado = document.createElement('a');
+        linkVerResultado.className = 'btn btn-sm btn-outline-primary me-1';
+        linkVerResultado.href = `resultado.html?id_avaliacao=${avaliacaoFinalizada.id_avaliacao}`;
+        linkVerResultado.setAttribute('aria-label', 'Ver resultado da avaliação');
+        linkVerResultado.title = 'Ver resultado da avaliação';
+        linkVerResultado.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        celulaAcoes.appendChild(linkVerResultado);
+    }
 
     // Vinculo encerrado e historico: nao oferece edicao nem reencerramento
     // (preserva a integridade do registro passado). Acoes compactas
