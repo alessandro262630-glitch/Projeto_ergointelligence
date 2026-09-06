@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhe do Inventário - ErgoIntelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/inventario-riscos.css">
+</head>
+<body>
+    <div class="d-flex vh-100">
+        <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 240px;">
+            <div class="sidebar-brand d-flex align-items-center justify-content-between border-bottom py-3 px-3">
+                <a href="colaboradores.html" class="d-flex align-items-center text-decoration-none text-dark">
+                    <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
+                    <span class="fw-bold">ErgoIntelligence</span>
+                </a>
+                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
+            </div>
+            <div class="offcanvas-body p-2">
+                <nav class="nav nav-pills flex-column gap-1">
+                    <a class="nav-link d-flex align-items-center gap-2" href="dashboard.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+                        Dashboard
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
+                        Avaliações
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
+                        Colaboradores
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="ghes.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"></circle><circle cx="16" cy="8" r="2.6"></circle><circle cx="12" cy="15" r="2.6"></circle><path d="M8 10.6V13M16 10.6V13M9.6 16.4h4.8"></path></svg>
+                        GHE
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7a2 2 0 012-2h3.6l2 2.2h7.4a2 2 0 012 2v7.3a2 2 0 01-2 2h-13a2 2 0 01-2-2V7z"></path></svg>
+                        Cadastros
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9.5 16.5h-19L12 3.5z"></path><path d="M12 10v4"></path><path d="M12 17.2h.01"></path></svg>
+                        Riscos
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"></path><path d="M10 21.5h4"></path><path d="M12 3a6 6 0 00-3.6 10.8c.5.4.8 1.1.8 1.7h5.6c0-.6.3-1.3.8-1.7A6 6 0 0012 3z"></path></svg>
+                        Recomendações
+                    </span>
+                    <a class="nav-link d-flex align-items-center gap-2" href="plano-acao.html">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
+                        Planos de Ação
+                    </a>
+                    <a class="nav-link active d-flex align-items-center gap-2" href="inventarios.html" aria-current="page">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"></rect><path d="M9 3.5V6h6V3.5"></path><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"></path></svg>
+                        Inventário de Riscos
+                    </a>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11"></path><path d="M12 20V4"></path><path d="M20 20v-6.5"></path></svg>
+                        Relatórios
+                    </span>
+                    <span class="nav-link disabled d-flex align-items-center gap-2" aria-disabled="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+                        Configurações
+                    </span>
+                </nav>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-grow-1" style="min-width: 0;">
+            <nav class="navbar navbar-light bg-white border-bottom px-3">
+                <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="ms-2 ms-lg-0">
+                    <span class="navbar-brand mb-0 h5 d-block">Inventário de Riscos Ocupacionais</span>
+                    <span class="small text-muted">Detalhe da versão</span>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo — dados fictícios</span>
+                </div>
+            </nav>
+
+            <main class="flex-grow-1 overflow-auto">
+                <div class="container-fluid p-3 p-md-4">
+                    <div id="area-estado" class="text-center text-muted py-5"></div>
+
+                    <div id="area-conteudo" hidden>
+                        <a href="inventarios.html" class="d-inline-flex align-items-center gap-1 small text-muted text-decoration-none mb-3">
+                            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                            Voltar para a lista de inventários
+                        </a>
+
+                        <div class="card cabecalho-inventario mb-3" id="card-cabecalho">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                    <div>
+                                        <h1 class="h4 mb-1" id="texto-titulo-inventario"></h1>
+                                        <span class="text-muted small">Empresa: <span id="texto-empresa-inventario"></span> &middot; Versão <span id="texto-versao-inventario"></span></span>
+                                    </div>
+                                    <span class="badge badge-status-inventario" id="badge-status-inventario"></span>
+                                </div>
+                                <p class="text-muted mb-3" id="texto-descricao-inventario"></p>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-muted">Data de referência</div>
+                                        <div class="fw-semibold" id="texto-data-referencia-inventario">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-muted">Itens</div>
+                                        <div class="fw-semibold" id="texto-total-itens">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-muted">GHEs abrangidos</div>
+                                        <div class="fw-semibold" id="texto-total-ghes">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-muted">Trabalhadores abrangidos</div>
+                                        <div class="fw-semibold" id="texto-total-expostos">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-muted">Criado por</div>
+                                        <div class="fw-semibold" id="texto-criado-por">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3" id="area-publicado-por" hidden>
+                                        <div class="small text-muted">Publicado por</div>
+                                        <div class="fw-semibold" id="texto-publicado-por">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3" id="area-publicado-em" hidden>
+                                        <div class="small text-muted">Publicado em</div>
+                                        <div class="fw-semibold" id="texto-publicado-em">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3" id="area-versao-anterior" hidden>
+                                        <div class="small text-muted">Versão anterior</div>
+                                        <a href="#" class="fw-semibold" id="link-versao-anterior">-</a>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="botao-editar-cabecalho">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i> Editar dados
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="botao-cancelar-rascunho">
+                                        <i class="bi bi-x-circle" aria-hidden="true"></i> Cancelar rascunho
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-success" id="botao-publicar-inventario">
+                                        <i class="bi bi-check2-circle" aria-hidden="true"></i> Publicar Inventário
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-primary" id="botao-criar-nova-versao">
+                                        <i class="bi bi-files" aria-hidden="true"></i> Criar nova versão
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning" id="area-pendencias-publicacao" hidden>
+                            <p class="fw-semibold mb-2"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Pendências para publicação</p>
+                            <ul class="mb-0 small" id="lista-pendencias-publicacao"></ul>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h2 class="h6 mb-0">Itens do Inventário</h2>
+                                    <button type="button" class="btn btn-primary btn-sm" id="botao-novo-item">
+                                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Novo Item
+                                    </button>
+                                </div>
+
+                                <div id="area-sem-itens" class="text-muted small py-3" hidden>
+                                    Nenhum item cadastrado nesta versão ainda.
+                                </div>
+
+                                <div id="area-tabela-itens" class="table-responsive" hidden>
+                                    <table class="table table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>GHE</th>
+                                                <th>Categoria</th>
+                                                <th>Perigo</th>
+                                                <th>Atividades</th>
+                                                <th class="text-end">Expostos</th>
+                                                <th>Classificação</th>
+                                                <th>Origem</th>
+                                                <th>Completude</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="corpo-tabela-itens"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
+                <span>MVP de demonstração &middot; dados fictícios</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal: editar cabecalho -->
+    <div class="modal fade" id="modal-cabecalho" tabindex="-1" aria-labelledby="modal-cabecalho-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-cabecalho-titulo">Editar Dados do Inventário</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-cabecalho" novalidate>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="campo-titulo-cabecalho" class="form-label">Título</label>
+                                <input type="text" id="campo-titulo-cabecalho" class="form-control" maxlength="160" required>
+                                <div class="invalid-feedback" id="erro-titulo-cabecalho"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-referencia-cabecalho" class="form-label">Data de referência</label>
+                                <input type="date" id="campo-data-referencia-cabecalho" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-referencia-cabecalho"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-descricao-cabecalho" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-descricao-cabecalho" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-cabecalho">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: novo/editar item -->
+    <div class="modal fade" id="modal-item" tabindex="-1" aria-labelledby="modal-item-titulo" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-item-titulo">Novo Item</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-item" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" id="campo-id-item">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="campo-ghe-item" class="form-label">GHE</label>
+                                <select id="campo-ghe-item" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-ghe-item"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-perigo-item" class="form-label">Perigo</label>
+                                <select id="campo-perigo-item" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-perigo-item"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="campo-ambiente-item" class="form-label">Ambiente <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select id="campo-ambiente-item" class="form-select">
+                                    <option value="">Não especificado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-posto-item" class="form-label">Posto de trabalho <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select id="campo-posto-item" class="form-select">
+                                    <option value="">Não especificado</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-processo-item" class="form-label">Descrição do processo <span class="text-muted fw-normal">(opcional, use quando ambiente/posto não representarem bem o contexto)</span></label>
+                                <textarea id="campo-processo-item" class="form-control" rows="2"></textarea>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="campo-fonte-item" class="form-label">Fonte / circunstância</label>
+                                <textarea id="campo-fonte-item" class="form-control" rows="2" placeholder="Ex.: Operação contínua de montagem com ciclo curto."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-lesoes-item" class="form-label">Possíveis lesões ou agravos</label>
+                                <textarea id="campo-lesoes-item" class="form-control" rows="2" placeholder="Ex.: Lesões por esforço repetitivo (LER/DORT)."></textarea>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="campo-expostos-item" class="form-label">Trabalhadores expostos</label>
+                                <input type="number" id="campo-expostos-item" class="form-control" min="0" step="1">
+                                <div class="form-text">Sugerido a partir do universo do GHE no momento da criação. Fica congelado depois (não muda se o GHE mudar).</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="campo-caracterizacao-item" class="form-label">Caracterização da exposição</label>
+                                <select id="campo-caracterizacao-item" class="form-select">
+                                    <option value="">Não informado</option>
+                                    <option value="ROTINEIRA">Rotineira</option>
+                                    <option value="NAO_ROTINEIRA">Não rotineira</option>
+                                    <option value="HABITUAL">Habitual</option>
+                                    <option value="INTERMITENTE">Intermitente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="campo-medida-categoria-item" class="form-label">Categoria da medida existente <span class="text-muted fw-normal">(opcional)</span></label>
+                                <select id="campo-medida-categoria-item" class="form-select">
+                                    <option value="">Não informado</option>
+                                    <option value="ELIMINACAO">Eliminação</option>
+                                    <option value="SUBSTITUICAO">Substituição</option>
+                                    <option value="ENGENHARIA">Engenharia</option>
+                                    <option value="ADMINISTRATIVA">Administrativa</option>
+                                    <option value="EPI">EPI</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-caracterizacao-descricao-item" class="form-label">Descrição complementar da exposição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <input type="text" id="campo-caracterizacao-descricao-item" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-medidas-item" class="form-label">Medidas existentes</label>
+                                <textarea id="campo-medidas-item" class="form-control" rows="2" placeholder="Ex.: Rodízio de tarefas a cada 2 horas (ou: nenhuma medida implementada até o momento)."></textarea>
+                            </div>
+                        </div>
+
+                        <div id="area-atividades-item" class="mt-4" hidden>
+                            <hr>
+                            <h3 class="h6">Atividades associadas</h3>
+                            <ul class="list-group mb-2" id="lista-atividades-item"></ul>
+                            <div class="input-group input-group-sm" style="max-width: 420px;">
+                                <select id="campo-nova-atividade-item" class="form-select">
+                                    <option value="">Selecione uma atividade...</option>
+                                </select>
+                                <button type="button" class="btn btn-outline-primary" id="botao-associar-atividade-item">Associar</button>
+                            </div>
+                        </div>
+                        <p class="text-muted small mt-3 mb-0" id="aviso-salvar-para-atividades">
+                            Salve o item para poder associar atividades a ele.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-item">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: confirmar publicacao -->
+    <div class="modal fade" id="modal-confirmar-publicacao" tabindex="-1" aria-labelledby="modal-confirmar-publicacao-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-confirmar-publicacao-titulo">Publicar este Inventário?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Após a publicação, esta versão ficará <strong>bloqueada para edição</strong>. Alterações
+                        futuras deverão ser realizadas em uma nova versão.
+                    </p>
+                    <div class="mb-3">
+                        <label for="campo-publicador" class="form-label">Publicado por</label>
+                        <select id="campo-publicador" class="form-select" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="botao-confirmar-publicacao">Publicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: criar nova versao -->
+    <div class="modal fade" id="modal-nova-versao" tabindex="-1" aria-labelledby="modal-nova-versao-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-nova-versao-titulo">Criar Nova Versão</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formulario-nova-versao" novalidate>
+                    <div class="modal-body">
+                        <p class="small text-muted">
+                            Os itens desta versão serão copiados para a nova versão (rascunho), para revisão item a
+                            item antes de uma nova publicação. Esta versão não será alterada.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="campo-titulo-nova-versao" class="form-label">Título</label>
+                                <input type="text" id="campo-titulo-nova-versao" class="form-control" maxlength="160" required>
+                                <div class="invalid-feedback" id="erro-titulo-nova-versao"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-referencia-nova-versao" class="form-label">Data de referência</label>
+                                <input type="date" id="campo-data-referencia-nova-versao" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-referencia-nova-versao"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-criador-nova-versao" class="form-label">Criado por</label>
+                                <select id="campo-criador-nova-versao" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-criador-nova-versao"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-descricao-nova-versao" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-descricao-nova-versao" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-nova-versao">Criar nova versão</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: confirmar cancelamento -->
+    <div class="modal fade" id="modal-confirmar-cancelamento" tabindex="-1" aria-labelledby="modal-confirmar-cancelamento-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-confirmar-cancelamento-titulo">Cancelar este rascunho?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        O inventário ficará com status <strong>Cancelado</strong> e não poderá mais ser editado ou
+                        publicado. Esta ação não apaga os dados já registrados.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Voltar</button>
+                    <button type="button" class="btn btn-danger" id="botao-confirmar-cancelamento">Cancelar rascunho</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: origem do item -->
+    <div class="modal fade" id="modal-origem-item" tabindex="-1" aria-labelledby="modal-origem-item-titulo" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="modal-origem-item-titulo">Origem do Item</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body" id="corpo-modal-origem-item"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/pages/inventario-detalhe.js"></script>
+</body>
+</html>
