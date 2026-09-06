@@ -1078,6 +1078,416 @@ CREATE TABLE resposta_coleta_opcao (
 COMMENT ON TABLE resposta_coleta_opcao IS 'Opcoes selecionadas em uma resposta de coleta de escolha unica ou multipla.';
 
 -- =====================================================================
+-- BLOCO 8 - MOTOR DE RISCO DO GHE (MVP-08B)
+-- =====================================================================
+-- Fundacao fisica do Motor de Risco do GHE (arquitetura aprovada em
+-- docs/mvp08a-arquitetura-motor-risco-ghe.md). Modelo TOTALMENTE
+-- PARALELO ao Motor individual - classificacao_risco, regra_risco,
+-- regra_condicao, avaliacao_risco e avaliacao_risco_regra (Bloco 3)
+-- permanecem exatamente como estao, sem nenhuma coluna nova. Nenhuma
+-- metodologia, regra, classificacao ou pontuacao cientifica e inserida
+-- aqui - somente estrutura (ver database/migrations/004_add_motor_risco_ghe.sql
+-- para o detalhamento comentado de cada decisao).
+
+-- ---------------------------------------------------------------------
+-- 40. METODOLOGIA_RISCO (catalogo versionado)
+-- ---------------------------------------------------------------------
+CREATE TABLE metodologia_risco (
+    id_metodologia    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codigo            VARCHAR(60) NOT NULL,
+    nome              VARCHAR(160) NOT NULL,
+    versao            VARCHAR(20) NOT NULL,
+    descricao         TEXT,
+    tipo_contexto     VARCHAR(20) NOT NULL,
+    status_validacao  VARCHAR(20) NOT NULL DEFAULT 'DEMONSTRATIVA',
+    ativo             BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_metodologia_risco_codigo_versao UNIQUE (codigo, versao),
+    CONSTRAINT chk_metodologia_risco_tipo_contexto CHECK (tipo_contexto IN ('GHE')),
+    CONSTRAINT chk_metodologia_risco_status_validacao CHECK (
+        status_validacao IN ('DEMONSTRATIVA', 'VALIDADA', 'INATIVA')
+    )
+);
+
+COMMENT ON TABLE metodologia_risco IS 'Metodologia versionada do Motor de Risco do GHE. Cada versao e uma linha propria e imutavel (nunca reinterpretada por UPDATE) - uma mudanca metodologica gera uma nova linha, nunca sobrescreve a anterior. status_validacao e um rotulo administrativo (quem cadastrou marcou), nunca uma validacao cientifica automatica.';
+
+-- ---------------------------------------------------------------------
+-- 41. CLASSIFICACAO_RISCO_GHE (faixas paralelas, isoladas de classificacao_risco)
+-- ---------------------------------------------------------------------
+CREATE TABLE classificacao_risco_ghe (
+    id_classificacao_ghe  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_metodologia        BIGINT NOT NULL,
+    codigo                VARCHAR(30) NOT NULL,
+    nome                  VARCHAR(60) NOT NULL,
+    descricao             TEXT,
+    pontuacao_minima      NUMERIC(10,2) NOT NULL,
+    pontuacao_maxima      NUMERIC(10,2),
+    prioridade            INTEGER NOT NULL,
+    cor_hex               CHAR(7),
+    ativo                 BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_classificacao_risco_ghe_metodologia FOREIGN KEY (id_metodologia)
+        REFERENCES metodologia_risco (id_metodologia) ON DELETE RESTRICT,
+    CONSTRAINT uq_classificacao_risco_ghe_metodologia_codigo UNIQUE (id_metodologia, codigo),
+    CONSTRAINT uq_classificacao_risco_ghe_metodologia_nome UNIQUE (id_metodologia, nome),
+    CONSTRAINT chk_classificacao_risco_ghe_pontuacao_minima CHECK (pontuacao_minima >= 0),
+    CONSTRAINT chk_classificacao_risco_ghe_pontuacao_maxima CHECK (
+        pontuacao_maxima IS NULL OR pontuacao_maxima >= pontuacao_minima
+    ),
+    CONSTRAINT chk_classificacao_risco_ghe_prioridade CHECK (prioridade > 0),
+    CONSTRAINT chk_classificacao_risco_ghe_cor_hex CHECK (
+        cor_hex IS NULL OR cor_hex ~ '^#[0-9A-Fa-f]{6}$'
+    )
+);
+
+COMMENT ON TABLE classificacao_risco_ghe IS 'Faixas de classificacao de risco exclusivas do Motor GHE, escopadas por metodologia. Nunca compartilhada com classificacao_risco (Motor individual) - isolamento deliberado (MVP-08A, Ajuste 01). Nenhuma faixa cientifica e inserida por esta migration.';
+
+-- ---------------------------------------------------------------------
+-- 42. REGRA_RISCO_GHE (paralela a regra_risco)
+-- ---------------------------------------------------------------------
+CREATE TABLE regra_risco_ghe (
+    id_regra_ghe          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_metodologia        BIGINT NOT NULL,
+    id_risco              BIGINT NOT NULL,
+    codigo                VARCHAR(60) NOT NULL,
+    nome                  VARCHAR(160) NOT NULL,
+    descricao             TEXT,
+    operador_agregacao    VARCHAR(5) NOT NULL,
+    pontuacao_resultado   NUMERIC(10,2) NOT NULL,
+    ativo                 BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_regra_risco_ghe_metodologia FOREIGN KEY (id_metodologia)
+        REFERENCES metodologia_risco (id_metodologia) ON DELETE RESTRICT,
+    CONSTRAINT fk_regra_risco_ghe_risco FOREIGN KEY (id_risco)
+        REFERENCES risco_ergonomico (id_risco) ON DELETE RESTRICT,
+    CONSTRAINT uq_regra_risco_ghe_metodologia_codigo UNIQUE (id_metodologia, codigo),
+    CONSTRAINT chk_regra_risco_ghe_operador_agregacao CHECK (operador_agregacao IN ('AND', 'OR')),
+    CONSTRAINT chk_regra_risco_ghe_pontuacao_resultado CHECK (pontuacao_resultado >= 0)
+);
+
+COMMENT ON TABLE regra_risco_ghe IS 'Regra do Motor GHE, escopada por metodologia, relacionando condicoes (regra_condicao_ghe) a um risco (risco_ergonomico, reaproveitado) e a uma pontuacao. Paralela a regra_risco - nunca compartilhada com o Motor individual (MVP-08A). pontuacao_resultado e apenas estrutura: nenhum valor cientifico e inserido por esta migration.';
+
+-- ---------------------------------------------------------------------
+-- 43. REGRA_CONDICAO_GHE (condicao sobre METRICA, nao sobre resposta bruta)
+-- ---------------------------------------------------------------------
+CREATE TABLE regra_condicao_ghe (
+    id_condicao_ghe      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_regra_ghe          BIGINT NOT NULL,
+    id_pergunta            BIGINT NOT NULL,
+    id_opcao               BIGINT,
+    tipo_metrica            VARCHAR(30) NOT NULL,
+    parametro_metrica       NUMERIC(12,3),
+    operador                VARCHAR(5) NOT NULL,
+    valor_comparacao        NUMERIC(12,3) NOT NULL,
+    ordem                   INTEGER NOT NULL,
+    ativo                   BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_regra_condicao_ghe_regra FOREIGN KEY (id_regra_ghe)
+        REFERENCES regra_risco_ghe (id_regra_ghe) ON DELETE CASCADE,
+    CONSTRAINT fk_regra_condicao_ghe_pergunta FOREIGN KEY (id_pergunta)
+        REFERENCES pergunta_avaliacao (id_pergunta) ON DELETE RESTRICT,
+    CONSTRAINT fk_regra_condicao_ghe_opcao FOREIGN KEY (id_opcao)
+        REFERENCES opcao_resposta (id_opcao) ON DELETE RESTRICT,
+    CONSTRAINT chk_regra_condicao_ghe_tipo_metrica CHECK (tipo_metrica IN (
+        'CONTAGEM_TRUE', 'CONTAGEM_FALSE', 'PERCENTUAL_TRUE', 'PERCENTUAL_FALSE',
+        'CONTAGEM_OPCAO', 'PERCENTUAL_OPCAO',
+        'MEDIA_VALOR_OPCAO', 'MAXIMO_VALOR_OPCAO', 'MINIMO_VALOR_OPCAO',
+        'MEDIA_NUMERICA', 'MINIMO_NUMERICO', 'MAXIMO_NUMERICO',
+        'PERCENTUAL_ACIMA_DE_VALOR', 'PERCENTUAL_ABAIXO_DE_VALOR',
+        'CONTAGEM_RESPOSTAS'
+    )),
+    CONSTRAINT chk_regra_condicao_ghe_operador CHECK (operador IN ('EQ', 'GTE')),
+    CONSTRAINT chk_regra_condicao_ghe_ordem CHECK (ordem > 0),
+    CONSTRAINT chk_regra_condicao_ghe_opcao_por_metrica CHECK (
+        (tipo_metrica IN ('CONTAGEM_OPCAO', 'PERCENTUAL_OPCAO') AND id_opcao IS NOT NULL)
+        OR (tipo_metrica NOT IN ('CONTAGEM_OPCAO', 'PERCENTUAL_OPCAO') AND id_opcao IS NULL)
+    ),
+    CONSTRAINT chk_regra_condicao_ghe_parametro_por_metrica CHECK (
+        (tipo_metrica IN ('PERCENTUAL_ACIMA_DE_VALOR', 'PERCENTUAL_ABAIXO_DE_VALOR') AND parametro_metrica IS NOT NULL)
+        OR (tipo_metrica NOT IN ('PERCENTUAL_ACIMA_DE_VALOR', 'PERCENTUAL_ABAIXO_DE_VALOR') AND parametro_metrica IS NULL)
+    )
+);
+
+COMMENT ON TABLE regra_condicao_ghe IS 'Condicao elementar de uma regra do GHE: consulta UMA metrica de evidencia (calculada em memoria, nunca persistida como catalogo) e compara com um limiar. parametro_metrica (usado para calcular a metrica) e valor_comparacao (usado para avaliar o resultado calculado) sao colunas propositalmente separadas (MVP-08A, Ajuste 03) - nunca confundir. PERCENTUAL_ACIMA_DE_OPCAO nao e uma metrica valida ainda (pendencia metodologica).';
+
+-- ---------------------------------------------------------------------
+-- 44. PROCESSAMENTO_RISCO_GHE (uma linha = uma execucao do motor)
+-- ---------------------------------------------------------------------
+CREATE TABLE processamento_risco_ghe (
+    id_processamento_risco_ghe     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_avaliacao_ghe                BIGINT NOT NULL,
+    id_metodologia                   BIGINT NOT NULL,
+    versao_metodologia_snapshot      VARCHAR(20) NOT NULL,
+    coletas_concluidas_snapshot      INTEGER NOT NULL,
+    amostra_planejada_snapshot       INTEGER NOT NULL,
+    percentual_cobertura_snapshot    NUMERIC(5,2) NOT NULL,
+    status                           VARCHAR(20) NOT NULL,
+    processado_em                    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_processamento_risco_ghe_avaliacao_ghe FOREIGN KEY (id_avaliacao_ghe)
+        REFERENCES avaliacao_ghe (id_avaliacao_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_processamento_risco_ghe_metodologia FOREIGN KEY (id_metodologia)
+        REFERENCES metodologia_risco (id_metodologia) ON DELETE RESTRICT,
+    CONSTRAINT chk_processamento_risco_ghe_status CHECK (
+        status IN ('PROCESSANDO', 'CONCLUIDO', 'ERRO', 'CANCELADO')
+    ),
+    CONSTRAINT chk_processamento_risco_ghe_coletas_concluidas CHECK (coletas_concluidas_snapshot >= 0),
+    CONSTRAINT chk_processamento_risco_ghe_amostra_planejada CHECK (amostra_planejada_snapshot > 0),
+    CONSTRAINT chk_processamento_risco_ghe_percentual_cobertura CHECK (percentual_cobertura_snapshot >= 0)
+);
+
+COMMENT ON TABLE processamento_risco_ghe IS 'Uma linha = uma execucao oficial do Motor de Risco do GHE. Reprocessar cria uma NOVA linha (nunca UPDATE numa existente) - MVP-08A, Ajuste 02. Os campos *_snapshot congelam o contexto da amostra no momento da execucao. Nao existe ainda regra permanente de "qual processamento e o oficial/vigente" persistida no banco - fica a cargo de uma funcao de service centralizada (ver docs/mvp08b-fundacao-motor-ghe.md).';
+
+-- ---------------------------------------------------------------------
+-- 45. AVALIACAO_GHE_RISCO (resultado por risco, dentro de um processamento)
+-- ---------------------------------------------------------------------
+CREATE TABLE avaliacao_ghe_risco (
+    id_avaliacao_ghe_risco        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_processamento_risco_ghe     BIGINT NOT NULL,
+    id_risco                        BIGINT NOT NULL,
+    id_classificacao_ghe            BIGINT NOT NULL,
+    pontuacao                       NUMERIC(10,2) NOT NULL,
+    criado_em                       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_avaliacao_ghe_risco_processamento FOREIGN KEY (id_processamento_risco_ghe)
+        REFERENCES processamento_risco_ghe (id_processamento_risco_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_risco_risco FOREIGN KEY (id_risco)
+        REFERENCES risco_ergonomico (id_risco) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_risco_classificacao_ghe FOREIGN KEY (id_classificacao_ghe)
+        REFERENCES classificacao_risco_ghe (id_classificacao_ghe) ON DELETE RESTRICT,
+    CONSTRAINT uq_avaliacao_ghe_risco UNIQUE (id_processamento_risco_ghe, id_risco),
+    CONSTRAINT chk_avaliacao_ghe_risco_pontuacao CHECK (pontuacao >= 0)
+);
+
+COMMENT ON TABLE avaliacao_ghe_risco IS 'Resultado consolidado de UM risco dentro de UM processamento do Motor GHE. Paralela a avaliacao_risco (Motor individual), mas pertence a um processamento_risco_ghe em vez de diretamente a uma avaliacao_ghe - permite reprocessamento sem apagar/sobrescrever resultados historicos (MVP-08A, secao 16/17).';
+
+-- ---------------------------------------------------------------------
+-- 46. AVALIACAO_GHE_RISCO_REGRA (rastreabilidade por regra)
+-- ---------------------------------------------------------------------
+CREATE TABLE avaliacao_ghe_risco_regra (
+    id_avaliacao_ghe_risco_regra    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_avaliacao_ghe_risco           BIGINT NOT NULL,
+    id_regra_ghe                      BIGINT NOT NULL,
+    codigo_regra_snapshot             VARCHAR(60) NOT NULL,
+    pontuacao_resultado_snapshot      NUMERIC(10,2) NOT NULL,
+    satisfeita                        BOOLEAN NOT NULL,
+    pontuacao_aplicada                NUMERIC(10,2) NOT NULL DEFAULT 0,
+    detalhe                           TEXT,
+    criado_em                         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_avaliacao_ghe_risco_regra_resultado FOREIGN KEY (id_avaliacao_ghe_risco)
+        REFERENCES avaliacao_ghe_risco (id_avaliacao_ghe_risco) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_risco_regra_regra FOREIGN KEY (id_regra_ghe)
+        REFERENCES regra_risco_ghe (id_regra_ghe) ON DELETE RESTRICT,
+    CONSTRAINT uq_avaliacao_ghe_risco_regra UNIQUE (id_avaliacao_ghe_risco, id_regra_ghe),
+    CONSTRAINT chk_avaliacao_ghe_risco_regra_pontuacao_aplicada CHECK (pontuacao_aplicada >= 0)
+);
+
+COMMENT ON TABLE avaliacao_ghe_risco_regra IS 'Registra quais regras contribuiram para o resultado de um risco, dentro de um processamento. Paralela a avaliacao_risco_regra (Motor individual). Guarda snapshot de codigo/pontuacao_resultado da regra para o historico nunca depender da configuracao atual de regra_risco_ghe.';
+
+-- ---------------------------------------------------------------------
+-- 47. AVALIACAO_GHE_RISCO_CONDICAO (rastreabilidade por condicao - sem
+-- equivalente no Motor individual)
+-- ---------------------------------------------------------------------
+CREATE TABLE avaliacao_ghe_risco_condicao (
+    id_avaliacao_ghe_risco_condicao   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_avaliacao_ghe_risco_regra       BIGINT NOT NULL,
+    id_condicao_ghe                     BIGINT NOT NULL,
+    id_pergunta                          BIGINT NOT NULL,
+    id_opcao                             BIGINT,
+    tipo_metrica                         VARCHAR(30) NOT NULL,
+    parametro_metrica_utilizado          NUMERIC(12,3),
+    valor_metrica_calculado              NUMERIC(14,4) NOT NULL,
+    base_calculo                         INTEGER NOT NULL,
+    operador_utilizado                   VARCHAR(5) NOT NULL,
+    valor_comparacao_utilizado           NUMERIC(12,3) NOT NULL,
+    resultado                            BOOLEAN NOT NULL,
+    criado_em                            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_avaliacao_ghe_risco_condicao_regra_resultado FOREIGN KEY (id_avaliacao_ghe_risco_regra)
+        REFERENCES avaliacao_ghe_risco_regra (id_avaliacao_ghe_risco_regra) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_risco_condicao_condicao FOREIGN KEY (id_condicao_ghe)
+        REFERENCES regra_condicao_ghe (id_condicao_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_risco_condicao_pergunta FOREIGN KEY (id_pergunta)
+        REFERENCES pergunta_avaliacao (id_pergunta) ON DELETE RESTRICT,
+    CONSTRAINT fk_avaliacao_ghe_risco_condicao_opcao FOREIGN KEY (id_opcao)
+        REFERENCES opcao_resposta (id_opcao) ON DELETE RESTRICT,
+    CONSTRAINT chk_avaliacao_ghe_risco_condicao_operador CHECK (operador_utilizado IN ('EQ', 'GTE')),
+    CONSTRAINT chk_avaliacao_ghe_risco_condicao_base_calculo CHECK (base_calculo >= 0)
+);
+
+COMMENT ON TABLE avaliacao_ghe_risco_condicao IS 'Rastreabilidade por condicao avaliada (sem equivalente no Motor individual): guarda o valor da metrica efetivamente calculado, a base de calculo (n), o parametro e o valor de comparacao usados, e o resultado - tudo snapshotado, nunca dependente da configuracao atual de regra_condicao_ghe (MVP-08A, secao 25/26/29).';
+
+-- =====================================================================
+-- BLOCO 9 - INVENTARIO DE RISCOS OCUPACIONAIS (MVP-09B)
+-- =====================================================================
+-- Fundacao fisica do Inventario de Riscos (arquitetura aprovada em
+-- docs/mvp09a-arquitetura-inventario-riscos.md). Nenhuma tabela
+-- existente e alterada - risco_ergonomico, avaliacao_ghe_risco,
+-- processamento_risco_ghe, ghe, atividade, ambiente_trabalho,
+-- posto_trabalho, usuario, empresa, plano_acao e acao_plano permanecem
+-- exatamente como estao. O Inventario e consumidor de resultados do
+-- Motor GHE, nunca produtor de calculo (ver
+-- database/migrations/005_add_inventario_riscos.sql para o
+-- detalhamento comentado de cada decisao).
+
+-- ---------------------------------------------------------------------
+-- 48. PERIGO_OCUPACIONAL (catalogo global, agnostico de motor)
+-- ---------------------------------------------------------------------
+CREATE TABLE perigo_ocupacional (
+    id_perigo       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codigo          VARCHAR(30) NOT NULL,
+    categoria       VARCHAR(20) NOT NULL,
+    nome            VARCHAR(160) NOT NULL,
+    descricao       TEXT,
+    ativo           BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_perigo_ocupacional_codigo UNIQUE (codigo),
+    CONSTRAINT chk_perigo_ocupacional_categoria CHECK (
+        categoria IN ('FISICO', 'QUIMICO', 'BIOLOGICO', 'ERGONOMICO', 'ACIDENTE')
+    )
+);
+
+COMMENT ON TABLE perigo_ocupacional IS 'Catalogo global de perigos ocupacionais, independente de motor de calculo. Nunca excluido fisicamente pelo fluxo comum (usar ativo=false) - um perigo ja referenciado por um item de inventario nao pode desaparecer do historico.';
+
+-- ---------------------------------------------------------------------
+-- 49. RISCO_ERGONOMICO_PERIGO (ponte N:1, risco_ergonomico intacto)
+-- ---------------------------------------------------------------------
+CREATE TABLE risco_ergonomico_perigo (
+    id_mapeamento   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_risco        BIGINT NOT NULL,
+    id_perigo       BIGINT NOT NULL,
+    ativo           BOOLEAN NOT NULL DEFAULT TRUE,
+    criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_risco_ergonomico_perigo_risco FOREIGN KEY (id_risco)
+        REFERENCES risco_ergonomico (id_risco) ON DELETE RESTRICT,
+    CONSTRAINT fk_risco_ergonomico_perigo_perigo FOREIGN KEY (id_perigo)
+        REFERENCES perigo_ocupacional (id_perigo) ON DELETE RESTRICT,
+    CONSTRAINT uq_risco_ergonomico_perigo_risco UNIQUE (id_risco)
+);
+
+COMMENT ON TABLE risco_ergonomico_perigo IS 'Ponte N:1 entre risco_ergonomico (vocabulario do Motor GHE, intocado) e perigo_ocupacional (catalogo do Inventario). UNIQUE(id_risco) garante que cada risco_ergonomico mapeia para no maximo um perigo - decisao MVP-09A, secao 5.';
+
+-- ---------------------------------------------------------------------
+-- 50. INVENTARIO_RISCO (cabecalho/versao do documento)
+-- ---------------------------------------------------------------------
+CREATE TABLE inventario_risco (
+    id_inventario           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_empresa              BIGINT NOT NULL,
+    numero_versao           INTEGER NOT NULL,
+    id_inventario_anterior  BIGINT,
+    titulo                  VARCHAR(160) NOT NULL,
+    descricao               TEXT,
+    status                  VARCHAR(20) NOT NULL DEFAULT 'RASCUNHO',
+    data_referencia         DATE NOT NULL,
+    criado_por              BIGINT NOT NULL,
+    publicado_por           BIGINT,
+    criado_em               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    publicado_em            TIMESTAMPTZ,
+    CONSTRAINT fk_inventario_risco_empresa FOREIGN KEY (id_empresa)
+        REFERENCES empresa (id_empresa) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_anterior FOREIGN KEY (id_inventario_anterior)
+        REFERENCES inventario_risco (id_inventario) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_criado_por FOREIGN KEY (criado_por)
+        REFERENCES usuario (id_usuario) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_publicado_por FOREIGN KEY (publicado_por)
+        REFERENCES usuario (id_usuario) ON DELETE RESTRICT,
+    CONSTRAINT uq_inventario_risco_empresa_versao UNIQUE (id_empresa, numero_versao),
+    CONSTRAINT chk_inventario_risco_status CHECK (status IN ('RASCUNHO', 'PUBLICADO', 'CANCELADO')),
+    CONSTRAINT chk_inventario_risco_numero_versao CHECK (numero_versao > 0),
+    CONSTRAINT chk_inventario_risco_publicacao_consistente CHECK (
+        (status = 'PUBLICADO' AND publicado_por IS NOT NULL AND publicado_em IS NOT NULL)
+        OR (status <> 'PUBLICADO' AND publicado_por IS NULL AND publicado_em IS NULL)
+    )
+);
+
+COMMENT ON TABLE inventario_risco IS 'Cabecalho de UMA versao do Inventario de Riscos de uma empresa. Nova revisao = nova linha (id_inventario_anterior encadeia a versao anterior), nunca UPDATE de uma linha existente. PUBLICADO e imutavel pelo fluxo normal - qualquer mudanca exige nova versao (MVP-09A, secao 6/20).';
+
+-- ---------------------------------------------------------------------
+-- 51. INVENTARIO_RISCO_ITEM (o risco contextualizado)
+-- ---------------------------------------------------------------------
+CREATE TABLE inventario_risco_item (
+    id_inventario_risco_item           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_inventario                      BIGINT NOT NULL,
+    id_ghe                             BIGINT NOT NULL,
+    id_perigo                          BIGINT NOT NULL,
+    id_ambiente                        BIGINT,
+    id_posto                           BIGINT,
+    processo_descricao                 TEXT,
+    fonte_circunstancia                TEXT,
+    possiveis_lesoes_agravos           TEXT,
+    trabalhadores_expostos_snapshot    INTEGER,
+    caracterizacao_exposicao           VARCHAR(20),
+    caracterizacao_exposicao_descricao TEXT,
+    medidas_existentes                 TEXT,
+    medida_existente_categoria         VARCHAR(20),
+    origem_tipo                        VARCHAR(10) NOT NULL,
+    id_avaliacao_ghe_risco             BIGINT,
+    pontuacao_snapshot                 NUMERIC(10,2),
+    classificacao_codigo_snapshot      VARCHAR(30),
+    classificacao_nome_snapshot        VARCHAR(60),
+    metodologia_codigo_snapshot        VARCHAR(60),
+    metodologia_versao_snapshot        VARCHAR(20),
+    criado_em                          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em                      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_inventario_risco_item_inventario FOREIGN KEY (id_inventario)
+        REFERENCES inventario_risco (id_inventario) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_item_ghe FOREIGN KEY (id_ghe)
+        REFERENCES ghe (id_ghe) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_item_perigo FOREIGN KEY (id_perigo)
+        REFERENCES perigo_ocupacional (id_perigo) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_item_ambiente FOREIGN KEY (id_ambiente)
+        REFERENCES ambiente_trabalho (id_ambiente) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_item_posto FOREIGN KEY (id_posto)
+        REFERENCES posto_trabalho (id_posto) ON DELETE RESTRICT,
+    CONSTRAINT fk_inventario_risco_item_avaliacao_ghe_risco FOREIGN KEY (id_avaliacao_ghe_risco)
+        REFERENCES avaliacao_ghe_risco (id_avaliacao_ghe_risco) ON DELETE RESTRICT,
+    CONSTRAINT uq_inventario_risco_item_avaliacao_ghe_risco UNIQUE (id_inventario, id_avaliacao_ghe_risco),
+    CONSTRAINT chk_inventario_risco_item_origem_tipo CHECK (origem_tipo IN ('MOTOR_GHE', 'MANUAL')),
+    CONSTRAINT chk_inventario_risco_item_origem_consistente CHECK (
+        (origem_tipo = 'MOTOR_GHE' AND id_avaliacao_ghe_risco IS NOT NULL)
+        OR (
+            origem_tipo = 'MANUAL'
+            AND id_avaliacao_ghe_risco IS NULL
+            AND pontuacao_snapshot IS NULL
+            AND classificacao_codigo_snapshot IS NULL
+            AND classificacao_nome_snapshot IS NULL
+            AND metodologia_codigo_snapshot IS NULL
+            AND metodologia_versao_snapshot IS NULL
+        )
+    ),
+    CONSTRAINT chk_inventario_risco_item_expostos CHECK (
+        trabalhadores_expostos_snapshot IS NULL OR trabalhadores_expostos_snapshot >= 0
+    ),
+    CONSTRAINT chk_inventario_risco_item_caracterizacao CHECK (
+        caracterizacao_exposicao IS NULL
+        OR caracterizacao_exposicao IN ('ROTINEIRA', 'NAO_ROTINEIRA', 'HABITUAL', 'INTERMITENTE')
+    ),
+    CONSTRAINT chk_inventario_risco_item_medida_categoria CHECK (
+        medida_existente_categoria IS NULL
+        OR medida_existente_categoria IN ('ELIMINACAO', 'SUBSTITUICAO', 'ENGENHARIA', 'ADMINISTRATIVA', 'EPI')
+    )
+);
+
+COMMENT ON TABLE inventario_risco_item IS 'UM perigo, em UM GHE, dentro de UMA versao do Inventario. Campos de conteudo sao nulos no banco (completude e responsabilidade da aplicacao - validarItemInventarioCompleto); apenas inventario/GHE/perigo sao estruturalmente obrigatorios. origem_tipo=MANUAL nunca pode carregar snapshot de avaliacao (CHECK garante no banco) - MVP-09A, secao 35/37.';
+
+-- ---------------------------------------------------------------------
+-- 52. INVENTARIO_RISCO_ITEM_ATIVIDADE (N:N com atividade, reutilizada)
+-- ---------------------------------------------------------------------
+CREATE TABLE inventario_risco_item_atividade (
+    id_inventario_risco_item_atividade  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_inventario_risco_item            BIGINT NOT NULL,
+    id_atividade                        BIGINT NOT NULL,
+    criado_em                           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_inventario_risco_item_atividade_item FOREIGN KEY (id_inventario_risco_item)
+        REFERENCES inventario_risco_item (id_inventario_risco_item) ON DELETE CASCADE,
+    CONSTRAINT fk_inventario_risco_item_atividade_atividade FOREIGN KEY (id_atividade)
+        REFERENCES atividade (id_atividade) ON DELETE RESTRICT,
+    CONSTRAINT uq_inventario_risco_item_atividade UNIQUE (id_inventario_risco_item, id_atividade)
+);
+
+COMMENT ON TABLE inventario_risco_item_atividade IS 'Associacao N:N entre um item do Inventario e as atividades (catalogo existente, reutilizado sem duplicacao) onde a exposicao ocorre. ON DELETE CASCADE e relativo apenas ao item pai - a atividade em si nunca e removida por esta relacao (ON DELETE RESTRICT do lado de atividade).';
+
+-- =====================================================================
 -- INDICES
 -- =====================================================================
 -- Indices em FKs usadas em JOIN/filtro que ainda nao possuem indice
@@ -1150,6 +1560,34 @@ CREATE INDEX ix_coleta_ghe_id_avaliacao_ghe ON coleta_ghe (id_avaliacao_ghe);
 CREATE INDEX ix_coleta_ghe_id_amostra_participante ON coleta_ghe (id_amostra_participante);
 CREATE INDEX ix_resposta_coleta_id_pergunta ON resposta_coleta (id_pergunta);
 CREATE INDEX ix_resposta_coleta_opcao_id_opcao ON resposta_coleta_opcao (id_opcao);
+
+-- Bloco 8
+CREATE INDEX ix_regra_risco_ghe_id_risco ON regra_risco_ghe (id_risco);
+CREATE INDEX ix_regra_condicao_ghe_id_regra_ghe ON regra_condicao_ghe (id_regra_ghe);
+CREATE INDEX ix_regra_condicao_ghe_id_pergunta ON regra_condicao_ghe (id_pergunta);
+CREATE INDEX ix_regra_condicao_ghe_id_opcao ON regra_condicao_ghe (id_opcao);
+CREATE INDEX ix_processamento_risco_ghe_id_avaliacao_ghe ON processamento_risco_ghe (id_avaliacao_ghe);
+CREATE INDEX ix_processamento_risco_ghe_id_metodologia ON processamento_risco_ghe (id_metodologia);
+CREATE INDEX ix_avaliacao_ghe_risco_id_risco ON avaliacao_ghe_risco (id_risco);
+CREATE INDEX ix_avaliacao_ghe_risco_id_classificacao_ghe ON avaliacao_ghe_risco (id_classificacao_ghe);
+CREATE INDEX ix_avaliacao_ghe_risco_regra_id_regra_ghe ON avaliacao_ghe_risco_regra (id_regra_ghe);
+CREATE INDEX ix_avaliacao_ghe_risco_condicao_id_regra_resultado ON avaliacao_ghe_risco_condicao (id_avaliacao_ghe_risco_regra);
+CREATE INDEX ix_avaliacao_ghe_risco_condicao_id_condicao_ghe ON avaliacao_ghe_risco_condicao (id_condicao_ghe);
+CREATE INDEX ix_avaliacao_ghe_risco_condicao_id_pergunta ON avaliacao_ghe_risco_condicao (id_pergunta);
+CREATE INDEX ix_avaliacao_ghe_risco_condicao_id_opcao ON avaliacao_ghe_risco_condicao (id_opcao);
+
+-- Bloco 9
+CREATE INDEX ix_risco_ergonomico_perigo_id_perigo ON risco_ergonomico_perigo (id_perigo);
+CREATE INDEX ix_inventario_risco_id_inventario_anterior ON inventario_risco (id_inventario_anterior);
+CREATE INDEX ix_inventario_risco_criado_por ON inventario_risco (criado_por);
+CREATE INDEX ix_inventario_risco_publicado_por ON inventario_risco (publicado_por);
+CREATE INDEX ix_inventario_risco_item_id_inventario ON inventario_risco_item (id_inventario);
+CREATE INDEX ix_inventario_risco_item_id_ghe ON inventario_risco_item (id_ghe);
+CREATE INDEX ix_inventario_risco_item_id_perigo ON inventario_risco_item (id_perigo);
+CREATE INDEX ix_inventario_risco_item_id_ambiente ON inventario_risco_item (id_ambiente);
+CREATE INDEX ix_inventario_risco_item_id_posto ON inventario_risco_item (id_posto);
+CREATE INDEX ix_inventario_risco_item_id_avaliacao_ghe_risco ON inventario_risco_item (id_avaliacao_ghe_risco);
+CREATE INDEX ix_inventario_risco_item_atividade_id_atividade ON inventario_risco_item_atividade (id_atividade);
 
 -- Indices compostos recomendados explicitamente pelo modelo logico (Secao F)
 CREATE INDEX ix_avaliacao_ergonomica_vinculo_data

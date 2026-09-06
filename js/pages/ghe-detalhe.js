@@ -14,7 +14,7 @@ import {
     listarParticipantes,
     adicionarParticipante,
     removerParticipante,
-    listarVinculosDaEmpresaParaAmostra,
+    listarVinculosCompativeisComGhe,
 } from '../services/gheService.js';
 import { listarUsuariosDaEmpresa } from '../services/planoAcaoService.js';
 import { obterAvaliadorPadrao } from '../services/avaliacaoService.js';
@@ -113,6 +113,9 @@ const instanciaModalParticipante = new bootstrap.Modal(modalParticipante);
 let gheAtual = null;
 let planoAtual = null;
 let participantesAtuais = [];
+let cargosAtuais = [];
+
+const botaoAdicionarParticipante = document.getElementById('botao-adicionar-participante');
 
 function mostrarNotificacao(texto, tipo = 'info') {
     mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
@@ -188,9 +191,24 @@ function renderizarGhe(nomeEmpresa) {
     numeroUniverso.textContent = gheAtual.universo;
 }
 
+// Sem nenhum cargo associado, nao ha como validar se um vinculo e
+// compativel com o GHE (secao de correcao MVP-06/MVP-07) - o botao de
+// adicionar participante fica desabilitado ate que ao menos um cargo seja
+// associado, em vez de deixar o usuario descobrir isso so ao tentar salvar.
+function atualizarDisponibilidadeParticipante() {
+    const semCargos = cargosAtuais.length === 0;
+    botaoAdicionarParticipante.disabled = semCargos;
+    botaoAdicionarParticipante.title = semCargos
+        ? 'Associe ao menos um cargo a este GHE antes de adicionar participantes.'
+        : '';
+}
+
 // --- Cargos relacionados -------------------------------------------------------
 async function carregarCargos() {
     const cargos = await listarCargosDoGhe(idGhe);
+    cargosAtuais = cargos;
+    atualizarDisponibilidadeParticipante();
+
     if (cargos.length === 0) {
         areaSemCargos.hidden = false;
         listaCargos.hidden = true;
@@ -497,25 +515,44 @@ async function carregarParticipantes() {
     });
 }
 
-document.getElementById('botao-adicionar-participante').addEventListener('click', async () => {
+botaoAdicionarParticipante.addEventListener('click', async () => {
+    if (cargosAtuais.length === 0) {
+        mostrarNotificacao('Associe ao menos um cargo a este GHE antes de adicionar participantes.', 'erro');
+        return;
+    }
+
     formularioParticipante.reset();
     campoVinculoParticipante.classList.remove('is-invalid');
     campoVinculoParticipante.innerHTML = '<option value="">Selecione...</option>';
     try {
-        const vinculos = await listarVinculosDaEmpresaParaAmostra();
+        // Somente vinculos compativeis com este GHE (mesmo setor, quando o
+        // GHE tiver um definido, e cargo dentre os associados) - nunca
+        // todos os vinculos da empresa (correcao: evita registrar um
+        // participante de setor/cargo incompativel com o GHE).
+        const vinculos = await listarVinculosCompativeisComGhe(idGhe);
         const idsJaParticipantes = new Set(participantesAtuais.map((p) => p.id_vinculo));
-        vinculos
-            .filter((vinculo) => !idsJaParticipantes.has(vinculo.id_vinculo))
-            .forEach((vinculo) => {
-                const opcao = document.createElement('option');
-                opcao.value = vinculo.id_vinculo;
-                opcao.textContent = `${vinculo.colaborador_nome} — ${vinculo.setor_nome || 'Sem setor'} / ${vinculo.cargo_nome || 'Sem cargo'}`;
-                campoVinculoParticipante.appendChild(opcao);
-            });
+        const disponiveis = vinculos.filter((vinculo) => !idsJaParticipantes.has(vinculo.id_vinculo));
+
+        disponiveis.forEach((vinculo) => {
+            const opcao = document.createElement('option');
+            opcao.value = vinculo.id_vinculo;
+            opcao.textContent = `${vinculo.colaborador_nome} — ${vinculo.setor_nome || 'Sem setor'} / ${vinculo.cargo_nome || 'Sem cargo'}`;
+            campoVinculoParticipante.appendChild(opcao);
+        });
+
+        if (disponiveis.length === 0) {
+            mostrarNotificacao('Não há colaboradores compatíveis disponíveis para este GHE no momento.', 'info');
+            return;
+        }
+
         instanciaModalParticipante.show();
     } catch (error) {
         console.error('Erro ao carregar vínculos disponíveis:', error);
-        mostrarNotificacao('Não foi possível carregar os colaboradores disponíveis.', 'erro');
+        if (error?.code === 'GHE_SEM_CARGOS_ASSOCIADOS') {
+            mostrarNotificacao(error.message, 'erro');
+        } else {
+            mostrarNotificacao('Não foi possível carregar os colaboradores disponíveis.', 'erro');
+        }
     }
 });
 

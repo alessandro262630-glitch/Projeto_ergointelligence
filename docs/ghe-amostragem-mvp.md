@@ -143,32 +143,52 @@ USUARIO (1) ──< (N) PLANO_AMOSTRAGEM   (responsável)
   gravar. Testado com uma empresa/setor/cargo de outro tenant criados
   temporariamente via API e removidos em seguida — ambos os casos foram
   corretamente bloqueados (`SETOR_INCOMPATIVEL`, `CARGO_INCOMPATIVEL`).
+- **CORREÇÃO (rodada de validação MVP-06/MVP-07)**: a validação original
+  de `adicionarParticipante` conferia apenas a empresa do vínculo,
+  permitindo registrar um participante de setor/cargo incompatível com o
+  próprio GHE (ex.: um colaborador do Administrativo registrado num GHE de
+  Produção) e vínculos já encerrados. Corrigido para também exigir: (1) o
+  vínculo estar vigente (`ativo=true` e `data_fim IS NULL`); (2) quando o
+  GHE tiver um setor definido, o vínculo pertencer exatamente a esse
+  setor; (3) o cargo do vínculo estar entre os cargos associados ao GHE
+  (`ghe_cargo`) — um GHE sem nenhum cargo associado bloqueia a adição de
+  participantes (`GHE_SEM_CARGOS_ASSOCIADOS`) até que ao menos um cargo
+  seja associado. `listarVinculosCompativeisComGhe(idGhe)` substituiu o
+  antigo `listarVinculosDaEmpresaParaAmostra()` no seletor de
+  "Adicionar Participante" de `ghe-detalhe.html`, que também passou a
+  desabilitar esse botão quando o GHE não tem cargo associado. Validado
+  com 6 cenários reais (participante compatível, setor incompatível,
+  cargo incompatível, outra empresa, vínculo encerrado, duplicidade) — os
+  5 casos inválidos foram corretamente bloqueados.
 
 ## Estado Real Após os Testes (dados demonstrativos)
 
 Preparado pelo fluxo normal da interface (nunca por INSERT manual) em
 04/09/2026:
 
-| GHE | Setor | Universo (atual) | Amostra planejada | Participantes registrados | Status do plano |
+| GHE | Setor | Universo (atual) | Amostra planejada | Participantes registrados (todos compatíveis) | Status do plano |
 |---|---|---|---|---|---|
-| Operadores de Produção (GHE-01) | Produção | 190 | 20 | 1 | Planejado |
-| Equipe de Logística (GHE-02) | Logística | 85 | 12 | 1 | Planejado |
-| Equipe Administrativa (GHE-03) | Administrativo | 90 | 10 | 0 | Planejado |
-| Suporte de Tecnologia (GHE-04) | Tecnologia | 55 | 8 | 0 | Planejado |
+| Operadores de Produção (GHE-01) | Produção | 190 | 20 | 2 (Juliana Ribeiro, Bruno Martins) | Planejado |
+| Equipe de Logística (GHE-02) | Logística | 85 | 12 | 0 | Planejado |
+| Equipe Administrativa (GHE-03) | Administrativo | 100 | 10 | 1 (Marina Alves) | Planejado |
+| Suporte de Tecnologia (GHE-04) | Tecnologia | 55 | 8 | 1 (Carlos Mendes) | Planejado |
 
-- **Universo total demonstrativo**: 420 trabalhadores.
+- **Universo total demonstrativo**: 430 trabalhadores.
 - **Amostra total planejada**: 50.
-- **Colaboradores fictícios realmente cadastrados no sistema**: 6 — muito
-  menor que o universo declarado, demonstrando deliberadamente que
-  `ghe.universo` não depende de `COUNT(colaborador)`.
+- **Colaboradores fictícios realmente cadastrados no sistema**: 6.
 - O GHE-01 teve seu universo alterado de 180 para 190 durante o teste de
   histórico; o plano de amostragem já existente continua mostrando
   `universo_snapshot = 180`, confirmando que o snapshot não acompanha
   alterações posteriores do GHE.
-- O mesmo vínculo (Marina Alves Demo) foi registrado como participante em
-  dois planos de amostragem diferentes (GHE-01 e GHE-02) — confirma que a
-  restrição de duplicidade é por plano (`UNIQUE(id_plano_amostragem,
-  id_vinculo)`), não uma proibição global do vínculo.
+- **Correção**: os 4 GHEs registravam anteriormente o mesmo vínculo
+  (Marina Alves Demo) em 3 planos diferentes para demonstrar que a
+  restrição de duplicidade é por plano — mas Marina só é compatível
+  (setor + cargo) com o GHE-03; ela foi removida dos planos de GHE-01 e
+  GHE-02, e cada GHE passou a ter apenas participantes realmente
+  compatíveis com seu setor/cargo (ver seção de correção acima). GHE-02
+  também não tinha nenhum cargo associado (bug que a correção do
+  MVP-07 passou a bloquear) — corrigido associando "Auxiliar de
+  Logística".
 
 ## Próxima Etapa
 

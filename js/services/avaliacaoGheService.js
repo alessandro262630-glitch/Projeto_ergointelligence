@@ -331,6 +331,25 @@ export async function finalizarColeta(idColeta) {
 export async function consolidarAvaliacaoGhe(idAvaliacaoGhe) {
     await garantirAvaliacaoGheEditavel(idAvaliacaoGhe);
 
+    // Nunca consolida sem nenhuma evidencia coletada (correcao: antes desta
+    // checagem, uma Avaliacao do GHE recem-criada, sem nenhuma coleta
+    // concluida, podia ser consolidada do mesmo jeito) - reaplicado aqui no
+    // service, nao so como um "disabled" na interface, pois a interface
+    // pode estar desatualizada em relacao ao banco.
+    const { count, error: erroContagem } = await supabase
+        .from('coleta_ghe')
+        .select('id_coleta', { count: 'exact', head: true })
+        .eq('id_avaliacao_ghe', idAvaliacaoGhe)
+        .eq('status', 'CONCLUIDA');
+
+    if (erroContagem) throw erroContagem;
+    if (!count || count === 0) {
+        throw erroAvaliacaoGhe(
+            'Não é possível consolidar sem nenhuma coleta concluída.',
+            'CONSOLIDACAO_SEM_COLETAS',
+        );
+    }
+
     const { data, error } = await supabase
         .from('avaliacao_ghe')
         .update({ status: 'CONSOLIDADA', atualizado_em: new Date().toISOString() })

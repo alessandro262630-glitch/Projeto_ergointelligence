@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colaboradores - ErgoIntelligence</title>
+    <title>Inventário de Riscos - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/inventario-riscos.css">
 </head>
 <body>
     <div class="d-flex vh-100">
@@ -28,7 +29,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
-                    <a class="nav-link active d-flex align-items-center gap-2" href="colaboradores.html" aria-current="page">
+                    <a class="nav-link d-flex align-items-center gap-2" href="colaboradores.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
                         Colaboradores
                     </a>
@@ -52,7 +53,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"></path><path d="M5 4.5h12l-2.2 3.5L17 11.5H5"></path></svg>
                         Planos de Ação
                     </a>
-                    <a class="nav-link d-flex align-items-center gap-2" href="inventarios.html">
+                    <a class="nav-link active d-flex align-items-center gap-2" href="inventarios.html" aria-current="page">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="1.5"></rect><path d="M9 3.5V6h6V3.5"></path><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"></path></svg>
                         Inventário de Riscos
                     </a>
@@ -73,54 +74,46 @@
                 <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Colaboradores</span>
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <div class="text-end d-none d-sm-block">
-                        <div class="small fw-semibold">SST Demo</div>
-                        <div class="small text-muted">Administrador</div>
-                    </div>
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.78rem;">SD</div>
+                <div class="ms-2 ms-lg-0">
+                    <span class="navbar-brand mb-0 h5 d-block">Inventário de Riscos Ocupacionais</span>
+                    <span class="small text-muted">Versões documentais do inventário, por empresa</span>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo — dados fictícios</span>
                 </div>
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-4">
-                    <div class="d-flex justify-content-end mb-3">
-                        <button type="button" class="btn btn-primary" id="botao-novo-colaborador">
-                            + Novo colaborador
+                <div class="container-fluid p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <p class="text-muted small mb-0">
+                            Cada versão do Inventário reúne, em um único documento, os perigos identificados por GHE,
+                            seu contexto de exposição e a classificação de risco associada. Uma versão publicada
+                            fica bloqueada para edição — alterações futuras exigem uma nova versão.
+                        </p>
+                        <button type="button" class="btn btn-primary text-nowrap ms-3" id="botao-novo-inventario">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                            Novo Inventário
                         </button>
                     </div>
 
                     <div class="card">
                         <div class="card-body">
-                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
-                                <input
-                                    type="search"
-                                    id="campo-busca"
-                                    class="form-control flex-grow-1"
-                                    style="min-width: 240px;"
-                                    placeholder="Buscar por nome, matrícula ou e-mail"
-                                    aria-label="Buscar colaborador"
-                                >
-                                <div class="btn-group" role="group" aria-label="Filtrar por status">
-                                    <button type="button" class="btn btn-outline-primary active" data-filtro-status="ativos" aria-pressed="true">Ativos</button>
-                                    <button type="button" class="btn btn-outline-primary" data-filtro-status="inativos" aria-pressed="false">Inativos</button>
-                                    <button type="button" class="btn btn-outline-primary" data-filtro-status="todos" aria-pressed="false">Todos</button>
-                                </div>
-                            </div>
-
-                            <div id="area-estado" class="text-center text-muted py-5" hidden></div>
+                            <div id="area-estado" class="text-center text-muted py-5"></div>
 
                             <div id="area-tabela" class="table-responsive" hidden>
                                 <table class="table table-hover align-middle">
                                     <thead>
                                         <tr>
-                                            <th>Matrícula</th>
-                                            <th>Nome</th>
-                                            <th>E-mail</th>
-                                            <th>Data de admissão</th>
+                                            <th>Versão</th>
+                                            <th>Título</th>
+                                            <th>Data de referência</th>
                                             <th>Status</th>
-                                            <th class="text-end">Ações</th>
+                                            <th class="text-end">Itens</th>
+                                            <th class="text-end">GHEs abrangidos</th>
+                                            <th>Criado por</th>
+                                            <th>Publicado em</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody id="corpo-tabela"></tbody>
@@ -132,86 +125,102 @@
             </main>
 
             <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
-                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
                 <span>MVP de demonstração &middot; dados fictícios</span>
             </footer>
         </div>
     </div>
 
-    <!-- Modal de cadastro/edicao -->
-    <div class="modal fade" id="modal-formulario" tabindex="-1" aria-labelledby="modal-formulario-titulo" aria-hidden="true">
+    <!-- Modal: novo inventario -->
+    <div class="modal fade" id="modal-inventario" tabindex="-1" aria-labelledby="modal-inventario-titulo" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-formulario-titulo">Novo colaborador</h2>
-                    <button type="button" class="btn-close" id="botao-fechar-formulario" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <h2 class="modal-title fs-5" id="modal-inventario-titulo">Novo Inventário de Riscos</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <form id="formulario-colaborador" novalidate>
+                <form id="formulario-inventario" novalidate>
                     <div class="modal-body">
-                        <input type="hidden" id="campo-id-colaborador">
-
-                        <div class="mb-3">
-                            <label for="campo-matricula" class="form-label">Matrícula</label>
-                            <input type="text" id="campo-matricula" class="form-control" maxlength="50" required>
-                            <div class="invalid-feedback" id="erro-matricula"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-nome" class="form-label">Nome</label>
-                            <input type="text" id="campo-nome" class="form-control" maxlength="160" required>
-                            <div class="invalid-feedback" id="erro-nome"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-email" class="form-label">E-mail</label>
-                            <input type="email" id="campo-email" class="form-control" maxlength="254">
-                            <div class="invalid-feedback" id="erro-email"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="campo-data-admissao" class="form-label">Data de admissão</label>
-                            <input type="date" id="campo-data-admissao" class="form-control" required>
-                            <div class="invalid-feedback" id="erro-data-admissao"></div>
+                        <p class="small text-muted">
+                            O número da versão é definido automaticamente pelo sistema (sequência da empresa).
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="campo-titulo-inventario" class="form-label">Título</label>
+                                <input type="text" id="campo-titulo-inventario" class="form-control" maxlength="160" required placeholder="Ex.: Inventário de Riscos Ocupacionais 2026">
+                                <div class="invalid-feedback" id="erro-titulo-inventario"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-referencia-inventario" class="form-label">Data de referência</label>
+                                <input type="date" id="campo-data-referencia-inventario" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-referencia-inventario"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-criador-inventario" class="form-label">Criado por</label>
+                                <select id="campo-criador-inventario" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-criador-inventario"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-descricao-inventario" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-descricao-inventario" class="form-control" rows="2"></textarea>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" id="botao-cancelar-formulario" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" id="botao-salvar-colaborador">Salvar</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-inventario">Criar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal de visualizacao (somente leitura) -->
-    <div class="modal fade" id="modal-detalhes" tabindex="-1" aria-labelledby="modal-detalhes-titulo" aria-hidden="true">
+    <!-- Modal: criar nova versao a partir de um inventario publicado -->
+    <div class="modal fade" id="modal-nova-versao" tabindex="-1" aria-labelledby="modal-nova-versao-titulo" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-detalhes-titulo">Detalhes do colaborador</h2>
-                    <button type="button" class="btn-close" id="botao-fechar-detalhes" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <h2 class="modal-title fs-5" id="modal-nova-versao-titulo">Criar Nova Versão</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body">
-                    <dl class="row mb-0">
-                        <dt class="col-5 text-muted text-uppercase small">Matrícula</dt>
-                        <dd class="col-7" id="detalhe-matricula"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">Nome</dt>
-                        <dd class="col-7" id="detalhe-nome"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">E-mail</dt>
-                        <dd class="col-7" id="detalhe-email"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">Data de admissão</dt>
-                        <dd class="col-7" id="detalhe-data-admissao"></dd>
-
-                        <dt class="col-5 text-muted text-uppercase small">Status</dt>
-                        <dd class="col-7" id="detalhe-status"></dd>
-                    </dl>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" id="botao-fechar-detalhes-rodape" data-bs-dismiss="modal">Fechar</button>
-                </div>
+                <form id="formulario-nova-versao" novalidate>
+                    <div class="modal-body">
+                        <p class="small text-muted">
+                            Os itens da versão publicada serão copiados para a nova versão (rascunho), para revisão
+                            item a item antes de uma nova publicação. A versão anterior não será alterada.
+                        </p>
+                        <input type="hidden" id="campo-id-inventario-anterior">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="campo-titulo-nova-versao" class="form-label">Título</label>
+                                <input type="text" id="campo-titulo-nova-versao" class="form-control" maxlength="160" required>
+                                <div class="invalid-feedback" id="erro-titulo-nova-versao"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-data-referencia-nova-versao" class="form-label">Data de referência</label>
+                                <input type="date" id="campo-data-referencia-nova-versao" class="form-control" required>
+                                <div class="invalid-feedback" id="erro-data-referencia-nova-versao"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="campo-criador-nova-versao" class="form-label">Criado por</label>
+                                <select id="campo-criador-nova-versao" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                </select>
+                                <div class="invalid-feedback" id="erro-criador-nova-versao"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="campo-descricao-nova-versao" class="form-label">Descrição <span class="text-muted fw-normal">(opcional)</span></label>
+                                <textarea id="campo-descricao-nova-versao" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="botao-salvar-nova-versao">Criar nova versão</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -219,6 +228,6 @@
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="area-notificacoes" aria-live="polite" aria-atomic="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/pages/colaboradores.js"></script>
+    <script type="module" src="js/pages/inventarios.js"></script>
 </body>
 </html>

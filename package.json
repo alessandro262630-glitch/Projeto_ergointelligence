@@ -1,0 +1,9 @@
+{
+  "name": "ergointelligence",
+  "private": true,
+  "type": "module",
+  "description": "Nao ha build/bundler - o site e servido estatico (ex.: python -m http.server). Este arquivo so declara que os .js do projeto sao ES Modules (ja eram, via <script type=\"module\">) e habilita 'node --test' para os testes unitarios do dominio puro em js/domain/ghe-risk/__tests__/.",
+  "scripts": {
+    "test": "node --test js/domain/ghe-risk/__tests__/metricasGhe.test.mjs js/domain/ghe-risk/__tests__/avaliadorGhe.test.mjs js/domain/ghe-risk/__tests__/validacaoConfiguracaoGhe.test.mjs js/domain/ghe-risk/__tests__/motorRiscoGhe.test.mjs js/domain/inventario-risco/__tests__/completudeInventario.test.mjs"
+  }
+}

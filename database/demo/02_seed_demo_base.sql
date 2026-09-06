@@ -73,6 +73,13 @@ WHERE e.cnpj = '12345678000190'
 -- Vinculo principal vigente de cada colaborador (distribuidos entre os 4
 -- setores - secao 12 do prompt FEIRA-05, para permitir "riscos por setor"
 -- ja no fluxo individual existente).
+-- CORRECAO MVP-06/MVP-07: este pareamento setor/cargo tambem e a base do
+-- que 03_seed_demo_ghe.sql usa para registrar participantes compativeis
+-- com cada GHE (mesmo setor do GHE + cargo associado via ghe_cargo). Ao
+-- adicionar novos colaboradores aqui, mantenha o par setor/cargo coerente
+-- com os cargos que 03_seed_demo_ghe.sql associa a cada GHE - caso
+-- contrario, gheService.adicionarParticipante/listarVinculosCompativeisComGhe
+-- corretamente recusara esse colaborador como participante.
 INSERT INTO colaborador_vinculo (id_colaborador, id_setor, id_cargo, data_inicio, principal)
 SELECT c.id_colaborador, s.id_setor, cg.id_cargo, c.data_admissao, TRUE
 FROM colaborador c

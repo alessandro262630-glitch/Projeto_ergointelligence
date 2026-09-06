@@ -200,8 +200,79 @@ desacoplados da aplicação).
 - `resposta_coleta` nunca tem `pontuacao_calculada` porque essa coluna nem
   existe na tabela (diferente de `resposta_avaliacao`).
 
+## Correção: consolidação sem nenhuma coleta concluída
+
+`consolidarAvaliacaoGhe(idAvaliacaoGhe)` originalmente só verificava se a
+Avaliação do GHE ainda estava editável (`RASCUNHO`/`EM_COLETA`) antes de
+mudar seu status para `CONSOLIDADA` — nada impedia consolidar uma
+avaliação recém-criada, sem nenhuma coleta sequer iniciada. Corrigido para
+contar as coletas com `status = 'CONCLUIDA'` da avaliação antes de
+permitir a transição; com zero coletas concluídas, lança
+`CONSOLIDACAO_SEM_COLETAS` e a consolidação é recusada. A interface
+(`avaliacao-ghe.html`) também passou a desabilitar o botão "Consolidar
+Avaliação do GHE" nesse caso, com uma dica explicando o motivo — mas a
+regra que realmente protege o dado é a do service, não a do botão
+desabilitado (o service foi testado diretamente, contornando a
+interface, e bloqueou corretamente).
+
+Isso não bloqueia a **visualização** da consolidação descritiva: mesmo
+com zero coletas concluídas, `consolidacao-ghe.html` continua acessível e
+mostra todas as perguntas com `total_respondidas: 0` — o bloqueio é
+apenas sobre a transição de status da Avaliação do GHE, nunca sobre a
+leitura descritiva.
+
 ## Estado Real Após os Testes
 
-*(preenchido após a aplicação da migration 003 e a execução dos testes ao
-vivo via interface — ver relatório final da feature para o estado
-definitivo.)*
+Testado com Chrome real (Playwright), contra o Supabase de produção do
+ambiente demonstrativo, em 05-06/09/2026, após a aplicação da migration
+003 e as duas correções acima:
+
+- **GHE-01 (Operadores de Produção)**: Avaliação do GHE `CONSOLIDADA`
+  (id_avaliacao_ghe=6), 2 participantes registrados (Juliana Ribeiro,
+  Bruno Martins — ambos compatíveis com setor Produção/cargos Operador e
+  Supervisor de Produção), 2 coletas `CONCLUIDA` com respostas contrastantes
+  de propósito (perfil "alto" para Juliana, perfil "baixo" para Bruno) para
+  validar a matemática de consolidação com valores realmente diferentes.
+- **Consolidação descritiva do GHE-01** conferida pergunta a pergunta
+  contra o cálculo manual esperado:
+  - Q01 (BOOLEANO): 2 respondidas, Sim 1 (50%), Não 1 (50%).
+  - Q05 (ESCALA): distribuição Nunca=1/Sempre=1, média descritiva = 2
+    (média de 0 e 4).
+  - Q11 (ESCOLHA_ÚNICA): distribuição Ótimo=1/Péssimo=1, média descritiva = 2.
+  - Q20 (TEXTO, opcional): 1 resposta registrada (Bruno deixou em branco
+    de propósito, confirmando que "vazio opcional" não aparece como
+    resposta) — texto exato preservado.
+  - Todos os valores bateram exatamente com o esperado.
+- **GHE-04 (Suporte de Tecnologia)**: 1 participante (Carlos Mendes,
+  compatível), Avaliação do GHE criada e deixada em `EM_COLETA` sem
+  nenhuma coleta concluída — usada deliberadamente para confirmar o
+  bloqueio de consolidação com zero coletas, tanto no service quanto no
+  botão da interface.
+- **GHE-02 (Equipe de Logística)**: corrigido durante os testes — não
+  tinha nenhum cargo associado (o que a correção desta rodada passou a
+  bloquear); associado o cargo "Auxiliar de Logística" via
+  `associarCargoAoGhe`, deixando o GHE apto a receber participantes.
+- **GHE-03 (Equipe Administrativa)**: mantido com seu único participante
+  pré-existente (Marina Alves), que é de fato compatível (setor
+  Administrativo, cargo Assistente Administrativo).
+- Nenhum participante incompatível permanece registrado em nenhum plano de
+  amostragem ao final dos testes.
+- Catálogo técnico (`pergunta_avaliacao`, `opcao_resposta`,
+  `regra_risco`, `classificacao_risco`, `recomendacao`) não foi alterado
+  em nenhum momento.
+- Motor de Risco, classificador, Dashboard e Plano de Ação não foram
+  tocados por nenhuma das mudanças desta rodada.
+
+### Limitação de cobertura de teste (honesta, não escondida)
+
+O catálogo de perguntas vigente (`pergunta_avaliacao`) não possui, hoje,
+nenhuma pergunta do tipo `NUMERICO` nem `ESCOLHA_MULTIPLA` — todas as 20
+perguntas ativas são `BOOLEANO` (14), `ESCALA` (3), `ESCOLHA_UNICA` (2) ou
+`TEXTO` (1, opcional). A matemática descritiva desses dois tipos em
+`consolidacaoGheService.js` foi revisada por leitura de código (mesma
+estrutura e mesmas premissas dos demais tipos, incluindo o aviso de que
+percentuais de `ESCOLHA_MULTIPLA` podem somar mais de 100%), mas **não
+pôde ser exercitada com dados reais** nesta rodada, pois não existe
+nenhuma pergunta desses tipos para gerar uma coleta real. Criar perguntas
+sintéticas desses tipos só para o teste alteraria o catálogo técnico
+compartilhado — fora do que esta feature autoriza tocar.

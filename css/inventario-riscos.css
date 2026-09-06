@@ -1,0 +1,53 @@
+/* ErgoIntelligence - Inventario de Riscos Ocupacionais (MVP-09B).
+   Bootstrap cobre cards/tabela/badges/forms/modais; aqui ficam so os
+   ajustes que o tema padrao nao cobre. */
+
+.badge-status-inventario {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.badge-status-inventario--rascunho {
+    color: #92400E;
+    background-color: #FEF3C7;
+}
+
+.badge-status-inventario--publicado {
+    color: #166534;
+    background-color: #DCFCE7;
+}
+
+.badge-status-inventario--cancelado {
+    color: #7F1D1D;
+    background-color: #FEE2E2;
+}
+
+.badge-completude-item {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.badge-completude-item--completo {
+    color: #166534;
+    background-color: #DCFCE7;
+}
+
+.badge-completude-item--incompleto {
+    color: #92400E;
+    background-color: #FEF3C7;
+}
+
+.cabecalho-inventario {
+    border-left: 4px solid var(--bs-primary);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(16, 38, 59, 0.07);
+}
+
+.cabecalho-inventario--publicado {
+    border-left-color: #16A34A;
+}
+
+.cabecalho-inventario--cancelado {
+    border-left-color: #DC2626;
+}

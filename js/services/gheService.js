@@ -493,26 +493,111 @@ export async function listarParticipantes(idPlano) {
     return (data || []).map(mapearParticipante);
 }
 
+// Um participante so e compativel com um GHE quando: (1) o colaborador do
+// vinculo pertence a mesma empresa do GHE; (2) o vinculo ainda esta vigente
+// (ativo=true e sem data_fim) - um vinculo encerrado nao representa mais
+// exposicao atual; (3) quando o GHE tem um setor definido, o vinculo
+// pertence exatamente a esse setor; (4) o cargo do vinculo esta entre os
+// cargos ativamente associados ao GHE (ghe_cargo). Um GHE sem NENHUM cargo
+// associado nao tem como ser validado por cargo, entao adicionar
+// participante fica bloqueado ate que ao menos um cargo seja associado
+// (correcao: antes desta checagem, um vinculo de qualquer setor/cargo da
+// mesma empresa podia ser registrado como participante de um GHE
+// incompativel).
+async function validarParticipanteCompativelComGhe(ghe, vinculo) {
+    if (vinculo.colaborador?.id_empresa !== ghe.id_empresa) {
+        throw erroGhe('O colaborador selecionado não pertence a esta empresa.', 'VINCULO_INCOMPATIVEL');
+    }
+    if (!vinculo.ativo || vinculo.data_fim) {
+        throw erroGhe('Este vínculo não está mais vigente.', 'VINCULO_ENCERRADO');
+    }
+
+    const cargosDoGhe = await listarCargosDoGhe(ghe.id_ghe);
+    if (cargosDoGhe.length === 0) {
+        throw erroGhe(
+            'Associe ao menos um cargo compatível a este GHE antes de adicionar participantes.',
+            'GHE_SEM_CARGOS_ASSOCIADOS',
+        );
+    }
+
+    if (ghe.id_setor && vinculo.id_setor !== ghe.id_setor) {
+        throw erroGhe('Este colaborador não pertence ao setor deste GHE.', 'SETOR_INCOMPATIVEL');
+    }
+
+    const idsCargosCompativeis = new Set(cargosDoGhe.map((c) => c.id_cargo));
+    if (!idsCargosCompativeis.has(vinculo.id_cargo)) {
+        throw erroGhe('O cargo deste colaborador não está associado a este GHE.', 'CARGO_INCOMPATIVEL');
+    }
+}
+
+// Vinculos vigentes E compativeis (mesmo setor, se o GHE tiver um definido,
+// e cargo dentre os associados ao GHE) - usado para popular o seletor de
+// "Adicionar Participante" (secao de correcao MVP-06/MVP-07: antes disto o
+// seletor mostrava TODOS os vinculos da empresa, permitindo registrar um
+// participante incompativel com o GHE). Lanca GHE_SEM_CARGOS_ASSOCIADOS
+// quando o GHE ainda nao tem nenhum cargo associado - a pagina deve tratar
+// isso como bloqueio, nao como lista vazia.
+export async function listarVinculosCompativeisComGhe(idGhe) {
+    const ghe = await buscarGhePorId(idGhe);
+    const cargosDoGhe = await listarCargosDoGhe(idGhe);
+
+    if (cargosDoGhe.length === 0) {
+        throw erroGhe(
+            'Associe ao menos um cargo compatível a este GHE antes de adicionar participantes.',
+            'GHE_SEM_CARGOS_ASSOCIADOS',
+        );
+    }
+
+    const idsCargosCompativeis = cargosDoGhe.map((c) => c.id_cargo);
+
+    let query = supabase
+        .from('colaborador_vinculo')
+        .select('id_vinculo, id_colaborador, id_setor, id_cargo, colaborador!inner(id_empresa, nome, matricula, ativo), setor(nome), cargo(nome)')
+        .eq('ativo', true)
+        .is('data_fim', null)
+        .eq('colaborador.id_empresa', ghe.id_empresa)
+        .eq('colaborador.ativo', true)
+        .in('id_cargo', idsCargosCompativeis);
+
+    if (ghe.id_setor) {
+        query = query.eq('id_setor', ghe.id_setor);
+    }
+
+    const { data, error } = await query.order('id_vinculo', { ascending: true });
+    if (error) throw error;
+
+    return (data || []).map((linha) => ({
+        id_vinculo: linha.id_vinculo,
+        colaborador_nome: linha.colaborador?.nome ?? null,
+        colaborador_matricula: linha.colaborador?.matricula ?? null,
+        setor_nome: linha.setor?.nome ?? null,
+        cargo_nome: linha.cargo?.nome ?? null,
+    }));
+}
+
 // Nunca duplica o mesmo vinculo no mesmo plano (uq_amostra_participante -
 // secao 21/45); a mensagem amigavel para o codigo 23505 fica a cargo da
-// pagina, no mesmo padrao ja usado em plano-acao.js.
+// pagina, no mesmo padrao ja usado em plano-acao.js. Alem da empresa,
+// tambem valida vigencia/setor/cargo do vinculo contra o GHE (correcao:
+// esta validacao existia so na criacao do GHE/associacao de cargo, nao ao
+// registrar um participante).
 export async function adicionarParticipante(idPlano, idVinculo) {
     if (!idVinculo) {
         throw erroGhe('Selecione o colaborador.', 'VINCULO_OBRIGATORIO');
     }
 
-    // Isolamento por empresa (secao 23/38) - colaborador_vinculo nao tem
-    // id_empresa direto, entao a checagem sobe ate colaborador.id_empresa
-    // e compara com a empresa do GHE dono do plano.
-    const [plano, vinculo] = await Promise.all([
+    const [plano, vinculoResultado] = await Promise.all([
         buscarPlanoAmostragemPorId(idPlano),
-        supabase.from('colaborador_vinculo').select('colaborador(id_empresa)').eq('id_vinculo', idVinculo).single(),
+        supabase
+            .from('colaborador_vinculo')
+            .select('id_vinculo, id_setor, id_cargo, ativo, data_fim, colaborador(id_empresa)')
+            .eq('id_vinculo', idVinculo)
+            .single(),
     ]);
-    if (vinculo.error) throw vinculo.error;
+    if (vinculoResultado.error) throw vinculoResultado.error;
+
     const ghe = await buscarGhePorId(plano.id_ghe);
-    if (vinculo.data.colaborador?.id_empresa !== ghe.id_empresa) {
-        throw erroGhe('O colaborador selecionado não pertence a esta empresa.', 'VINCULO_INCOMPATIVEL');
-    }
+    await validarParticipanteCompativelComGhe(ghe, vinculoResultado.data);
 
     const { data, error } = await supabase
         .from('amostra_participante')

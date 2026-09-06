@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questionário Ergonômico - ErgoIntelligence</title>
+    <title>Resultado de Risco do GHE - ErgoIntelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/ghe.css">
 </head>
 <body>
     <div class="d-flex vh-100">
@@ -23,7 +25,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
                         Dashboard
                     </a>
-                    <a class="nav-link active d-flex align-items-center gap-2" href="nova-avaliacao.html" aria-current="page">
+                    <a class="nav-link d-flex align-items-center gap-2" href="nova-avaliacao.html">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5h6a1 1 0 011 1V6H8v-.5a1 1 0 011-1z"></path><rect x="5" y="6" width="14" height="15" rx="2"></rect><path d="M9 13l2 2 4-4.5"></path></svg>
                         Avaliações
                     </a>
@@ -31,7 +33,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"></path><circle cx="17" cy="9" r="2.3"></circle><path d="M15 14.2c2.6.5 4.5 2.6 4.5 5.3"></path></svg>
                         Colaboradores
                     </a>
-                    <a class="nav-link d-flex align-items-center gap-2" href="ghes.html">
+                    <a class="nav-link active d-flex align-items-center gap-2" href="ghes.html" aria-current="page">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.6"></circle><circle cx="16" cy="8" r="2.6"></circle><circle cx="12" cy="15" r="2.6"></circle><path d="M8 10.6V13M16 10.6V13M9.6 16.4h4.8"></path></svg>
                         GHE
                     </a>
@@ -72,103 +74,103 @@
                 <button type="button" class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Abrir menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Questionário Ergonômico</span>
+                <span class="navbar-brand mb-0 h5 ms-2 ms-lg-0">Resultado de Risco do GHE</span>
+                <div class="ms-auto">
+                    <a href="#" class="btn btn-outline-secondary btn-sm" id="link-voltar-avaliacao">&larr; Voltar à Avaliação</a>
+                </div>
             </nav>
 
             <main class="flex-grow-1 overflow-auto">
-                <div class="container-fluid p-3 p-md-4" style="max-width: 640px;">
+                <div class="container-fluid p-3 p-md-4" style="max-width: 1000px;">
+
                     <div id="area-estado" class="text-center text-muted py-5"></div>
 
-                    <div id="area-questionario" hidden>
-                        <div id="alerta-somente-leitura" class="alert alert-warning" hidden></div>
-
-                        <p class="text-muted small text-uppercase mb-1">Avaliação Ergonômica</p>
-                        <p class="fw-semibold mb-2" id="texto-categoria"></p>
-
-                        <div class="progress mb-1" role="progressbar" aria-label="Progresso do questionário" style="height: 8px;">
-                            <div class="progress-bar" id="barra-progresso" style="width: 0%;"></div>
+                    <div id="area-conteudo" hidden>
+                        <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
+                            <div>
+                                <strong>Resultado demonstrativo — metodologia não validada para uso profissional.</strong>
+                                Os critérios e limites utilizados são fictícios e servem exclusivamente para
+                                apresentação das funcionalidades do sistema. Não representam conformidade legal,
+                                validação NR-17, diagnóstico ergonômico, laudo técnico ou classificação oficial.
+                            </div>
                         </div>
-                        <p class="text-muted small mb-4" id="texto-progresso"></p>
+
+                        <div id="alerta-amostra-incompleta" class="alert alert-info" hidden></div>
 
                         <div class="card mb-3">
                             <div class="card-body">
-                                <fieldset>
-                                    <legend class="fs-5 fw-semibold mb-3" id="legenda-pergunta"></legend>
-                                    <div id="area-controle-pergunta"></div>
-                                </fieldset>
-                            </div>
-                        </div>
+                                <p class="text-muted small text-uppercase mb-1">GHE</p>
+                                <h1 class="fs-4 mb-3" id="texto-ghe-nome">-</h1>
 
-                        <p class="text-muted small text-center mb-2" id="texto-status-salvamento" aria-live="polite"></p>
-
-                        <div class="d-flex justify-content-between gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-lg" id="botao-anterior">&larr; Anterior</button>
-                            <button type="button" class="btn btn-primary btn-lg" id="botao-proxima">Próxima &rarr;</button>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <div id="card-finalizacao">
-                            <div id="alerta-validacao-finalizacao" class="alert alert-danger" hidden>
-                                <p class="mb-2 fw-semibold" id="texto-validacao-finalizacao"></p>
-                                <ul class="mb-2" id="lista-erros-finalizacao"></ul>
-                                <button type="button" class="btn btn-sm btn-outline-danger" id="botao-revisar-questionario" hidden>
-                                    Revisar questionário
-                                </button>
-                            </div>
-                            <button type="button" class="btn btn-success btn-lg w-100" id="botao-finalizar-avaliacao">
-                                Finalizar avaliação
-                            </button>
-                        </div>
-
-                        <!-- INT-RSK-01: acionamento/acompanhamento do Motor de Risco apos a
-                             avaliacao estar FINALIZADA. Nao substitui card-finalizacao - fica
-                             visivel so quando ha algo a mostrar (calculando, resultado pronto,
-                             falha do motor ou avaliacao ja finalizada anteriormente). -->
-                        <div id="card-processamento-risco" class="card mt-3" hidden>
-                            <div class="card-body">
-                                <p class="mb-2" id="status-processamento-risco" aria-live="polite"></p>
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-outline-primary" id="botao-reprocessar-risco" hidden>
-                                        Tentar calcular novamente
-                                    </button>
-                                    <a href="#" class="btn btn-success" id="link-ver-resultado" hidden>Ver resultado</a>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Setor</div>
+                                        <div class="fw-semibold" id="texto-setor">-</div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Universo</div>
+                                        <div class="fw-semibold" id="texto-universo">-</div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Amostra planejada</div>
+                                        <div class="fw-semibold" id="texto-amostra-planejada">-</div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Coletas concluídas</div>
+                                        <div class="fw-semibold" id="texto-coletas-concluidas">-</div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Cobertura descritiva</div>
+                                        <div class="fw-semibold" id="texto-cobertura">-</div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Metodologia</div>
+                                        <div class="fw-semibold" id="texto-metodologia">-</div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Versão</div>
+                                        <div class="fw-semibold" id="texto-versao">-</div>
+                                    </div>
+                                    <div class="col-6 col-lg-3">
+                                        <div class="small text-uppercase text-muted">Data do processamento</div>
+                                        <div class="fw-semibold" id="texto-data-processamento">-</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <h2 class="fs-6 fw-semibold mb-3">Resultado por risco</h2>
+                        <div class="row g-3" id="area-cards-riscos"></div>
                     </div>
                 </div>
             </main>
 
             <footer class="d-flex flex-wrap justify-content-between gap-2 p-3 border-top small text-muted">
-                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência Ergonômica</span>
+                <span>&copy; 2026 ErgoIntelligence &mdash; Plataforma de Inteligência em Ergonomia e Gestão de Riscos Ocupacionais</span>
                 <span>MVP de demonstração &middot; dados fictícios</span>
             </footer>
         </div>
     </div>
 
-    <!-- Confirmacao antes da finalizacao definitiva (secao 29 do prompt AVA-05) -->
-    <div class="modal fade" id="modal-confirmar-finalizacao" tabindex="-1" aria-labelledby="modal-confirmar-finalizacao-titulo" aria-hidden="true">
-        <div class="modal-dialog">
+    <!-- "Entenda por que" -->
+    <div class="modal fade" id="modal-entenda-por-que" tabindex="-1" aria-labelledby="modal-entenda-por-que-titulo" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="modal-confirmar-finalizacao-titulo">Finalizar avaliação?</h2>
+                    <h2 class="modal-title fs-5" id="modal-entenda-por-que-titulo">Entenda por quê</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="mb-0">
-                        Após a finalização, as respostas não poderão mais ser alteradas pelo fluxo normal.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" id="botao-confirmar-finalizacao">Finalizar avaliação</button>
+                <div class="modal-body" id="corpo-modal-entenda-por-que">
+                    <!-- preenchido dinamicamente -->
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/pages/questionario.js"></script>
+    <script type="module" src="js/pages/resultado-ghe.js"></script>
 </body>
 </html>

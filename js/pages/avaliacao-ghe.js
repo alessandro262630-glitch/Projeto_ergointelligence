@@ -5,13 +5,23 @@ import {
     criarOuObterColeta,
     consolidarAvaliacaoGhe,
 } from '../services/avaliacaoGheService.js';
+import {
+    buscarMetodologiaDemoPadrao,
+    validarMetodologiaProcessavel,
+    processarRiscosGhe,
+    listarProcessamentos,
+} from '../services/motorRiscoGheService.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
 
 // MVP-07 - Avaliacao do GHE: visao de progresso das coletas de TODOS os
 // participantes registrados no plano de amostragem (mesmo os que ainda nao
 // iniciaram nenhuma coleta - secao 3/53 do prompt). So interface/eventos -
-// toda regra de dominio fica em js/services/avaliacaoGheService.js. NUNCA
-// calcula/atribui risco do GHE (MVP-08, fora de escopo aqui).
+// toda regra de dominio fica em js/services/avaliacaoGheService.js.
+//
+// MVP-08C - acrescenta o processamento oficial de riscos do GHE
+// (exclusivamente com a metodologia demonstrativa ERGO-GHE-DEMO) e o
+// historico de processamentos. So interface/eventos aqui tambem - todo o
+// calculo/persistencia fica em js/services/motorRiscoGheService.js.
 
 const idAvaliacaoGhe = Number(new URLSearchParams(window.location.search).get('id_avaliacao_ghe')) || null;
 
@@ -35,7 +45,17 @@ const alertaAvaliacaoConsolidada = document.getElementById('alerta-avaliacao-con
 
 const corpoTabelaProgresso = document.getElementById('corpo-tabela-progresso');
 
+const cardProcessamentoRiscos = document.getElementById('card-processamento-riscos');
+const botaoProcessarRiscos = document.getElementById('botao-processar-riscos');
+const textoStatusProcessamentoRiscos = document.getElementById('texto-status-processamento-riscos');
+const areaHistoricoProcessamentos = document.getElementById('area-historico-processamentos');
+const corpoTabelaProcessamentos = document.getElementById('corpo-tabela-processamentos');
+const modalConfirmarProcessamentoEl = document.getElementById('modal-confirmar-processamento');
+const botaoConfirmarProcessamento = document.getElementById('botao-confirmar-processamento');
+const instanciaModalConfirmarProcessamento = new bootstrap.Modal(modalConfirmarProcessamentoEl);
+
 let avaliacaoAtual = null;
+let metodologiaDemoAtual = null;
 
 function mostrarNotificacao(texto, tipo = 'info') {
     mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
@@ -108,6 +128,7 @@ async function carregarPagina() {
 
         renderizarStatusAvaliacao();
         await carregarProgresso();
+        await carregarProcessamentoRiscos();
         definirEstado('pronto');
     } catch (error) {
         console.error('Erro ao carregar avaliação do GHE:', error);
@@ -128,8 +149,18 @@ function renderizarStatusAvaliacao() {
 
 async function carregarProgresso() {
     const progresso = await listarProgressoColetas(idAvaliacaoGhe);
+    const coletasConcluidas = progresso.filter((item) => item.coleta?.status === 'CONCLUIDA').length;
     numeroParticipantesRegistrados.textContent = progresso.length;
-    numeroColetasConcluidas.textContent = progresso.filter((item) => item.coleta?.status === 'CONCLUIDA').length;
+    numeroColetasConcluidas.textContent = coletasConcluidas;
+
+    // Nunca permite consolidar sem nenhuma coleta concluida (correcao: o
+    // service ja bloqueia isso, mas a interface tambem deve deixar isso
+    // visivel antes do clique, nao so depois de um erro).
+    const editavel = ['RASCUNHO', 'EM_COLETA'].includes(avaliacaoAtual.status);
+    botaoConsolidarAvaliacao.disabled = !editavel || coletasConcluidas === 0;
+    botaoConsolidarAvaliacao.title = editavel && coletasConcluidas === 0
+        ? 'É necessário concluir ao menos uma coleta antes de consolidar.'
+        : '';
 
     corpoTabelaProgresso.innerHTML = '';
 
@@ -219,6 +250,156 @@ botaoConsolidarAvaliacao.addEventListener('click', async () => {
     } finally {
         botaoConsolidarAvaliacao.disabled = false;
         botaoConsolidarAvaliacao.textContent = textoOriginal;
+    }
+});
+
+// --- MVP-08C: Processamento de Riscos do GHE ---------------------------------
+const ROTULOS_STATUS_PROCESSAMENTO = { PROCESSANDO: 'Processando', CONCLUIDO: 'Concluído', ERRO: 'Erro', CANCELADO: 'Cancelado' };
+const CLASSE_BADGE_PROCESSAMENTO = {
+    PROCESSANDO: 'text-bg-warning',
+    CONCLUIDO: 'text-bg-success',
+    ERRO: 'text-bg-danger',
+    CANCELADO: 'text-bg-secondary',
+};
+
+function formatarDataHoraBR(isoString) {
+    return new Date(isoString).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+// So mostra/permite processar quando a Avaliacao do GHE ja esta
+// CONSOLIDADA (secao 45 do prompt MVP-08C: o botao vive "na avaliacao
+// consolidada"). A metodologia demonstrativa e resolvida pelo codigo
+// (nunca um id_metodologia hardcoded no frontend - secao 49) e revalidada
+// estruturalmente a cada carga da pagina, nunca assumida como sempre
+// disponivel/valida.
+async function carregarProcessamentoRiscos() {
+    if (avaliacaoAtual.status !== 'CONSOLIDADA') {
+        cardProcessamentoRiscos.hidden = true;
+        return;
+    }
+    cardProcessamentoRiscos.hidden = false;
+    botaoProcessarRiscos.disabled = true;
+
+    try {
+        metodologiaDemoAtual = await buscarMetodologiaDemoPadrao();
+        if (!metodologiaDemoAtual) {
+            textoStatusProcessamentoRiscos.textContent = 'Nenhuma metodologia demonstrativa está disponível no momento.';
+        } else {
+            const relatorio = await validarMetodologiaProcessavel(metodologiaDemoAtual.id_metodologia);
+            if (relatorio.processavel) {
+                botaoProcessarRiscos.disabled = false;
+                textoStatusProcessamentoRiscos.textContent =
+                    `Metodologia disponível: ${metodologiaDemoAtual.codigo} ${metodologiaDemoAtual.versao} (demonstrativa, não validada para uso profissional).`;
+            } else {
+                textoStatusProcessamentoRiscos.textContent =
+                    'A metodologia demonstrativa não está estruturalmente pronta para processamento no momento.';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao verificar metodologia demonstrativa:', error);
+        textoStatusProcessamentoRiscos.textContent = 'Não foi possível verificar a metodologia demonstrativa.';
+    }
+
+    await carregarHistoricoProcessamentos();
+}
+
+async function carregarHistoricoProcessamentos() {
+    const processamentos = await listarProcessamentos(idAvaliacaoGhe);
+    corpoTabelaProcessamentos.innerHTML = '';
+
+    if (processamentos.length === 0) {
+        areaHistoricoProcessamentos.hidden = true;
+        return;
+    }
+    areaHistoricoProcessamentos.hidden = false;
+
+    // O mais recente CONCLUIDO e rotulado so como "Mais recente" - nunca
+    // "Oficial" (secao 44 do prompt MVP-08C), a menos que uma decisao de
+    // negocio explicita defina isso no futuro.
+    const idMaisRecenteConcluido = processamentos.find((p) => p.status === 'CONCLUIDO')?.id_processamento_risco_ghe;
+
+    processamentos.forEach((p) => {
+        const linha = document.createElement('tr');
+
+        const celulaData = document.createElement('td');
+        celulaData.textContent = formatarDataHoraBR(p.processado_em);
+
+        const celulaMetodologia = document.createElement('td');
+        celulaMetodologia.textContent = `${p.codigo_metodologia || '-'} ${p.versao_metodologia_snapshot}`;
+
+        const celulaCobertura = document.createElement('td');
+        celulaCobertura.textContent = `${p.coletas_concluidas_snapshot} de ${p.amostra_planejada_snapshot} (${String(p.percentual_cobertura_snapshot).replace('.', ',')}%)`;
+
+        const celulaStatus = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = `badge ${CLASSE_BADGE_PROCESSAMENTO[p.status] || 'text-bg-secondary'}`;
+        badge.textContent = ROTULOS_STATUS_PROCESSAMENTO[p.status] || p.status;
+        celulaStatus.appendChild(badge);
+        if (p.id_processamento_risco_ghe === idMaisRecenteConcluido) {
+            const badgeRecente = document.createElement('span');
+            badgeRecente.className = 'badge text-bg-light border text-muted ms-1';
+            badgeRecente.textContent = 'Mais recente';
+            celulaStatus.appendChild(badgeRecente);
+        }
+
+        const celulaAcao = document.createElement('td');
+        if (p.status === 'CONCLUIDO') {
+            const link = document.createElement('a');
+            link.href = `resultado-ghe.html?id_processamento=${p.id_processamento_risco_ghe}`;
+            link.className = 'btn btn-sm btn-outline-primary';
+            link.textContent = 'Ver resultado';
+            celulaAcao.appendChild(link);
+        }
+
+        linha.append(celulaData, celulaMetodologia, celulaCobertura, celulaStatus, celulaAcao);
+        corpoTabelaProcessamentos.appendChild(linha);
+    });
+}
+
+botaoProcessarRiscos.addEventListener('click', async () => {
+    if (!metodologiaDemoAtual) {
+        mostrarNotificacao('Nenhuma metodologia demonstrativa está disponível.', 'erro');
+        return;
+    }
+
+    const textoOriginal = botaoProcessarRiscos.textContent;
+    botaoProcessarRiscos.disabled = true;
+    botaoProcessarRiscos.textContent = 'Verificando...';
+
+    try {
+        const relatorio = await validarMetodologiaProcessavel(metodologiaDemoAtual.id_metodologia);
+        if (!relatorio.processavel) {
+            mostrarNotificacao('A metodologia demonstrativa não está estruturalmente pronta para processamento.', 'erro');
+            return;
+        }
+        instanciaModalConfirmarProcessamento.show();
+    } catch (error) {
+        console.error('Erro ao validar metodologia antes do processamento:', error);
+        mostrarNotificacao('Não foi possível verificar a metodologia antes de processar.', 'erro');
+    } finally {
+        botaoProcessarRiscos.disabled = false;
+        botaoProcessarRiscos.textContent = textoOriginal;
+    }
+});
+
+botaoConfirmarProcessamento.addEventListener('click', async () => {
+    const textoOriginal = botaoConfirmarProcessamento.textContent;
+    botaoConfirmarProcessamento.disabled = true;
+    botaoConfirmarProcessamento.textContent = 'Processando...';
+
+    try {
+        const resultado = await processarRiscosGhe(idAvaliacaoGhe, metodologiaDemoAtual.id_metodologia);
+        instanciaModalConfirmarProcessamento.hide();
+        mostrarNotificacao('Processamento demonstrativo concluído com sucesso.', 'sucesso');
+        window.location.href = `resultado-ghe.html?id_processamento=${resultado.processamento.id_processamento_risco_ghe}`;
+    } catch (error) {
+        console.error('Erro ao processar riscos do GHE:', error);
+        instanciaModalConfirmarProcessamento.hide();
+        mostrarNotificacao(mensagemErroAmigavel(error), 'erro');
+        await carregarHistoricoProcessamentos();
+    } finally {
+        botaoConfirmarProcessamento.disabled = false;
+        botaoConfirmarProcessamento.textContent = textoOriginal;
     }
 });
 
