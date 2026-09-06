@@ -67,45 +67,6 @@
     max-width: 640px;
 }
 
-/* --- Como funciona: passos conectados por seta ------------------------- */
-.home-passos {
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.home-passo {
-    flex: 1 1 160px;
-    max-width: 200px;
-}
-
-.home-passo__icone {
-    width: 56px;
-    height: 56px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 1.5rem;
-}
-
-.home-passo__seta {
-    display: flex;
-    align-items: center;
-    color: var(--bs-secondary-color);
-    font-size: 1.5rem;
-    flex: 0 0 auto;
-}
-
-@media (max-width: 767.98px) {
-    .home-passo__seta {
-        transform: rotate(90deg);
-        align-self: center;
-    }
-}
-
 /* --- Modulos da plataforma ------------------------------------------------ */
 .home-modulo {
     border: 1px solid var(--bs-border-color);
