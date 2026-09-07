@@ -168,6 +168,61 @@ export async function encerrarVinculo(idVinculo, dataFim) {
     return mapearVinculo(data);
 }
 
+// Setor (do vinculo principal/ativo/vigente) + funcao principal (do mesmo
+// vinculo) para varios colaboradores de uma vez - usado por
+// colaboradores.html para exibir a coluna "Setor"/"Funcao" e o filtro por
+// setor sem N+1 (uma consulta para os vinculos + uma para as funcoes,
+// nunca uma consulta por colaborador). Colaborador sem vinculo atual
+// simplesmente nao aparece no Map retornado.
+export async function buscarSetorEFuncaoAtuaisPorColaboradores(idsColaborador) {
+    if (idsColaborador.length === 0) {
+        return new Map();
+    }
+
+    const { data: vinculos, error: erroVinculos } = await supabase
+        .from('colaborador_vinculo')
+        .select('id_vinculo, id_colaborador, setor(nome)')
+        .in('id_colaborador', idsColaborador)
+        .eq('principal', true)
+        .eq('ativo', true)
+        .is('data_fim', null);
+
+    if (erroVinculos) {
+        throw erroVinculos;
+    }
+
+    const idsVinculo = vinculos.map((vinculo) => vinculo.id_vinculo);
+    const funcaoPorVinculo = new Map();
+
+    if (idsVinculo.length > 0) {
+        const { data: funcoes, error: erroFuncoes } = await supabase
+            .from('vinculo_funcao')
+            .select('id_vinculo, funcao(nome)')
+            .in('id_vinculo', idsVinculo)
+            .eq('principal', true)
+            .eq('ativo', true)
+            .is('data_fim', null);
+
+        if (erroFuncoes) {
+            throw erroFuncoes;
+        }
+
+        funcoes.forEach((funcao) => {
+            funcaoPorVinculo.set(funcao.id_vinculo, funcao.funcao?.nome ?? null);
+        });
+    }
+
+    const resultado = new Map();
+    vinculos.forEach((vinculo) => {
+        resultado.set(vinculo.id_colaborador, {
+            setor: vinculo.setor?.nome ?? null,
+            funcao: funcaoPorVinculo.get(vinculo.id_vinculo) ?? null,
+        });
+    });
+
+    return resultado;
+}
+
 // --- Catalogos (somente leitura; CRUD de setor/cargo fica fora de escopo) --
 export async function listarSetores() {
     const { data, error } = await supabase

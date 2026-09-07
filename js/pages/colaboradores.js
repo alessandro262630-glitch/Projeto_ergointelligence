@@ -5,6 +5,10 @@ import {
   atualizarColaborador,
   desativarColaborador,
 } from "../services/colaboradorService.js";
+import {
+  listarSetores,
+  buscarSetorEFuncaoAtuaisPorColaboradores,
+} from "../services/vinculoService.js";
 import { formatarDataBR, formatarStatus } from "../utils/formatadores.js";
 import {
   campoPreenchido,
@@ -19,6 +23,7 @@ const areaEstado = document.getElementById("area-estado");
 const areaTabela = document.getElementById("area-tabela");
 const corpoTabela = document.getElementById("corpo-tabela");
 const campoBusca = document.getElementById("campo-busca");
+const filtroSetor = document.getElementById("filtro-setor");
 const botoesFiltro = document.querySelectorAll("[data-filtro-status]");
 const areaNotificacoes = document.getElementById("area-notificacoes");
 
@@ -43,6 +48,8 @@ const instanciaModalDetalhes = new bootstrap.Modal(modalDetalhes);
 let colaboradores = [];
 let termoBusca = "";
 let filtroStatus = "ativos";
+let filtroSetorAtual = "";
+let opcoesSetorPopuladas = false;
 
 // --- Estados de carregamento / vazio / erro / sucesso -------------------
 function definirEstado(tipo, mensagem) {
@@ -62,10 +69,51 @@ function definirEstado(tipo, mensagem) {
   }
 }
 
+// Preenche o filtro de setor uma unica vez (o catalogo de setores nao
+// muda durante a sessao) - assim uma selecao ja feita pelo usuario nao e
+// perdida quando a lista e recarregada apos criar/editar/desativar.
+async function popularFiltroSetorSeNecessario() {
+  if (opcoesSetorPopuladas) {
+    return;
+  }
+  try {
+    const setores = await listarSetores();
+    setores.forEach((setor) => {
+      const opcao = document.createElement("option");
+      opcao.value = setor.nome;
+      opcao.textContent = setor.nome;
+      filtroSetor.appendChild(opcao);
+    });
+    opcoesSetorPopuladas = true;
+  } catch (error) {
+    console.error("Erro ao carregar setores para o filtro:", error);
+  }
+}
+
 async function carregarColaboradores() {
   definirEstado("carregando", "Carregando colaboradores...");
   try {
-    colaboradores = await listarColaboradores();
+    const [listaColaboradores] = await Promise.all([
+      listarColaboradores(),
+      popularFiltroSetorSeNecessario(),
+    ]);
+
+    // Setor/funcao do vinculo atual, buscados em lote (nunca um SELECT por
+    // colaborador) e mesclados na propria lista para exibir nas colunas
+    // novas e no filtro de setor.
+    const idsColaborador = listaColaboradores.map((c) => c.id_colaborador);
+    const setorEFuncaoPorColaborador =
+      await buscarSetorEFuncaoAtuaisPorColaboradores(idsColaborador);
+
+    colaboradores = listaColaboradores.map((colaborador) => {
+      const info = setorEFuncaoPorColaborador.get(colaborador.id_colaborador);
+      return {
+        ...colaborador,
+        setor_atual: info?.setor ?? null,
+        funcao_atual: info?.funcao ?? null,
+      };
+    });
+
     //organizar pela matricula (string) para facilitar a busca e leitura
     colaboradores.sort((a, b) => a.matricula.localeCompare(b.matricula));
     renderizar(); //mostra a tabela ou mensagem de vazio, dependendo do resultado
@@ -84,6 +132,9 @@ function obterColaboradoresFiltrados() {
       return false;
     }
     if (filtroStatus === "inativos" && colaborador.ativo) {
+      return false;
+    }
+    if (filtroSetorAtual && colaborador.setor_atual !== filtroSetorAtual) {
       return false;
     }
     if (!termo) {
@@ -156,6 +207,12 @@ function criarLinhaColaborador(colaborador) {
   const celulaNome = document.createElement("td");
   celulaNome.textContent = colaborador.nome;
 
+  const celulaSetor = document.createElement("td");
+  celulaSetor.textContent = colaborador.setor_atual || "-";
+
+  const celulaFuncao = document.createElement("td");
+  celulaFuncao.textContent = colaborador.funcao_atual || "-";
+
   const celulaEmail = document.createElement("td");
   celulaEmail.textContent = colaborador.email || "-";
 
@@ -224,6 +281,8 @@ function criarLinhaColaborador(colaborador) {
   linha.append(
     celulaMatricula,
     celulaNome,
+    celulaSetor,
+    celulaFuncao,
     celulaEmail,
     celulaData,
     celulaStatus,
@@ -477,6 +536,11 @@ function mostrarNotificacao(texto, tipo = "info") {
 // --- Busca e filtro de status ---------------------------------------------
 campoBusca.addEventListener("input", (event) => {
   termoBusca = event.target.value;
+  renderizar();
+});
+
+filtroSetor.addEventListener("change", (event) => {
+  filtroSetorAtual = event.target.value;
   renderizar();
 });
 

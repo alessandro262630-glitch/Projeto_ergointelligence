@@ -14,7 +14,7 @@
         <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 260px;">
             <div class="sidebar-brand d-flex align-items-center justify-content-between py-3 px-3">
                 <a href="index.html" class="d-flex align-items-center text-decoration-none">
-                    <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
+                    <span class="sidebar-logo-badge me-2"><img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo"></span>
                     <span class="fw-bold sidebar-brand__nome">ErgoIntelligence</span>
                 </a>
                 <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
@@ -120,6 +120,14 @@
                                     placeholder="Buscar por nome, matrícula ou e-mail"
                                     aria-label="Buscar colaborador"
                                 >
+                                <select
+                                    id="filtro-setor"
+                                    class="form-select"
+                                    style="max-width: 220px;"
+                                    aria-label="Filtrar por setor"
+                                >
+                                    <option value="">Todos os setores</option>
+                                </select>
                                 <div class="btn-group" role="group" aria-label="Filtrar por status">
                                     <button type="button" class="btn btn-outline-primary active" data-filtro-status="ativos" aria-pressed="true">Ativos</button>
                                     <button type="button" class="btn btn-outline-primary" data-filtro-status="inativos" aria-pressed="false">Inativos</button>
@@ -135,6 +143,8 @@
                                         <tr>
                                             <th>Matrícula</th>
                                             <th>Nome</th>
+                                            <th>Setor</th>
+                                            <th>Função</th>
                                             <th>E-mail</th>
                                             <th>Data de admissão</th>
                                             <th>Status</th>

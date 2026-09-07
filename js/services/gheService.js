@@ -68,7 +68,7 @@ export async function listarGhes() {
         .from('ghe')
         .select(COLUNAS_GHE)
         .eq('id_empresa', idEmpresa)
-        .order('nome', { ascending: true });
+        .order('codigo', { ascending: true });
 
     if (error) throw error;
 

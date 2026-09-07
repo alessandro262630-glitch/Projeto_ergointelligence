@@ -15,7 +15,7 @@
         <div class="offcanvas-lg offcanvas-start bg-white border-end" tabindex="-1" id="sidebar" style="width: 260px;">
             <div class="sidebar-brand d-flex align-items-center justify-content-between py-3 px-3">
                 <a href="index.html" class="d-flex align-items-center text-decoration-none">
-                    <img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo me-2">
+                    <span class="sidebar-logo-badge me-2"><img src="assets/logo/logo-marca.png" alt="" class="sidebar-logo"></span>
                     <span class="fw-bold sidebar-brand__nome">ErgoIntelligence</span>
                 </a>
                 <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Fechar"></button>
@@ -96,7 +96,7 @@
                     <span class="pagina-titulo">GHEs — Grupos Homogêneos de Exposição</span>
                 </div>
                 <div class="ms-auto">
-                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo — dados fictícios</span>
+                    <span class="badge text-bg-light border text-muted d-none d-md-inline">Ambiente demonstrativo</span>
                 </div>
             </nav>
 
@@ -122,6 +122,17 @@
 
                     <div class="card">
                         <div class="card-body">
+                            <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+                                <select
+                                    id="filtro-setor-ghe"
+                                    class="form-select"
+                                    style="max-width: 220px;"
+                                    aria-label="Filtrar por setor"
+                                >
+                                    <option value="">Todos os setores</option>
+                                </select>
+                            </div>
+
                             <div id="area-estado" class="text-center text-muted py-5"></div>
 
                             <div id="area-tabela" class="table-responsive" hidden>

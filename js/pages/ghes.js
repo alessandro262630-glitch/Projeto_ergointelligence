@@ -10,6 +10,7 @@ const areaEstado = document.getElementById('area-estado');
 const areaTabela = document.getElementById('area-tabela');
 const corpoTabela = document.getElementById('corpo-tabela');
 const areaNotificacoes = document.getElementById('area-notificacoes');
+const filtroSetorGhe = document.getElementById('filtro-setor-ghe');
 
 const modalGhe = document.getElementById('modal-ghe');
 const tituloModalGhe = document.getElementById('modal-ghe-titulo');
@@ -23,6 +24,10 @@ const campoDescricaoGhe = document.getElementById('campo-descricao-ghe');
 const botaoSalvarGhe = document.getElementById('botao-salvar-ghe');
 
 const instanciaModalGhe = new bootstrap.Modal(modalGhe);
+
+// --- Estado local da pagina (cache da ultima listagem carregada) --------
+let ghes = [];
+let filtroSetorGheAtual = '';
 
 function mostrarNotificacao(texto, tipo = 'info') {
     mostrarNotificacaoBase(areaNotificacoes, texto, tipo);
@@ -107,17 +112,33 @@ function criarLinhaGhe(ghe) {
     return linha;
 }
 
+// Filtro aplicado sobre a lista ja carregada (nunca uma nova consulta ao
+// Supabase so para filtrar - mesmo padrao de colaboradores.js).
+function obterGhesFiltrados() {
+    if (!filtroSetorGheAtual) {
+        return ghes;
+    }
+    return ghes.filter((ghe) => ghe.setor === filtroSetorGheAtual);
+}
+
+function renderizarGhes() {
+    const filtrados = obterGhesFiltrados();
+
+    if (filtrados.length === 0) {
+        definirEstado('vazio', filtroSetorGheAtual ? 'Nenhum GHE encontrado para o setor selecionado.' : 'Nenhum GHE cadastrado ainda.');
+        return;
+    }
+
+    corpoTabela.innerHTML = '';
+    filtrados.forEach((ghe) => corpoTabela.appendChild(criarLinhaGhe(ghe)));
+    definirEstado('pronto');
+}
+
 async function carregarGhes() {
     definirEstado('carregando', 'Carregando GHEs...');
     try {
-        const ghes = await listarGhes();
-        if (ghes.length === 0) {
-            definirEstado('vazio', 'Nenhum GHE cadastrado ainda.');
-            return;
-        }
-        corpoTabela.innerHTML = '';
-        ghes.forEach((ghe) => corpoTabela.appendChild(criarLinhaGhe(ghe)));
-        definirEstado('pronto');
+        ghes = await listarGhes();
+        renderizarGhes();
     } catch (error) {
         console.error('Erro ao carregar GHEs:', error);
         definirEstado('erro', 'Não foi possível carregar os GHEs.');
@@ -132,11 +153,21 @@ async function carregarSetoresSelect() {
             opcao.value = setor.id_setor;
             opcao.textContent = setor.nome;
             campoSetorGhe.appendChild(opcao);
+
+            const opcaoFiltro = document.createElement('option');
+            opcaoFiltro.value = setor.nome;
+            opcaoFiltro.textContent = setor.nome;
+            filtroSetorGhe.appendChild(opcaoFiltro);
         });
     } catch (error) {
         console.error('Erro ao carregar setores:', error);
     }
 }
+
+filtroSetorGhe.addEventListener('change', (event) => {
+    filtroSetorGheAtual = event.target.value;
+    renderizarGhes();
+});
 
 function limparErrosFormularioGhe() {
     [campoNomeGhe, campoUniversoGhe].forEach((campo) => campo.classList.remove('is-invalid'));
