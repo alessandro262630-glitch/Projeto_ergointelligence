@@ -102,10 +102,25 @@
     --bs-progress-bar-bg: var(--eg-teal);
 }
 
+/* O simbolo da logo e escuro (navy/teal) e some sobre o degrade do
+   sidebar-brand - este selo claro atras do simbolo garante contraste,
+   mesmo tratamento ja aplicado ao cabecalho da home (.home-logo-badge
+   em css/home.css). */
+.sidebar-logo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 999px;
+    padding: 0.3rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
 .sidebar-logo {
-    height: 34px;
+    height: 26px;
     width: auto;
     object-fit: contain;
+    display: block;
 }
 
 /* Nome da marca bicolor, replicando assets/logo/logo do projeto.png:
