@@ -23,7 +23,7 @@ WHERE NOT EXISTS (SELECT 1 FROM empresa WHERE cnpj = '12345678000190');
 INSERT INTO setor (id_empresa, codigo_interno, nome)
 SELECT e.id_empresa, v.codigo, v.nome
 FROM empresa e
-CROSS JOIN (VALUES ('SET-ADM', 'Administrativo'), ('SET-TEC', 'Tecnologia'), ('SET-PRO', 'Producao'), ('SET-LOG', 'Logistica')) AS v(codigo, nome)
+CROSS JOIN (VALUES ('SET-ADM', 'Administrativo'), ('SET-TEC', 'Tecnologia'), ('SET-PRO', 'Produção'), ('SET-LOG', 'Logística')) AS v(codigo, nome)
 WHERE e.cnpj = '12345678000190'
   AND NOT EXISTS (SELECT 1 FROM setor s WHERE s.id_empresa = e.id_empresa AND s.nome = v.nome);
 
@@ -35,9 +35,9 @@ CROSS JOIN (VALUES
     ('CAR-AADM', 'Assistente Administrativo'),
     ('CAR-NADM', 'Analista Administrativo'),
     ('CAR-SIST', 'Analista de Sistemas'),
-    ('CAR-OPRO', 'Operador de Producao'),
-    ('CAR-SPRO', 'Supervisor de Producao'),
-    ('CAR-ALOG', 'Auxiliar de Logistica')
+    ('CAR-OPRO', 'Operador de Produção'),
+    ('CAR-SPRO', 'Supervisor de Produção'),
+    ('CAR-ALOG', 'Auxiliar de Logística')
 ) AS v(codigo, nome)
 WHERE e.cnpj = '12345678000190'
   AND NOT EXISTS (SELECT 1 FROM cargo c WHERE c.id_empresa = e.id_empresa AND c.nome = v.nome);
@@ -87,14 +87,14 @@ JOIN empresa e ON e.id_empresa = c.id_empresa AND e.cnpj = '12345678000190'
 JOIN (VALUES
     ('DEM001', 'Administrativo', 'Assistente Administrativo'),
     ('DEM002', 'Tecnologia', 'Analista de Sistemas'),
-    ('DEM003', 'Producao', 'Operador de Producao'),
-    ('DEM004', 'Logistica', 'Auxiliar de Logistica'),
+    ('DEM003', 'Produção', 'Operador de Produção'),
+    ('DEM004', 'Logística', 'Auxiliar de Logística'),
     ('DEM005', 'Administrativo', 'Analista Administrativo'),
-    ('DEM006', 'Producao', 'Supervisor de Producao'),
+    ('DEM006', 'Produção', 'Supervisor de Produção'),
     ('DEM008', 'Administrativo', 'Assistente Administrativo'),
     ('DEM009', 'Tecnologia', 'Analista de Sistemas'),
-    ('DEM010', 'Logistica', 'Auxiliar de Logistica'),
-    ('DEM011', 'Producao', 'Operador de Producao')
+    ('DEM010', 'Logística', 'Auxiliar de Logística'),
+    ('DEM011', 'Produção', 'Operador de Produção')
 ) AS v(matricula, setor_nome, cargo_nome) ON v.matricula = c.matricula
 JOIN setor s ON s.id_empresa = e.id_empresa AND s.nome = v.setor_nome
 JOIN cargo cg ON cg.id_empresa = e.id_empresa AND cg.nome = v.cargo_nome

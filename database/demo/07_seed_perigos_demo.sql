@@ -36,13 +36,13 @@ FROM (VALUES
         'Adocao de posturas que forcam articulacoes e estruturas musculoesqueleticas alem dos limites confortaveis durante a execucao das tarefas.'),
     ('ERG-002', 'ERGONOMICO', 'Movimentos repetitivos',
         'Execucao continua e ciclica dos mesmos movimentos musculares, sem pausas ou variacao suficiente, ao longo da jornada de trabalho.'),
-    ('ERG-003', 'ERGONOMICO', 'Esforco fisico excessivo',
+    ('ERG-003', 'ERGONOMICO', 'Esforço físico excessivo',
         'Aplicacao de forca muscular acima da capacidade recomendada para levantar, empurrar, puxar ou sustentar cargas.'),
     ('ERG-004', 'ERGONOMICO', 'Fadiga ocupacional',
         'Desgaste fisico ou mental acumulado ao longo da jornada, associado a ritmo, duracao ou intensidade do trabalho.'),
-    ('ERG-005', 'ERGONOMICO', 'Organizacao inadequada das pausas',
+    ('ERG-005', 'ERGONOMICO', 'Organização inadequada das pausas',
         'Ausencia ou insuficiencia de pausas programadas para recuperacao fisica e mental durante a jornada de trabalho.'),
-    ('FIS-001', 'FISICO', 'Ruido continuo acima do limite de tolerancia',
+    ('FIS-001', 'FISICO', 'Ruído contínuo acima do limite de tolerância',
         'Exposicao a niveis de pressao sonora continuos ou intermitentes capazes de causar dano auditivo ou extra-auditivo. Sem motor de calculo implementado nesta feature.')
 ) AS v(codigo, categoria, nome, descricao)
 WHERE NOT EXISTS (

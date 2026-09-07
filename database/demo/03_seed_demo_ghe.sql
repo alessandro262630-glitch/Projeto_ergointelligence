@@ -28,8 +28,8 @@ INSERT INTO ghe (id_empresa, id_setor, codigo, nome, descricao, universo)
 SELECT e.id_empresa, s.id_setor, v.codigo, v.nome, v.descricao, v.universo
 FROM empresa e
 JOIN (VALUES
-    ('GHE-01', 'Producao',      'Operadores de Producao', 'Trabalhadores expostos a condicoes semelhantes na linha de producao.', 180),
-    ('GHE-02', 'Logistica',     'Equipe de Logistica',     'Separacao, conferencia e transporte manual de materiais.', 110),
+    ('GHE-01', 'Produção',      'Operadores de Produção', 'Trabalhadores expostos a condicoes semelhantes na linha de producao.', 180),
+    ('GHE-02', 'Logística',     'Equipe de Logística',     'Separacao, conferencia e transporte manual de materiais.', 110),
     ('GHE-03', 'Administrativo','Equipe Administrativa',   'Atividades administrativas em escritorio.', 90),
     ('GHE-04', 'Tecnologia',    'Suporte de Tecnologia',   'Desenvolvimento e suporte tecnico em estacoes de trabalho.', 70)
 ) AS v(codigo, setor_nome, nome, descricao, universo) ON TRUE
@@ -44,9 +44,9 @@ SELECT g.id_ghe, cg.id_cargo
 FROM ghe g
 JOIN empresa e ON e.id_empresa = g.id_empresa AND e.cnpj = '12345678000190'
 JOIN (VALUES
-    ('GHE-01', 'Operador de Producao'),
-    ('GHE-01', 'Supervisor de Producao'),
-    ('GHE-02', 'Auxiliar de Logistica'),
+    ('GHE-01', 'Operador de Produção'),
+    ('GHE-01', 'Supervisor de Produção'),
+    ('GHE-02', 'Auxiliar de Logística'),
     ('GHE-03', 'Assistente Administrativo'),
     ('GHE-03', 'Analista Administrativo'),
     ('GHE-04', 'Analista de Sistemas')

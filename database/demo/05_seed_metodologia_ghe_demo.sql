@@ -56,7 +56,7 @@ JOIN (VALUES
     ('BAIXO',    'Baixo',    'Faixa demonstrativa. Uso exclusivo para apresentacao do sistema.', 0::numeric, 1::numeric,    1, '#2ECC71'),
     ('MODERADO', 'Moderado', 'Faixa demonstrativa. Uso exclusivo para apresentacao do sistema.', 2::numeric, 3::numeric,    2, '#F1C40F'),
     ('ALTO',     'Alto',     'Faixa demonstrativa. Uso exclusivo para apresentacao do sistema.', 4::numeric, 5::numeric,    3, '#E67E22'),
-    ('CRITICO',  'Critico',  'Faixa demonstrativa, sem limite superior. Uso exclusivo para apresentacao do sistema.', 6::numeric, NULL::numeric, 4, '#E74C3C')
+    ('CRITICO',  'Crítico',  'Faixa demonstrativa, sem limite superior. Uso exclusivo para apresentacao do sistema.', 6::numeric, NULL::numeric, 4, '#E74C3C')
 ) AS v(codigo, nome, descricao, pontuacao_minima, pontuacao_maxima, prioridade, cor_hex) ON TRUE
 WHERE m.codigo = 'ERGO-GHE-DEMO' AND m.versao = '1.0.0'
   AND NOT EXISTS (

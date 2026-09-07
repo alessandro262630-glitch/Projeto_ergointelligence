@@ -50,8 +50,8 @@ VALUES (
 INSERT INTO setor (id_empresa, codigo_interno, nome, descricao, ativo) VALUES
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ADM',  'Administrativo', 'Setor responsavel pelas atividades administrativas e de apoio.', TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'TEC',  'Tecnologia', 'Setor responsavel pelo desenvolvimento e suporte de sistemas.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'PROD', 'Producao', 'Setor responsavel pelas atividades de producao industrial.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'LOG',  'Logistica', 'Setor responsavel pela separacao, movimentacao e expedicao de materiais.', TRUE);
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'PROD', 'Produção', 'Setor responsavel pelas atividades de producao industrial.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'LOG',  'Logística', 'Setor responsavel pela separacao, movimentacao e expedicao de materiais.', TRUE);
 
 -- ---------------------------------------------------------------------
 -- 3. CARGO (6)
@@ -60,9 +60,9 @@ INSERT INTO cargo (id_empresa, codigo_interno, nome, descricao, ativo) VALUES
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-ASSIST-ADM', 'Assistente Administrativo', 'Cargo de apoio administrativo geral.', TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-ANL-ADM',    'Analista Administrativo', 'Cargo responsavel por analises e processos administrativos.', TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-ANL-SIS',    'Analista de Sistemas', 'Cargo responsavel pelo desenvolvimento e manutencao de sistemas.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-OP-PROD',    'Operador de Producao', 'Cargo responsavel pela operacao de equipamentos de producao.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-AUX-LOG',    'Auxiliar de Logistica', 'Cargo responsavel pelo apoio as atividades logisticas.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-SUP-PROD',   'Supervisor de Producao', 'Cargo responsavel pela supervisao das atividades de producao.', TRUE);
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-OP-PROD',    'Operador de Produção', 'Cargo responsavel pela operacao de equipamentos de producao.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-AUX-LOG',    'Auxiliar de Logística', 'Cargo responsavel pelo apoio as atividades logisticas.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'CARGO-SUP-PROD',   'Supervisor de Produção', 'Cargo responsavel pela supervisao das atividades de producao.', TRUE);
 
 -- ---------------------------------------------------------------------
 -- 4. FUNCAO (8)
@@ -71,13 +71,13 @@ INSERT INTO cargo (id_empresa, codigo_interno, nome, descricao, ativo) VALUES
 -- funcao e o trabalho efetivamente executado (ver cargo_funcao a seguir).
 INSERT INTO funcao (id_empresa, codigo, nome, descricao, ativo) VALUES
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-ATEND',    'Atendimento administrativo', 'Atendimento a clientes e colaboradores, presencial ou por telefone.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-DIGIT',    'Digitacao e lancamento de dados', 'Digitacao e lancamento de informacoes em sistemas administrativos.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-DIGIT',    'Digitação e lançamento de dados', 'Digitacao e lancamento de informacoes em sistemas administrativos.', TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-DEV',      'Desenvolvimento de software', 'Desenvolvimento e manutencao de sistemas de software.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-MONIT',    'Monitoramento em estacao de trabalho', 'Monitoramento e inspecao de processos a partir de uma estacao fixa.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-OPMAQ',    'Operacao de maquina', 'Operacao de equipamento industrial em linha de producao.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-SEPAR',    'Separacao de materiais', 'Separacao e conferencia de materiais para expedicao.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-MOVCARGA', 'Movimentacao manual de cargas', 'Movimentacao e transporte manual de materiais e volumes.', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-SUPERV',   'Supervisao operacional', 'Supervisao e acompanhamento das atividades operacionais.', TRUE);
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-MONIT',    'Monitoramento em estação de trabalho', 'Monitoramento e inspecao de processos a partir de uma estacao fixa.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-OPMAQ',    'Operação de máquina', 'Operacao de equipamento industrial em linha de producao.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-SEPAR',    'Separação de materiais', 'Separacao e conferencia de materiais para expedicao.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-MOVCARGA', 'Movimentação manual de cargas', 'Movimentacao e transporte manual de materiais e volumes.', TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'FN-SUPERV',   'Supervisão operacional', 'Supervisao e acompanhamento das atividades operacionais.', TRUE);
 
 -- ---------------------------------------------------------------------
 -- 5. CARGO_FUNCAO (12) - quais funcoes cada cargo pode exercer
@@ -184,16 +184,16 @@ INSERT INTO posto_trabalho (id_ambiente, codigo, nome, tipo_posto, descricao, at
 -- 13. ATIVIDADE (10)
 -- ---------------------------------------------------------------------
 INSERT INTO atividade (id_empresa, codigo, nome, descricao, postura_predominante, ativo) VALUES
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-DIGIT-01',   'Digitacao prolongada',           'Atividade de digitacao continua em computador, executada majoritariamente sentado.', 'SENTADO',   TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-ATEND-01',   'Atendimento ao publico',         'Atendimento presencial ou por telefone a clientes e colaboradores.', 'SENTADO',   TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-DOC-01',     'Analise de documentos',          'Leitura, conferencia e lancamento de informacoes a partir de documentos.', 'SENTADO',   TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-DIGIT-01',   'Digitação prolongada',           'Atividade de digitacao continua em computador, executada majoritariamente sentado.', 'SENTADO',   TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-ATEND-01',   'Atendimento ao público',         'Atendimento presencial ou por telefone a clientes e colaboradores.', 'SENTADO',   TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-DOC-01',     'Análise de documentos',          'Leitura, conferencia e lancamento de informacoes a partir de documentos.', 'SENTADO',   TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-DEV-01',     'Desenvolvimento em computador',  'Desenvolvimento e manutencao de sistemas, com uso intensivo de teclado e mouse.', 'SENTADO',   TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-MAQ-01',     'Operacao de maquina',            'Operacao de equipamento industrial em pe, com uso de comandos manuais.', 'EM_PE',     TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-INSP-01',    'Inspecao visual',                'Inspecao visual de itens produzidos para verificacao de qualidade.', 'EM_PE',     TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-SEP-01',     'Separacao de materiais',         'Separacao e conferencia de materiais para expedicao.', 'EM_PE',     TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-MAQ-01',     'Operação de máquina',            'Operacao de equipamento industrial em pe, com uso de comandos manuais.', 'EM_PE',     TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-INSP-01',    'Inspeção visual',                'Inspecao visual de itens produzidos para verificacao de qualidade.', 'EM_PE',     TRUE),
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-SEP-01',     'Separação de materiais',         'Separacao e conferencia de materiais para expedicao.', 'EM_PE',     TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-LEV-01',     'Levantamento manual de caixas',  'Levantamento manual de caixas e volumes para movimentacao interna.', 'MOVIMENTO', TRUE),
 ((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-TRANSP-01',  'Transporte manual de materiais', 'Transporte manual de materiais entre pontos do setor de logistica.', 'MOVIMENTO', TRUE),
-((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-SUPERV-01',  'Supervisao da operacao',         'Acompanhamento e supervisao das atividades operacionais do setor.', 'ALTERNADO', TRUE);
+((SELECT id_empresa FROM empresa WHERE cnpj = '12345678000190'), 'ATV-SUPERV-01',  'Supervisão da operação',         'Acompanhamento e supervisao das atividades operacionais do setor.', 'ALTERNADO', TRUE);
 
 -- ---------------------------------------------------------------------
 -- 14. FUNCAO_ATIVIDADE (12)
@@ -315,19 +315,19 @@ INSERT INTO classificacao_risco (codigo, nome, pontuacao_min, pontuacao_max, pri
 ('BAIXO',    'Baixo',    0, 1,    1, '#2ECC71', 'Faixa demonstrativa de risco baixo. Uso exclusivo para o MVP.',    TRUE),
 ('MODERADO', 'Moderado', 2, 3,    2, '#F1C40F', 'Faixa demonstrativa de risco moderado. Uso exclusivo para o MVP.', TRUE),
 ('ALTO',     'Alto',     4, 4,    3, '#E67E22', 'Faixa demonstrativa de risco alto. Uso exclusivo para o MVP.',     TRUE),
-('CRITICO',  'Critico',  5, NULL, 4, '#E74C3C', 'Faixa demonstrativa de risco critico, sem limite superior. Uso exclusivo para o MVP.', TRUE);
+('CRITICO',  'Crítico',  5, NULL, 4, '#E74C3C', 'Faixa demonstrativa de risco critico, sem limite superior. Uso exclusivo para o MVP.', TRUE);
 
 -- ---------------------------------------------------------------------
 -- 18. RISCO_ERGONOMICO (7) - fatores de risco, nao diagnosticos
 -- ---------------------------------------------------------------------
 INSERT INTO risco_ergonomico (codigo, nome, descricao, categoria, ativo) VALUES
-('RISCO-POST-01', 'Permanencia prolongada em postura estatica', 'Fator de risco associado a manutencao prolongada da mesma postura durante a jornada de trabalho, sem alternancia ou pausas adequadas.', 'POSTURAL',        TRUE),
+('RISCO-POST-01', 'Permanência prolongada em postura estática', 'Fator de risco associado a manutencao prolongada da mesma postura durante a jornada de trabalho, sem alternancia ou pausas adequadas.', 'POSTURAL',        TRUE),
 ('RISCO-POST-02', 'Postura inadequada',                          'Fator de risco associado a adocao de posturas fora dos padroes recomendados, incluindo inclinacao de tronco, elevacao de bracos ou uso de mobiliario nao ajustavel.', 'POSTURAL', TRUE),
 ('RISCO-REP-01',  'Movimentos repetitivos',                      'Fator de risco associado a repeticao frequente dos mesmos movimentos ao longo da jornada, sem variacao de tarefas.', 'REPETITIVIDADE',   TRUE),
-('RISCO-ESF-01',  'Esforco fisico excessivo',                    'Fator de risco associado ao levantamento manual de cargas ou aplicacao frequente de forca durante a atividade.', 'ESFORCO',            TRUE),
+('RISCO-ESF-01',  'Esforço físico excessivo',                    'Fator de risco associado ao levantamento manual de cargas ou aplicacao frequente de forca durante a atividade.', 'ESFORCO',            TRUE),
 ('RISCO-FAD-01',  'Fadiga ocupacional',                          'Fator de risco associado ao aumento percebido de cansaco e desconforto ao longo da jornada de trabalho.', 'FADIGA',              TRUE),
-('RISCO-ORG-01',  'Organizacao inadequada das pausas',           'Fator de risco associado a ausencia de pausas programadas ou de possibilidade de alternancia entre tarefas ao longo da jornada.', 'ORGANIZACIONAL', TRUE),
-('RISCO-AMB-01',  'Condicoes ambientais desfavoraveis',          'Fator de risco associado a condicoes ambientais percebidas como desfavoraveis ao conforto e a execucao da atividade, como iluminacao, ruido ou temperatura.', 'AMBIENTAL', TRUE);
+('RISCO-ORG-01',  'Organização inadequada das pausas',           'Fator de risco associado a ausencia de pausas programadas ou de possibilidade de alternancia entre tarefas ao longo da jornada.', 'ORGANIZACIONAL', TRUE),
+('RISCO-AMB-01',  'Condições ambientais desfavoráveis',          'Fator de risco associado a condicoes ambientais percebidas como desfavoraveis ao conforto e a execucao da atividade, como iluminacao, ruido ou temperatura.', 'AMBIENTAL', TRUE);
 
 -- ---------------------------------------------------------------------
 -- 19. REGRA_RISCO (14)
@@ -395,16 +395,16 @@ INSERT INTO regra_condicao (id_regra, id_pergunta, operador, id_opcao, valor_tex
 -- fixos de pausa sem protocolo tecnico validado (duracao_minutos e
 -- intervalo_minutos permanecem NULL onde essa decisao ainda nao existe).
 INSERT INTO recomendacao (codigo, titulo, descricao, tipo, duracao_minutos, intervalo_minutos, prioridade_padrao, fonte_tecnica, requer_validacao, ativo) VALUES
-('REC-POST-01',   'Avaliar possibilidade de alternancia postural',                       'Recomenda-se avaliar a possibilidade de alternar a postura ao longo da jornada, conforme viabilidade da atividade e orientacao do profissional responsavel.', 'POSTURA',      NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-MOB-01',    'Revisar adequacao do mobiliario ao usuario',                          'Recomenda-se revisar a adequacao do mobiliario (cadeira e superficie de trabalho) as caracteristicas do usuario e da atividade.', 'MOBILIARIO',   NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-ORG-01',    'Avaliar organizacao das pausas ao longo da jornada',                  'Recomenda-se avaliar a organizacao das pausas durante a jornada de trabalho, respeitando a legislacao e as normas internas aplicaveis.', 'ORGANIZACAO', NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-AJUSTE-01', 'Orientar ajuste da estacao de trabalho',                              'Recomenda-se orientar o colaborador sobre o ajuste adequado da estacao de trabalho, incluindo altura de cadeira e posicionamento de equipamentos.', 'ORIENTACAO', NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-REP-01',    'Avaliar redistribuicao de tarefas repetitivas',                       'Recomenda-se avaliar a possibilidade de redistribuir ou alternar tarefas que envolvam movimentos repetitivos ao longo da jornada.', 'ORGANIZACAO', NULL, NULL, 'ALTA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-PROF-01',   'Realizar analise profissional do posto quando identificado risco elevado', 'Recomenda-se que um profissional de SST realize analise presencial do posto de trabalho quando o risco identificado for classificado como Alto ou Critico.', 'ORIENTACAO', NULL, NULL, 'ALTA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-PAUSA-01',  'Avaliar insercao de pausas adicionais conforme protocolo institucional', 'Recomenda-se avaliar, junto ao profissional responsavel, a insercao de pausas adicionais conforme protocolo tecnico validado pela organizacao. Este MVP nao prescreve tempos fixos de pausa.', 'PAUSA', NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
-('REC-MOV-01',    'Avaliar tecnica de movimentacao manual de cargas',                    'Recomenda-se avaliar a tecnica utilizada na movimentacao manual de cargas e a possibilidade de uso de equipamentos auxiliares.', 'MOVIMENTO', NULL, NULL, 'ALTA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-POST-01',   'Avaliar possibilidade de alternância postural',                       'Recomenda-se avaliar a possibilidade de alternar a postura ao longo da jornada, conforme viabilidade da atividade e orientacao do profissional responsavel.', 'POSTURA',      NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-MOB-01',    'Revisar adequação do mobiliário ao usuário',                          'Recomenda-se revisar a adequacao do mobiliario (cadeira e superficie de trabalho) as caracteristicas do usuario e da atividade.', 'MOBILIARIO',   NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-ORG-01',    'Avaliar organização das pausas ao longo da jornada',                  'Recomenda-se avaliar a organizacao das pausas durante a jornada de trabalho, respeitando a legislacao e as normas internas aplicaveis.', 'ORGANIZACAO', NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-AJUSTE-01', 'Orientar ajuste da estação de trabalho',                              'Recomenda-se orientar o colaborador sobre o ajuste adequado da estacao de trabalho, incluindo altura de cadeira e posicionamento de equipamentos.', 'ORIENTACAO', NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-REP-01',    'Avaliar redistribuição de tarefas repetitivas',                       'Recomenda-se avaliar a possibilidade de redistribuir ou alternar tarefas que envolvam movimentos repetitivos ao longo da jornada.', 'ORGANIZACAO', NULL, NULL, 'ALTA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-PROF-01',   'Realizar análise profissional do posto quando identificado risco elevado', 'Recomenda-se que um profissional de SST realize analise presencial do posto de trabalho quando o risco identificado for classificado como Alto ou Critico.', 'ORIENTACAO', NULL, NULL, 'ALTA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-PAUSA-01',  'Avaliar inserção de pausas adicionais conforme protocolo institucional', 'Recomenda-se avaliar, junto ao profissional responsavel, a insercao de pausas adicionais conforme protocolo tecnico validado pela organizacao. Este MVP nao prescreve tempos fixos de pausa.', 'PAUSA', NULL, NULL, 'MEDIA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
+('REC-MOV-01',    'Avaliar técnica de movimentação manual de cargas',                    'Recomenda-se avaliar a tecnica utilizada na movimentacao manual de cargas e a possibilidade de uso de equipamentos auxiliares.', 'MOVIMENTO', NULL, NULL, 'ALTA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE),
 ('REC-POST-02',   'Orientar sobre postura adequada durante a atividade',                 'Recomenda-se orientacao geral sobre postura adequada durante a execucao da atividade, como reforco educativo.', 'POSTURA', NULL, NULL, 'BAIXA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', FALSE, TRUE),
-('REC-AMB-01',    'Avaliar condicoes ambientais do posto de trabalho',                   'Recomenda-se avaliar as condicoes ambientais do posto de trabalho, como iluminacao, ruido e temperatura, quanto ao conforto para a atividade.', 'AMBIENTE', NULL, NULL, 'BAIXA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE);
+('REC-AMB-01',    'Avaliar condições ambientais do posto de trabalho',                   'Recomenda-se avaliar as condicoes ambientais do posto de trabalho, como iluminacao, ruido e temperatura, quanto ao conforto para a atividade.', 'AMBIENTE', NULL, NULL, 'BAIXA', 'Recomendacao demonstrativa do MVP. Validacao tecnica formal pendente.', TRUE,  TRUE);
 
 -- ---------------------------------------------------------------------
 -- 22. RISCO_RECOMENDACAO (17) - relacoes coerentes com cada risco
