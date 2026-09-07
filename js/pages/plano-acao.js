@@ -2,46 +2,69 @@ import { buscarAvaliacaoPorId, obterAvaliadorPadrao } from '../services/avaliaca
 import { buscarVinculoPorId } from '../services/vinculoService.js';
 import { buscarColaboradorPorId } from '../services/colaboradorService.js';
 import { buscarClassificacaoPorId } from '../services/riscoService.js';
+import { buscarInventario, listarItens } from '../services/inventarioRiscoService.js';
+import { buscarNomeEmpresa } from '../services/gheService.js';
 import {
     buscarPlanoPorAvaliacao,
-    criarPlano,
+    buscarPlanoPorInventario,
+    criarPlanoAvaliacaoIndividual,
+    criarPlanoInventario,
     atualizarPlano,
     listarAcoesDoPlano,
     buscarAcaoPorId,
     criarAcao,
+    criarAcaoParaItemInventario,
     atualizarAcao,
     alterarStatusAcao,
+    concluirAcao,
     listarUsuariosDaEmpresa,
     listarRecomendacoesDisponiveisDaAvaliacao,
+    verificarPlanoInventarioDemonstrativo,
 } from '../services/planoAcaoService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
 import { marcarComoCarregando } from '../utils/carregando.js';
 
-// FEIRA-04 - Plano de Acao MVP.
-// So LE resultado de risco/classificacao/recomendacoes ja persistidos -
-// NUNCA chama motorRisco.js/classificadorRisco.js/riscoService.js.
-// processarRiscosDaAvaliacao e NUNCA gera avaliacao_recomendacao nova.
-// Toda escrita passa por js/services/planoAcaoService.js (PLANO_ACAO e
-// ACAO_PLANO, tabelas ja existentes no schema - nenhuma tabela nova).
+// FEIRA-04 - Plano de Acao MVP (fluxo individual).
+// FAIR-PA-01 - Plano de Acao 2.0: a mesma pagina passa a aceitar DOIS
+// pontos de entrada, mutuamente exclusivos:
+//   plano-acao.html?id_avaliacao=<id>   -> origem AVALIACAO_INDIVIDUAL (like antes)
+//   plano-acao.html?id_inventario=<id>  -> origem INVENTARIO_RISCOS (novo)
+// So LE resultado de risco/classificacao/recomendacoes/itens de inventario
+// ja persistidos - NUNCA chama motorRisco.js/classificadorRisco.js/
+// riscoService.js/motorRiscoGhe.js. Toda escrita passa por
+// js/services/planoAcaoService.js.
 
-// --- Contexto: id_avaliacao vem da URL -----------------------------------------
+// --- Contexto: id_avaliacao OU id_inventario vem da URL (nunca os dois) --------
 const parametrosUrl = new URLSearchParams(window.location.search);
 const idAvaliacao = Number(parametrosUrl.get('id_avaliacao')) || null;
+const idInventario = Number(parametrosUrl.get('id_inventario')) || null;
+const origemPagina = idInventario ? 'INVENTARIO_RISCOS' : (idAvaliacao ? 'AVALIACAO_INDIVIDUAL' : null);
 
 // --- Referencias de DOM ---------------------------------------------------------
 const areaEstado = document.getElementById('area-estado');
 const areaConteudo = document.getElementById('area-conteudo');
 const areaNotificacoes = document.getElementById('area-notificacoes');
-const linkVoltarResultado = document.getElementById('link-voltar-resultado');
+const linkVoltarContexto = document.getElementById('link-voltar-contexto');
 
+const blocoContextoIndividual = document.getElementById('bloco-contexto-individual');
 const textoContextoColaborador = document.getElementById('texto-contexto-colaborador');
 const textoContextoSetor = document.getElementById('texto-contexto-setor');
 const textoContextoData = document.getElementById('texto-contexto-data');
 const textoContextoClassificacao = document.getElementById('texto-contexto-classificacao');
 
+const blocoContextoInventario = document.getElementById('bloco-contexto-inventario');
+const textoContextoInventarioTitulo = document.getElementById('texto-contexto-inventario-titulo');
+const textoContextoInventarioVersao = document.getElementById('texto-contexto-inventario-versao');
+const badgeContextoInventarioStatus = document.getElementById('badge-contexto-inventario-status');
+const textoContextoInventarioEmpresa = document.getElementById('texto-contexto-inventario-empresa');
+const textoContextoInventarioGhes = document.getElementById('texto-contexto-inventario-ghes');
+const textoContextoInventarioItens = document.getElementById('texto-contexto-inventario-itens');
+const avisoPlanoDemonstrativo = document.getElementById('aviso-plano-demonstrativo');
+
 const areaSemPlano = document.getElementById('area-sem-plano');
+const textoSemPlano = document.getElementById('texto-sem-plano');
 const areaPlano = document.getElementById('area-plano');
 const botaoCriarPlano = document.getElementById('botao-criar-plano');
 const botaoEditarPlano = document.getElementById('botao-editar-plano');
@@ -57,6 +80,9 @@ const resumoTotal = document.getElementById('resumo-total');
 const resumoAbertas = document.getElementById('resumo-abertas');
 const resumoAndamento = document.getElementById('resumo-andamento');
 const resumoConcluidas = document.getElementById('resumo-concluidas');
+
+const areaItensInventario = document.getElementById('area-itens-inventario');
+const corpoTabelaItensInventario = document.getElementById('corpo-tabela-itens-inventario');
 
 const areaSemAcoes = document.getElementById('area-sem-acoes');
 const areaTabelaAcoes = document.getElementById('area-tabela-acoes');
@@ -79,6 +105,13 @@ const modalAcao = document.getElementById('modal-acao');
 const tituloModalAcao = document.getElementById('modal-acao-titulo');
 const formularioAcao = document.getElementById('formulario-acao');
 const campoIdAcao = document.getElementById('campo-id-acao');
+const campoItemInventarioAcao = document.getElementById('campo-item-inventario-acao');
+const grupoContextoItemAcao = document.getElementById('grupo-contexto-item-acao');
+const textoContextoItemGhe = document.getElementById('texto-contexto-item-ghe');
+const textoContextoItemPerigo = document.getElementById('texto-contexto-item-perigo');
+const textoContextoItemClassificacao = document.getElementById('texto-contexto-item-classificacao');
+const textoContextoItemExpostos = document.getElementById('texto-contexto-item-expostos');
+const grupoRecomendacaoAcao = document.getElementById('grupo-recomendacao-acao');
 const campoDescricaoAcao = document.getElementById('campo-descricao-acao');
 const campoRecomendacaoAcao = document.getElementById('campo-recomendacao-acao');
 const campoResponsavelAcao = document.getElementById('campo-responsavel-acao');
@@ -103,6 +136,8 @@ const instanciaModalConcluir = new bootstrap.Modal(modalConcluirAcao);
 // --- Estado local da pagina -------------------------------------------------------
 let avaliacaoAtual = null;
 let avaliadorPadrao = null; // usado como plano_acao.criado_por (secao 32 - sem auth no MVP)
+let inventarioAtual = null;
+let itensInventarioAtual = [];
 let planoAtual = null;
 let acoesAtuais = [];
 let usuariosDaEmpresa = [];
@@ -142,6 +177,8 @@ const ROTULOS_STATUS_ACAO = { ABERTA: 'Aberta', EM_ANDAMENTO: 'Em andamento', BL
 const ROTULOS_PRIORIDADE_ACAO = { BAIXA: 'Baixa', MEDIA: 'Média', ALTA: 'Alta', CRITICA: 'Crítica' };
 const CORES_PRIORIDADE_ACAO = { BAIXA: 'text-bg-light border text-dark', MEDIA: 'text-bg-info', ALTA: 'text-bg-warning text-dark', CRITICA: 'text-bg-danger' };
 const ROTULOS_STATUS_RECOMENDACAO = { SUGERIDA: 'Sugerida', ACEITA: 'Aceita', REJEITADA: 'Rejeitada', CONCLUIDA: 'Concluída' };
+const ROTULOS_STATUS_INVENTARIO = { RASCUNHO: 'Rascunho', PUBLICADO: 'Publicado', CANCELADO: 'Cancelado' };
+const CORES_STATUS_INVENTARIO = { RASCUNHO: 'text-bg-secondary', PUBLICADO: 'text-bg-success', CANCELADO: 'text-bg-danger' };
 
 const STATUS_ACAO_CONCLUIDOS = ['CONCLUIDA', 'CANCELADA'];
 
@@ -151,16 +188,31 @@ function acaoAtrasada(acao) {
 
 // --- Carga inicial -----------------------------------------------------------------
 async function carregarPagina() {
-    if (!idAvaliacao) {
+    if (origemPagina === 'AVALIACAO_INDIVIDUAL') {
+        await carregarPaginaIndividual();
+    } else if (origemPagina === 'INVENTARIO_RISCOS') {
+        await carregarPaginaInventario();
+    } else {
         definirEstado(
             'erro',
-            'Nenhuma avaliação selecionada. Acesse o Plano de Ação a partir do Resultado de uma avaliação finalizada.',
+            'Nenhum contexto selecionado. Acesse o Plano de Ação a partir do Resultado de uma avaliação finalizada ou de um Inventário de Riscos publicado.',
         );
-        return;
     }
+}
+
+// =====================================================================
+// Origem: Avaliacao Individual (FEIRA-04 - fluxo preservado)
+// =====================================================================
+async function carregarPaginaIndividual() {
+    blocoContextoIndividual.hidden = false;
+    blocoContextoInventario.hidden = true;
+    areaItensInventario.hidden = true;
+    botaoAdicionarAcao.hidden = false;
+    textoSemPlano.textContent = 'Esta avaliação ainda não possui um plano de ação.';
 
     definirEstado('carregando', 'Carregando Plano de Ação...');
-    linkVoltarResultado.href = `resultado.html?id_avaliacao=${idAvaliacao}`;
+    linkVoltarContexto.textContent = '← Voltar ao Resultado';
+    linkVoltarContexto.href = `resultado.html?id_avaliacao=${idAvaliacao}`;
 
     try {
         avaliacaoAtual = await buscarAvaliacaoPorId(idAvaliacao);
@@ -176,7 +228,7 @@ async function carregarPagina() {
     }
 
     try {
-        await carregarContexto();
+        await carregarContextoIndividual();
         avaliadorPadrao = await obterAvaliadorPadrao(avaliacaoAtual.id_empresa);
         usuariosDaEmpresa = await listarUsuariosDaEmpresa(avaliacaoAtual.id_empresa);
         recomendacoesDaAvaliacao = await listarRecomendacoesDisponiveisDaAvaliacao(idAvaliacao);
@@ -187,6 +239,7 @@ async function carregarPagina() {
     }
 
     try {
+        planoAtual = await buscarPlanoPorAvaliacao(idAvaliacao);
         await carregarPlano();
     } catch (error) {
         console.error('Erro ao carregar plano de ação:', error);
@@ -197,8 +250,8 @@ async function carregarPagina() {
     definirEstado('pronto');
 }
 
-// --- Contexto (secao 17/18) ---------------------------------------------------------
-async function carregarContexto() {
+// --- Contexto (secao 17/18/32) ---------------------------------------------------------
+async function carregarContextoIndividual() {
     const vinculo = await buscarVinculoPorId(avaliacaoAtual.id_vinculo);
     const colaborador = await buscarColaboradorPorId(vinculo.id_colaborador);
 
@@ -226,10 +279,139 @@ async function carregarContexto() {
     }
 }
 
-// --- Plano (secao 15/16) -------------------------------------------------------------
-async function carregarPlano() {
-    planoAtual = await buscarPlanoPorAvaliacao(idAvaliacao);
+// =====================================================================
+// Origem: Inventario de Riscos (FAIR-PA-01)
+// =====================================================================
+async function carregarPaginaInventario() {
+    blocoContextoIndividual.hidden = true;
+    blocoContextoInventario.hidden = false;
+    areaItensInventario.hidden = false;
+    botaoAdicionarAcao.hidden = true; // acoes deste fluxo nascem de um item especifico (secao 49)
+    textoSemPlano.textContent = 'Este Inventário de Riscos ainda não possui um plano de ação.';
 
+    definirEstado('carregando', 'Carregando Plano de Ação...');
+    linkVoltarContexto.textContent = '← Voltar ao Inventário';
+    linkVoltarContexto.href = `inventario-detalhe.html?id_inventario=${idInventario}`;
+
+    try {
+        inventarioAtual = await buscarInventario(idInventario);
+    } catch (error) {
+        console.error('Erro ao carregar inventário:', error);
+        definirEstado('erro', 'Inventário de Riscos não encontrado.');
+        return;
+    }
+
+    try {
+        itensInventarioAtual = await listarItens(idInventario);
+        avaliadorPadrao = await obterAvaliadorPadrao(inventarioAtual.id_empresa);
+        usuariosDaEmpresa = await listarUsuariosDaEmpresa(inventarioAtual.id_empresa);
+        await carregarContextoInventario();
+    } catch (error) {
+        console.error('Erro ao carregar contexto do plano de ação:', error);
+        definirEstado('erro', 'Não foi possível carregar o contexto do Inventário de Riscos.');
+        return;
+    }
+
+    try {
+        planoAtual = await buscarPlanoPorInventario(idInventario);
+        await carregarPlano();
+    } catch (error) {
+        console.error('Erro ao carregar plano de ação:', error);
+        definirEstado('erro', 'Não foi possível carregar o plano de ação deste Inventário.');
+        return;
+    }
+
+    definirEstado('pronto');
+}
+
+// --- Contexto (secao 33) ---------------------------------------------------------------
+async function carregarContextoInventario() {
+    textoContextoInventarioTitulo.textContent = inventarioAtual.titulo;
+    textoContextoInventarioVersao.textContent = `v${inventarioAtual.numero_versao}`;
+    badgeContextoInventarioStatus.className = `badge ${CORES_STATUS_INVENTARIO[inventarioAtual.status] || 'text-bg-secondary'}`;
+    badgeContextoInventarioStatus.textContent = ROTULOS_STATUS_INVENTARIO[inventarioAtual.status] || inventarioAtual.status;
+
+    const ghesAbrangidos = [...new Set(itensInventarioAtual.map((item) => item.ghe_nome).filter(Boolean))];
+    textoContextoInventarioGhes.textContent = ghesAbrangidos.length > 0 ? ghesAbrangidos.join(', ') : '-';
+    textoContextoInventarioItens.textContent = itensInventarioAtual.length;
+
+    try {
+        textoContextoInventarioEmpresa.textContent = await buscarNomeEmpresa(inventarioAtual.id_empresa);
+    } catch (error) {
+        console.error('Erro ao carregar nome da empresa:', error);
+        textoContextoInventarioEmpresa.textContent = '-';
+    }
+
+    // Aviso de metodologia demonstrativa (secao 21/22) - nunca apresenta um
+    // resultado DEMONSTRATIVO como se fosse tecnicamente validado.
+    try {
+        const algumaDemonstrativa = await verificarPlanoInventarioDemonstrativo(idInventario);
+        avisoPlanoDemonstrativo.hidden = !algumaDemonstrativa;
+    } catch (error) {
+        console.error('Erro ao verificar metodologia demonstrativa:', error);
+    }
+}
+
+// --- Itens de risco do Inventario (secao 37-39) -----------------------------------------
+function contarAcoesPorItem() {
+    const contagem = new Map();
+    acoesAtuais.forEach((acao) => {
+        if (acao.id_inventario_risco_item) {
+            contagem.set(acao.id_inventario_risco_item, (contagem.get(acao.id_inventario_risco_item) || 0) + 1);
+        }
+    });
+    return contagem;
+}
+
+function criarLinhaItemInventario(item, quantidadeAcoes) {
+    const linha = document.createElement('tr');
+
+    const celulaPerigo = document.createElement('td');
+    celulaPerigo.textContent = item.perigo_nome || '-';
+
+    const celulaGhe = document.createElement('td');
+    celulaGhe.textContent = item.ghe_nome || '-';
+
+    const celulaClassificacao = document.createElement('td');
+    celulaClassificacao.textContent = item.classificacao_nome_snapshot || 'Não avaliado';
+
+    const celulaExpostos = document.createElement('td');
+    celulaExpostos.className = 'text-end';
+    celulaExpostos.textContent = item.trabalhadores_expostos_snapshot ?? '-';
+
+    // Contagem calculada em memoria a partir das acoes ja carregadas
+    // (secao 38: "nao hardcode"), nunca uma consulta nova por item.
+    const celulaQuantidadeAcoes = document.createElement('td');
+    celulaQuantidadeAcoes.className = 'text-end';
+    celulaQuantidadeAcoes.textContent = quantidadeAcoes;
+
+    const celulaAcao = document.createElement('td');
+    const botaoAdicionar = document.createElement('button');
+    botaoAdicionar.type = 'button';
+    botaoAdicionar.className = 'btn btn-sm btn-outline-primary';
+    botaoAdicionar.textContent = 'Adicionar Ação';
+    botaoAdicionar.addEventListener('click', () => abrirFormularioCriacaoAcaoParaItem(item));
+    celulaAcao.appendChild(botaoAdicionar);
+
+    linha.append(celulaPerigo, celulaGhe, celulaClassificacao, celulaExpostos, celulaQuantidadeAcoes, celulaAcao);
+    return linha;
+}
+
+function renderizarItensInventario() {
+    if (origemPagina !== 'INVENTARIO_RISCOS') {
+        return;
+    }
+    const contagemAcoes = contarAcoesPorItem();
+    corpoTabelaItensInventario.innerHTML = '';
+    itensInventarioAtual.forEach((item) => {
+        corpoTabelaItensInventario.appendChild(
+            criarLinhaItemInventario(item, contagemAcoes.get(item.id_inventario_risco_item) || 0),
+        );
+    });
+}
+
+// --- Plano (secao 15/16/35/36) -------------------------------------------------------
+async function carregarPlano() {
     if (!planoAtual) {
         areaSemPlano.hidden = false;
         areaPlano.hidden = true;
@@ -252,17 +434,20 @@ function renderizarPlano() {
     textoPlanoDataConclusao.textContent = planoAtual.data_conclusao ? formatarDataBR(planoAtual.data_conclusao) : '-';
 }
 
-// --- Acoes do plano (secao 25/26/42) --------------------------------------------------
+// --- Acoes do plano (secao 25/26/42/46/47) --------------------------------------------
 async function carregarAcoes() {
     acoesAtuais = await listarAcoesDoPlano(planoAtual.id_plano);
     renderizarResumo();
     renderizarTabelaAcoes();
+    renderizarItensInventario();
 }
 
 // Contagens calculadas em memoria a partir das acoes carregadas (secao 42:
 // "nao hardcodar numeros"). BLOQUEADA e agrupada visualmente junto de "Em
 // andamento" (nao e concluida nem cancelada) - o status real gravado no
 // banco permanece intacto, isso e so um agrupamento de exibicao.
+// O percentual de conclusao (quando exibido) representa PROGRESSO DO
+// PLANO, nunca reducao de risco (secao 47/48).
 function renderizarResumo() {
     resumoTotal.textContent = acoesAtuais.length;
     resumoAbertas.textContent = acoesAtuais.filter((acao) => acao.status === 'ABERTA').length;
@@ -274,6 +459,14 @@ function criarCelulaOrigem(acao) {
     const celula = document.createElement('td');
     if (acao.recomendacao_titulo) {
         celula.textContent = acao.recomendacao_codigo ? `${acao.recomendacao_codigo} — ${acao.recomendacao_titulo}` : acao.recomendacao_titulo;
+    } else if (acao.id_inventario_risco_item) {
+        // Origem do fluxo Inventario (secao 43/44) - mostra o perigo/GHE do
+        // item e um link para ve-lo no Inventario (que ja tem seu proprio
+        // "Ver Origem" ate o resultado do Motor GHE, secao 45).
+        const link = document.createElement('a');
+        link.href = `inventario-detalhe.html?id_inventario=${acao.item_inventario_id_inventario}`;
+        link.textContent = `${acao.item_inventario_perigo || 'Item do Inventário'}${acao.item_inventario_ghe ? ` (${acao.item_inventario_ghe})` : ''}`;
+        celula.appendChild(link);
     } else {
         const span = document.createElement('span');
         span.className = 'text-muted';
@@ -378,12 +571,12 @@ function mensagemErroAmigavel(error) {
     const codigo = error?.code;
     if (codigo && codigo !== '23503' && codigo !== '23514' && codigo !== '23505' && !/^\d+$/.test(String(codigo))) {
         // Codigos definidos pelo proprio planoAcaoService.js (ex.:
-        // TITULO_OBRIGATORIO, DATA_CONCLUSAO_OBRIGATORIA) ja trazem
-        // mensagem pronta para o usuario.
+        // TITULO_OBRIGATORIO, DATA_CONCLUSAO_OBRIGATORIA, INVENTARIO_NAO_PUBLICADO,
+        // ITEM_INVENTARIO_INCOMPATIVEL) ja trazem mensagem pronta para o usuario.
         return error.message;
     }
     if (codigo === '23503') {
-        return 'Não foi possível localizar um dos itens selecionados (responsável ou recomendação).';
+        return 'Não foi possível localizar um dos itens selecionados (responsável, recomendação ou item do Inventário).';
     }
     if (codigo === '23514') {
         return 'Verifique os dados informados, especialmente as datas.';
@@ -476,7 +669,6 @@ function validarFormularioPlano() {
     return {
         valido: true,
         dados: {
-            id_avaliacao: idAvaliacao,
             titulo: campoTituloPlano.value,
             descricao: campoDescricaoPlano.value,
             status: campoStatusPlano.value,
@@ -510,11 +702,19 @@ formularioPlano.addEventListener('submit', async (event) => {
         if (idExistente) {
             await atualizarPlano(Number(idExistente), resultado.dados);
             mostrarNotificacao('Plano atualizado com sucesso.', 'sucesso');
+        } else if (origemPagina === 'INVENTARIO_RISCOS') {
+            await criarPlanoInventario({ ...resultado.dados, id_inventario: idInventario });
+            mostrarNotificacao('Plano criado com sucesso.', 'sucesso');
         } else {
-            await criarPlano(resultado.dados);
+            await criarPlanoAvaliacaoIndividual({ ...resultado.dados, id_avaliacao: idAvaliacao });
             mostrarNotificacao('Plano criado com sucesso.', 'sucesso');
         }
         instanciaModalPlano.hide();
+        if (origemPagina === 'INVENTARIO_RISCOS') {
+            planoAtual = await buscarPlanoPorInventario(idInventario);
+        } else {
+            planoAtual = await buscarPlanoPorAvaliacao(idAvaliacao);
+        }
         await carregarPlano();
     } catch (error) {
         console.error('Erro ao salvar plano de ação:', error);
@@ -529,7 +729,7 @@ botaoCriarPlano.addEventListener('click', abrirFormularioCriacaoPlano);
 botaoEditarPlano.addEventListener('click', abrirFormularioEdicaoPlano);
 
 // =====================================================================
-// Modal: Acao do plano (criar/editar - secao 27-37)
+// Modal: Acao do plano (criar/editar - secao 27-37/39-41)
 // =====================================================================
 
 function preencherSelectResponsaveis(selecionado = '') {
@@ -557,6 +757,17 @@ function preencherSelectRecomendacoes(selecionado = '') {
     campoRecomendacaoAcao.value = selecionado;
 }
 
+// Preenche o bloco de contexto do risco, somente leitura (secao 41) - a
+// partir de um item de inventario_risco_item ja carregado em memoria
+// (itensInventarioAtual ou o proprio snapshot da acao), nunca uma consulta
+// nova so para exibir isso.
+function preencherContextoItemAcao({ ghe, perigo, classificacao, expostos }) {
+    textoContextoItemGhe.textContent = ghe || '-';
+    textoContextoItemPerigo.textContent = perigo || '-';
+    textoContextoItemClassificacao.textContent = classificacao || 'Não avaliado';
+    textoContextoItemExpostos.textContent = expostos ?? '-';
+}
+
 function alternarGrupoDataConclusaoAcao() {
     const exigeConclusao = campoStatusAcao.value === 'CONCLUIDA';
     grupoDataConclusaoAcao.hidden = !exigeConclusao;
@@ -581,17 +792,46 @@ function definirErroCampoAcao(campo, idErro, mensagem) {
     document.getElementById(idErro).textContent = mensagem;
 }
 
-function abrirFormularioCriacaoAcao() {
+// Estado comum de "novo formulario" (secao comum aos dois fluxos).
+function prepararFormularioAcaoEmBranco() {
     formularioAcao.reset();
     limparErrosFormularioAcao();
     campoIdAcao.value = '';
+    campoItemInventarioAcao.value = '';
     preencherSelectResponsaveis();
-    preencherSelectRecomendacoes();
     campoPrioridadeAcao.value = 'MEDIA';
     campoStatusAcao.value = 'ABERTA';
     grupoDataConclusaoAcao.hidden = true;
     campoDataConclusaoAcao.required = false;
     campoDataConclusaoAcao.value = '';
+}
+
+// Fluxo individual (secao comportamento original - FEIRA-04): mostra o
+// select de recomendacao, esconde o contexto de item do Inventario.
+function abrirFormularioCriacaoAcao() {
+    prepararFormularioAcaoEmBranco();
+    grupoRecomendacaoAcao.hidden = false;
+    grupoContextoItemAcao.hidden = true;
+    preencherSelectRecomendacoes();
+    tituloModalAcao.textContent = 'Nova Ação';
+    instanciaModalAcao.show();
+    campoDescricaoAcao.focus();
+}
+
+// Fluxo Inventario (secao 39-41): a acao ja nasce vinculada ao item
+// clicado - esconde o select de recomendacao (que so existe no fluxo
+// individual) e mostra o contexto do risco, somente leitura.
+function abrirFormularioCriacaoAcaoParaItem(item) {
+    prepararFormularioAcaoEmBranco();
+    campoItemInventarioAcao.value = item.id_inventario_risco_item;
+    grupoRecomendacaoAcao.hidden = true;
+    grupoContextoItemAcao.hidden = false;
+    preencherContextoItemAcao({
+        ghe: item.ghe_nome,
+        perigo: item.perigo_nome,
+        classificacao: item.classificacao_nome_snapshot,
+        expostos: item.trabalhadores_expostos_snapshot,
+    });
     tituloModalAcao.textContent = 'Nova Ação';
     instanciaModalAcao.show();
     campoDescricaoAcao.focus();
@@ -603,9 +843,25 @@ async function abrirFormularioEdicaoAcao(idAcao) {
         formularioAcao.reset();
         limparErrosFormularioAcao();
         campoIdAcao.value = acao.id_acao;
+        campoItemInventarioAcao.value = acao.id_inventario_risco_item || '';
         campoDescricaoAcao.value = acao.descricao;
         preencherSelectResponsaveis(acao.id_responsavel);
-        preencherSelectRecomendacoes(acao.id_avaliacao_recomendacao || '');
+
+        if (acao.id_inventario_risco_item) {
+            grupoRecomendacaoAcao.hidden = true;
+            grupoContextoItemAcao.hidden = false;
+            preencherContextoItemAcao({
+                ghe: acao.item_inventario_ghe,
+                perigo: acao.item_inventario_perigo,
+                classificacao: acao.item_inventario_classificacao,
+                expostos: acao.item_inventario_expostos,
+            });
+        } else {
+            grupoRecomendacaoAcao.hidden = false;
+            grupoContextoItemAcao.hidden = true;
+            preencherSelectRecomendacoes(acao.id_avaliacao_recomendacao || '');
+        }
+
         campoPrioridadeAcao.value = acao.prioridade;
         campoPrazoAcao.value = acao.prazo;
         campoStatusAcao.value = acao.status;
@@ -649,7 +905,7 @@ function validarFormularioAcao() {
     return {
         valido: true,
         dados: {
-            id_avaliacao_recomendacao: campoRecomendacaoAcao.value ? Number(campoRecomendacaoAcao.value) : null,
+            id_avaliacao_recomendacao: !grupoRecomendacaoAcao.hidden && campoRecomendacaoAcao.value ? Number(campoRecomendacaoAcao.value) : null,
             id_responsavel: Number(campoResponsavelAcao.value),
             descricao: campoDescricaoAcao.value,
             prioridade: campoPrioridadeAcao.value,
@@ -670,14 +926,18 @@ formularioAcao.addEventListener('submit', async (event) => {
     }
 
     const idExistente = campoIdAcao.value;
+    const idItemInventario = campoItemInventarioAcao.value ? Number(campoItemInventarioAcao.value) : null;
     const textoOriginal = botaoSalvarAcao.textContent;
     botaoSalvarAcao.disabled = true;
     botaoSalvarAcao.textContent = 'Salvando...';
 
     try {
         if (idExistente) {
-            await atualizarAcao(Number(idExistente), resultado.dados);
+            await atualizarAcao(Number(idExistente), { ...resultado.dados, id_inventario_risco_item: idItemInventario });
             mostrarNotificacao('Ação atualizada com sucesso.', 'sucesso');
+        } else if (idItemInventario) {
+            await criarAcaoParaItemInventario(planoAtual.id_plano, idItemInventario, resultado.dados);
+            mostrarNotificacao('Ação cadastrada com sucesso.', 'sucesso');
         } else {
             await criarAcao({ ...resultado.dados, id_plano: planoAtual.id_plano });
             mostrarNotificacao('Ação cadastrada com sucesso.', 'sucesso');
@@ -738,7 +998,7 @@ formularioConcluirAcao.addEventListener('submit', async (event) => {
     botaoConfirmarConcluir.textContent = 'Salvando...';
 
     try {
-        await alterarStatusAcao(idAcao, 'CONCLUIDA', campoDataConclusaoRapida.value);
+        await concluirAcao(idAcao, campoDataConclusaoRapida.value);
         mostrarNotificacao('Status atualizado.', 'sucesso');
         selectStatusEmEdicao = null; // sucesso: nao reverter no evento "hidden" do modal
         instanciaModalConcluir.hide();

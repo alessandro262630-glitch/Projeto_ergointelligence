@@ -17,7 +17,7 @@ import { buscarOrigemItemInventario, verificarAlgumaMetodologiaDemonstrativa } f
 import { listarGhes, buscarNomeEmpresa } from '../services/gheService.js';
 import { listarAmbientesPorSetor, listarPostosPorAmbiente } from '../services/ambienteService.js';
 import { listarAtividades } from '../services/avaliacaoService.js';
-import { listarUsuariosDaEmpresa } from '../services/planoAcaoService.js';
+import { listarUsuariosDaEmpresa, buscarPlanoPorInventario } from '../services/planoAcaoService.js';
 import { formatarDataBR } from '../utils/formatadores.js';
 import { campoPreenchido } from '../utils/validacoes.js';
 import { mostrarNotificacao as mostrarNotificacaoBase } from '../utils/notificacoes.js';
@@ -64,6 +64,8 @@ const botaoEditarCabecalho = document.getElementById('botao-editar-cabecalho');
 const botaoCancelarRascunho = document.getElementById('botao-cancelar-rascunho');
 const botaoPublicarInventario = document.getElementById('botao-publicar-inventario');
 const botaoCriarNovaVersaoDetalhe = document.getElementById('botao-criar-nova-versao');
+const linkPlanoAcaoInventario = document.getElementById('link-plano-acao-inventario');
+const textoLinkPlanoAcaoInventario = document.getElementById('texto-link-plano-acao-inventario');
 
 const areaPendenciasPublicacao = document.getElementById('area-pendencias-publicacao');
 const avisoMetodologiaDemonstrativa = document.getElementById('aviso-metodologia-demonstrativa');
@@ -258,6 +260,28 @@ function renderizarCabecalho(nomeEmpresa) {
     // chama (6 pontos de chamada) - o aviso so aparece/desaparece quando a
     // consulta resolver, sem bloquear o restante do cabecalho.
     atualizarAvisoMetodologiaDemonstrativa();
+    atualizarLinkPlanoAcao();
+}
+
+// Botao "Criar Plano de Ação"/"Ver Plano de Ação" (FAIR-PA-01, secao
+// 34/36) - so aparece para Inventario PUBLICADO (secao 20: o Plano deve
+// tratar riscos ja consolidados no documento). Nunca cria um plano
+// automaticamente - so troca o rotulo/destino do link conforme ja existir
+// um ou nao, para a UI nao deixar o usuario criar planos duplicados por
+// engano (secao 35/36).
+async function atualizarLinkPlanoAcao() {
+    if (inventarioAtual.status !== 'PUBLICADO') {
+        linkPlanoAcaoInventario.hidden = true;
+        return;
+    }
+    try {
+        const planoExistente = await buscarPlanoPorInventario(idInventario);
+        linkPlanoAcaoInventario.hidden = false;
+        linkPlanoAcaoInventario.href = `plano-acao.html?id_inventario=${idInventario}`;
+        textoLinkPlanoAcaoInventario.textContent = planoExistente ? 'Ver Plano de Ação' : 'Criar Plano de Ação';
+    } catch (error) {
+        console.error('Erro ao verificar plano de ação do inventário:', error);
+    }
 }
 
 // Aviso obrigatorio do cabecalho quando QUALQUER item do inventario vem de

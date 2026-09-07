@@ -804,9 +804,16 @@ COMMENT ON TABLE avaliacao_recomendacao IS 'Snapshot das recomendacoes geradas p
 -- ---------------------------------------------------------------------
 -- 30. PLANO_ACAO
 -- ---------------------------------------------------------------------
+-- origem_tipo/id_inventario (FAIR-PA-01, migration 007): um plano agora
+-- pode nascer de uma avaliacao individual OU de uma versao do Inventario
+-- de Riscos - nunca as duas ao mesmo tempo (chk_plano_acao_origem_consistente).
+-- fk_plano_acao_inventario e adicionada mais abaixo, via ALTER TABLE, pois
+-- inventario_risco so e definida no Bloco 9 (Inventario de Riscos).
 CREATE TABLE plano_acao (
     id_plano         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_avaliacao     BIGINT NOT NULL,
+    id_avaliacao     BIGINT,
+    origem_tipo      VARCHAR(20) NOT NULL,
+    id_inventario    BIGINT,
     titulo            VARCHAR(180) NOT NULL,
     descricao         TEXT,
     status            VARCHAR(20) NOT NULL,
@@ -824,18 +831,31 @@ CREATE TABLE plano_acao (
         status IN ('ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO')
     ),
     CONSTRAINT chk_plano_acao_data_alvo CHECK (data_alvo IS NULL OR data_alvo >= data_inicio),
-    CONSTRAINT chk_plano_acao_data_conclusao CHECK (data_conclusao IS NULL OR data_conclusao >= data_inicio)
+    CONSTRAINT chk_plano_acao_data_conclusao CHECK (data_conclusao IS NULL OR data_conclusao >= data_inicio),
+    CONSTRAINT chk_plano_acao_origem_tipo CHECK (
+        origem_tipo IN ('AVALIACAO_INDIVIDUAL', 'INVENTARIO_RISCOS')
+    ),
+    CONSTRAINT chk_plano_acao_origem_consistente CHECK (
+        (origem_tipo = 'AVALIACAO_INDIVIDUAL' AND id_avaliacao IS NOT NULL AND id_inventario IS NULL)
+        OR (origem_tipo = 'INVENTARIO_RISCOS' AND id_inventario IS NOT NULL AND id_avaliacao IS NULL)
+    )
 );
 
-COMMENT ON TABLE plano_acao IS 'Agrupa acoes de intervencao vinculadas a uma avaliacao.';
+COMMENT ON TABLE plano_acao IS 'Agrupa acoes de intervencao vinculadas a uma avaliacao individual OU a uma versao do Inventario de Riscos (origem_tipo, FAIR-PA-01) - nunca as duas.';
 
 -- ---------------------------------------------------------------------
 -- 31. ACAO_PLANO
 -- ---------------------------------------------------------------------
+-- id_inventario_risco_item (FAIR-PA-01, migration 007): rastreia qual
+-- item especifico do Inventario motivou a acao, no fluxo INVENTARIO_RISCOS
+-- - opcional e mutuamente exclusiva com id_avaliacao_recomendacao
+-- (chk_acao_plano_origem_unica). fk_acao_plano_inventario_risco_item e
+-- adicionada mais abaixo, via ALTER TABLE (mesmo motivo do plano_acao acima).
 CREATE TABLE acao_plano (
     id_acao                     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_plano                     BIGINT NOT NULL,
     id_avaliacao_recomendacao    BIGINT,
+    id_inventario_risco_item     BIGINT,
     id_responsavel                BIGINT NOT NULL,
     descricao                     TEXT NOT NULL,
     prioridade                    VARCHAR(12) NOT NULL,
@@ -859,10 +879,13 @@ CREATE TABLE acao_plano (
     ),
     CONSTRAINT chk_acao_plano_conclusao CHECK (
         status <> 'CONCLUIDA' OR data_conclusao IS NOT NULL
+    ),
+    CONSTRAINT chk_acao_plano_origem_unica CHECK (
+        id_avaliacao_recomendacao IS NULL OR id_inventario_risco_item IS NULL
     )
 );
 
-COMMENT ON TABLE acao_plano IS 'Acao executavel com responsavel, prazo e evidencia.';
+COMMENT ON TABLE acao_plano IS 'Acao executavel com responsavel, prazo e evidencia. Pode rastrear uma recomendacao do fluxo individual OU um item do Inventario de Riscos (FAIR-PA-01), nunca as duas.';
 
 -- =====================================================================
 -- FK ADIADA (dependencia cruzada entre Bloco 2 e Bloco 3)
@@ -1469,6 +1492,23 @@ CREATE TABLE inventario_risco_item (
 );
 
 COMMENT ON TABLE inventario_risco_item IS 'UM perigo, em UM GHE, dentro de UMA versao do Inventario. Campos de conteudo sao nulos no banco (completude e responsabilidade da aplicacao - validarItemInventarioCompleto); apenas inventario/GHE/perigo sao estruturalmente obrigatorios. origem_tipo=MANUAL nunca pode carregar snapshot de avaliacao (CHECK garante no banco) - MVP-09A, secao 35/37.';
+
+-- =====================================================================
+-- FKs ADIADAS (FAIR-PA-01, migration 007) - plano_acao/acao_plano sao
+-- definidas no Bloco 5, antes de inventario_risco/inventario_risco_item
+-- (Bloco 9) existirem. Mesmo padrao ja usado acima para
+-- avaliacao_ergonomica.id_classificacao_geral.
+-- =====================================================================
+ALTER TABLE plano_acao
+    ADD CONSTRAINT fk_plano_acao_inventario FOREIGN KEY (id_inventario)
+    REFERENCES inventario_risco (id_inventario) ON DELETE RESTRICT;
+
+ALTER TABLE acao_plano
+    ADD CONSTRAINT fk_acao_plano_inventario_risco_item FOREIGN KEY (id_inventario_risco_item)
+    REFERENCES inventario_risco_item (id_inventario_risco_item) ON DELETE RESTRICT;
+
+CREATE INDEX idx_plano_acao_inventario ON plano_acao (id_inventario) WHERE id_inventario IS NOT NULL;
+CREATE INDEX idx_acao_plano_inventario_risco_item ON acao_plano (id_inventario_risco_item) WHERE id_inventario_risco_item IS NOT NULL;
 
 -- ---------------------------------------------------------------------
 -- 52. INVENTARIO_RISCO_ITEM_ATIVIDADE (N:N com atividade, reutilizada)

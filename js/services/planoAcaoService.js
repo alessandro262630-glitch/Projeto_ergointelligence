@@ -1,27 +1,37 @@
 import { supabase } from '../config/supabase.js';
 import { campoPreenchido } from '../utils/validacoes.js';
+import { buscarInventario, listarItens } from './inventarioRiscoService.js';
+import { verificarAlgumaMetodologiaDemonstrativa } from './inventarioIntegracaoService.js';
+import { obterIdEmpresaAtiva } from './colaboradorService.js';
 
 // FEIRA-04 - Plano de Acao MVP.
-// Le/escreve exclusivamente PLANO_ACAO e ACAO_PLANO, tabelas ja existentes
-// no schema (database/schema.sql, secoes 30/31) - nenhuma tabela/coluna
-// nova. NUNCA chama motorRisco.js/classificadorRisco.js/riscoService.js.
-// processarRiscosDaAvaliacao e NUNCA gera novas avaliacao_recomendacao -
-// so consome resultados de risco e recomendacoes ja persistidos por outras
-// features. So Supabase aqui: nenhum document.*/innerHTML/addEventListener.
+// FAIR-PA-01 - Plano de Acao 2.0: expande a mesma tabela para tambem
+// aceitar Inventario de Riscos como origem (origem_tipo), em vez de criar
+// um service separado por origem (secao 30 do prompt - "nao duplicar
+// service"). O fluxo individual (origem_tipo=AVALIACAO_INDIVIDUAL)
+// continua exatamente como estava - so passou a informar origem_tipo
+// explicitamente.
+// Le/escreve exclusivamente PLANO_ACAO e ACAO_PLANO (colunas novas:
+// migration 007). NUNCA chama motorRisco.js/classificadorRisco.js/
+// riscoService.js/motorRiscoGhe.js - so consome resultados/recomendacoes
+// ja persistidos por outras features. So Supabase aqui: nenhum
+// document.*/innerHTML/addEventListener.
 
 // Unicos valores aceitos pelo schema (chk_plano_acao_status /
-// chk_acao_plano_status / chk_acao_plano_prioridade).
+// chk_acao_plano_status / chk_acao_plano_prioridade / chk_plano_acao_origem_tipo).
 const STATUS_PLANO_VALIDOS = ['ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO'];
 const STATUS_ACAO_VALIDOS = ['ABERTA', 'EM_ANDAMENTO', 'BLOQUEADA', 'CONCLUIDA', 'CANCELADA'];
 const PRIORIDADES_ACAO_VALIDAS = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
-const COLUNAS_PLANO = 'id_plano, id_avaliacao, titulo, descricao, status, criado_por, '
+const COLUNAS_PLANO = 'id_plano, id_avaliacao, origem_tipo, id_inventario, titulo, descricao, status, criado_por, '
     + 'data_inicio, data_alvo, data_conclusao, criado_em, atualizado_em';
 
-const COLUNAS_ACAO = 'id_acao, id_plano, id_avaliacao_recomendacao, id_responsavel, descricao, '
+const COLUNAS_ACAO = 'id_acao, id_plano, id_avaliacao_recomendacao, id_inventario_risco_item, id_responsavel, descricao, '
     + 'prioridade, prazo, status, data_conclusao, evidencia_texto, criado_em, atualizado_em, '
     + 'usuario(nome), '
-    + 'avaliacao_recomendacao(id_avaliacao_recomendacao, id_avaliacao, recomendacao(codigo, titulo))';
+    + 'avaliacao_recomendacao(id_avaliacao_recomendacao, id_avaliacao, recomendacao(codigo, titulo)), '
+    + 'inventario_risco_item(id_inventario_risco_item, id_inventario, trabalhadores_expostos_snapshot, '
+    + 'classificacao_nome_snapshot, ghe(nome), perigo_ocupacional(nome))';
 
 function erroPlanoAcao(mensagem, codigo) {
     const erro = new Error(mensagem);
@@ -36,10 +46,12 @@ function mapearAcao(linha) {
     if (!linha) {
         return null;
     }
+    const item = linha.inventario_risco_item;
     return {
         id_acao: linha.id_acao,
         id_plano: linha.id_plano,
         id_avaliacao_recomendacao: linha.id_avaliacao_recomendacao,
+        id_inventario_risco_item: linha.id_inventario_risco_item,
         id_responsavel: linha.id_responsavel,
         descricao: linha.descricao,
         prioridade: linha.prioridade,
@@ -52,6 +64,14 @@ function mapearAcao(linha) {
         responsavel_nome: linha.usuario?.nome ?? null,
         recomendacao_codigo: linha.avaliacao_recomendacao?.recomendacao?.codigo ?? null,
         recomendacao_titulo: linha.avaliacao_recomendacao?.recomendacao?.titulo ?? null,
+        // Contexto do item do Inventario, somente leitura (secao 41/42 do
+        // prompt FAIR-PA-01) - o Plano de Acao NUNCA edita/recalcula isso,
+        // so exibe o snapshot ja persistido.
+        item_inventario_id_inventario: item?.id_inventario ?? null,
+        item_inventario_ghe: item?.ghe?.nome ?? null,
+        item_inventario_perigo: item?.perigo_ocupacional?.nome ?? null,
+        item_inventario_classificacao: item?.classificacao_nome_snapshot ?? null,
+        item_inventario_expostos: item?.trabalhadores_expostos_snapshot ?? null,
     };
 }
 
@@ -93,14 +113,42 @@ export async function buscarPlanoPorId(idPlano) {
     return data;
 }
 
-// dados: { id_avaliacao, titulo, descricao, status, criado_por, data_inicio, data_alvo, data_conclusao }
-// A checagem de duplicidade (existe plano para esta avaliacao?) e
-// responsabilidade de quem chama (plano-acao.js), pois a modelagem permite
-// multiplos planos - aqui so valida os campos da propria linha.
-export async function criarPlano(dados) {
-    if (!dados.id_avaliacao) {
-        throw erroPlanoAcao('Avaliação não informada.', 'AVALIACAO_OBRIGATORIA');
+// Mesmo espirito de buscarPlanoPorAvaliacao (secao 35/36 do prompt
+// FAIR-PA-01): o schema tambem nao possui UNIQUE(id_inventario) - a UI
+// deve evitar criar planos duplicados oferecendo "Ver Plano de Ação" em
+// vez de "Criar" quando ja existir um, mas o banco nao bloqueia
+// estruturalmente. Retorna o mais recente, ou null (estado valido).
+export async function buscarPlanoPorInventario(idInventario) {
+    const { data, error } = await supabase
+        .from('plano_acao')
+        .select(COLUNAS_PLANO)
+        .eq('id_inventario', idInventario)
+        .order('criado_em', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        throw error;
     }
+    return data;
+}
+
+// Todos os planos ja criados para esta versao do Inventario (normalmente
+// zero ou um, mas o schema permite mais - secao 35).
+export async function listarPlanosDoInventario(idInventario) {
+    const { data, error } = await supabase
+        .from('plano_acao')
+        .select(COLUNAS_PLANO)
+        .eq('id_inventario', idInventario)
+        .order('criado_em', { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+    return data || [];
+}
+
+function validarCamposComunsPlano(dados) {
     if (!campoPreenchido(dados.titulo)) {
         throw erroPlanoAcao('Informe o título do plano.', 'TITULO_OBRIGATORIO');
     }
@@ -122,11 +170,21 @@ export async function criarPlano(dados) {
     if (dados.data_conclusao && dados.data_conclusao < dados.data_inicio) {
         throw erroPlanoAcao('A data de conclusão não pode ser anterior à data de início.', 'DATA_CONCLUSAO_INVALIDA');
     }
+}
+
+// Escritor unico e privado - as duas origens (secao 10) sempre passam por
+// aqui, nunca duplicando a logica de insert (secao 30). origem_tipo e as
+// duas FKs (id_avaliacao/id_inventario) sao decididas pelos wrappers
+// publicos abaixo, nunca por quem chama o service diretamente.
+async function inserirPlano(dados) {
+    validarCamposComunsPlano(dados);
 
     const { data, error } = await supabase
         .from('plano_acao')
         .insert({
+            origem_tipo: dados.origem_tipo,
             id_avaliacao: dados.id_avaliacao,
+            id_inventario: dados.id_inventario,
             titulo: dados.titulo.trim(),
             descricao: campoPreenchido(dados.descricao) ? dados.descricao.trim() : null,
             status: dados.status,
@@ -143,6 +201,64 @@ export async function criarPlano(dados) {
         throw erroPlanoAcao('Não foi possível criar o plano de ação.', 'PERSISTENCIA_PLANO_FALHOU');
     }
     return data;
+}
+
+// dados: { id_avaliacao, titulo, descricao, status, criado_por, data_inicio, data_alvo, data_conclusao }
+// Fluxo legado (FEIRA-04) - comportamento identico ao de antes do
+// FAIR-PA-01, so passou a gravar origem_tipo explicitamente.
+export async function criarPlanoAvaliacaoIndividual(dados) {
+    if (!dados.id_avaliacao) {
+        throw erroPlanoAcao('Avaliação não informada.', 'AVALIACAO_OBRIGATORIA');
+    }
+    return inserirPlano({
+        ...dados,
+        origem_tipo: 'AVALIACAO_INDIVIDUAL',
+        id_inventario: null,
+    });
+}
+
+// dados: { id_inventario, titulo, descricao, status, criado_por, data_inicio, data_alvo, data_conclusao }
+// Nova origem (secao 7/11/20 do prompt FAIR-PA-01). So aceita Inventario
+// PUBLICADO (decisao documentada em docs/fair-pa01-plano-acao-ghe-inventario.md,
+// secao 20/21 do prompt): o Plano deve tratar riscos ja consolidados no
+// documento, nunca um rascunho ainda em edicao. Tambem valida que o
+// Inventario pertence a empresa ativa (secao 19 - cross-tenant), mesmo
+// padrao de gheService.validarSetorDaEmpresa.
+export async function criarPlanoInventario(dados) {
+    if (!dados.id_inventario) {
+        throw erroPlanoAcao('Inventário não informado.', 'INVENTARIO_OBRIGATORIO');
+    }
+
+    const inventario = await buscarInventario(dados.id_inventario);
+    if (inventario.status !== 'PUBLICADO') {
+        throw erroPlanoAcao('Só é possível criar um Plano de Ação a partir de um Inventário publicado.', 'INVENTARIO_NAO_PUBLICADO');
+    }
+
+    const idEmpresaAtiva = await obterIdEmpresaAtiva();
+    if (inventario.id_empresa !== idEmpresaAtiva) {
+        throw erroPlanoAcao('O inventário selecionado não pertence a esta empresa.', 'INVENTARIO_INCOMPATIVEL');
+    }
+
+    return inserirPlano({
+        ...dados,
+        origem_tipo: 'INVENTARIO_RISCOS',
+        id_avaliacao: null,
+    });
+}
+
+// Verifica se algum item MOTOR_GHE desta versao do Inventario usa uma
+// metodologia DEMONSTRATIVA (secao 21/22/68) - reaproveita
+// inventarioRiscoService.listarItens e
+// inventarioIntegracaoService.verificarAlgumaMetodologiaDemonstrativa
+// (mesma funcao ja usada em inventario-detalhe.js), sem nenhuma consulta
+// nova. Usada pela pagina para mostrar o aviso "resultados demonstrativos"
+// tambem no Plano de Ação de origem Inventario.
+export async function verificarPlanoInventarioDemonstrativo(idInventario) {
+    const itens = await listarItens(idInventario);
+    const paresMetodologia = itens
+        .filter((item) => item.origem_tipo === 'MOTOR_GHE')
+        .map((item) => ({ codigo: item.metodologia_codigo_snapshot, versao: item.metodologia_versao_snapshot }));
+    return verificarAlgumaMetodologiaDemonstrativa(paresMetodologia);
 }
 
 // dados: subconjunto de { titulo, descricao, status, data_alvo, data_conclusao }.
@@ -238,23 +354,51 @@ function validarCamposAcao(dados) {
     if (dados.status === 'CONCLUIDA' && !dados.data_conclusao) {
         throw erroPlanoAcao('Informe a data de conclusão da ação.', 'DATA_CONCLUSAO_OBRIGATORIA');
     }
+    // Espelha chk_acao_plano_origem_unica (migration 007/secao 17): uma
+    // acao tem no maximo UMA origem especifica, nunca as duas.
+    if (dados.id_avaliacao_recomendacao && dados.id_inventario_risco_item) {
+        throw erroPlanoAcao('Selecione apenas uma origem para a ação: recomendação ou item do Inventário.', 'ORIGEM_ACAO_DUPLICADA');
+    }
 }
 
-// dados: { id_plano, id_avaliacao_recomendacao, id_responsavel, descricao,
-//          prioridade, prazo, status, data_conclusao, evidencia_texto }
-// id_avaliacao_recomendacao e opcional (FK nullable) - null quando a acao
-// nao tem origem em nenhuma recomendacao especifica (secao 29).
+// Garante que o item do Inventario referenciado pela acao pertence a
+// MESMA versao do Inventario do plano (secao 18) - nunca uma acao do
+// plano do Inventario A apontando para um item do Inventario B. Mesmo
+// espirito de gheService.validarParticipanteCompativelComGhe.
+async function validarItemCompativelComPlano(idItem, idPlano) {
+    const [item, plano] = await Promise.all([
+        supabase.from('inventario_risco_item').select('id_inventario').eq('id_inventario_risco_item', idItem).single(),
+        buscarPlanoPorId(idPlano),
+    ]);
+    if (item.error) {
+        throw item.error;
+    }
+    if (plano.origem_tipo !== 'INVENTARIO_RISCOS' || item.data.id_inventario !== plano.id_inventario) {
+        throw erroPlanoAcao('Este item pertence a outro Inventário de Riscos.', 'ITEM_INVENTARIO_INCOMPATIVEL');
+    }
+}
+
+// dados: { id_plano, id_avaliacao_recomendacao, id_inventario_risco_item,
+//          id_responsavel, descricao, prioridade, prazo, status,
+//          data_conclusao, evidencia_texto }
+// id_avaliacao_recomendacao/id_inventario_risco_item sao opcionais (FKs
+// nullable, mutuamente exclusivas) - null/null quando a acao nao tem
+// origem especifica (acao "manual", secao 29/49).
 export async function criarAcao(dados) {
     if (!dados.id_plano) {
         throw erroPlanoAcao('Plano de ação não informado.', 'PLANO_OBRIGATORIO');
     }
     validarCamposAcao(dados);
+    if (dados.id_inventario_risco_item) {
+        await validarItemCompativelComPlano(dados.id_inventario_risco_item, dados.id_plano);
+    }
 
     const { data, error } = await supabase
         .from('acao_plano')
         .insert({
             id_plano: dados.id_plano,
             id_avaliacao_recomendacao: dados.id_avaliacao_recomendacao || null,
+            id_inventario_risco_item: dados.id_inventario_risco_item || null,
             id_responsavel: dados.id_responsavel,
             descricao: dados.descricao.trim(),
             prioridade: dados.prioridade,
@@ -273,17 +417,34 @@ export async function criarAcao(dados) {
     return mapearAcao(data);
 }
 
-// dados: subconjunto de { id_avaliacao_recomendacao, id_responsavel,
-//          descricao, prioridade, prazo, status, data_conclusao, evidencia_texto }.
+// Atalho com o nome pedido pela secao 29/39 do prompt FAIR-PA-01 - mesma
+// escrita de criarAcao, so preenchendo id_inventario_risco_item e
+// deixando id_avaliacao_recomendacao explicitamente nulo.
+export async function criarAcaoParaItemInventario(idPlano, idItem, dadosResto) {
+    return criarAcao({
+        ...dadosResto,
+        id_plano: idPlano,
+        id_inventario_risco_item: idItem,
+        id_avaliacao_recomendacao: null,
+    });
+}
+
+// dados: subconjunto de { id_avaliacao_recomendacao, id_inventario_risco_item,
+//          id_responsavel, descricao, prioridade, prazo, status, data_conclusao, evidencia_texto }.
 // id_plano nao e alteravel por aqui (secao 38 - nao move uma acao entre
 // planos arbitrariamente).
 export async function atualizarAcao(idAcao, dados) {
     validarCamposAcao(dados);
+    if (dados.id_inventario_risco_item) {
+        const acaoAtual = await buscarAcaoPorId(idAcao);
+        await validarItemCompativelComPlano(dados.id_inventario_risco_item, acaoAtual.id_plano);
+    }
 
     const { data, error } = await supabase
         .from('acao_plano')
         .update({
             id_avaliacao_recomendacao: dados.id_avaliacao_recomendacao || null,
+            id_inventario_risco_item: dados.id_inventario_risco_item || null,
             id_responsavel: dados.id_responsavel,
             descricao: dados.descricao.trim(),
             prioridade: dados.prioridade,
@@ -332,6 +493,12 @@ export async function alterarStatusAcao(idAcao, novoStatus, dataConclusao = null
         throw erroPlanoAcao('Não foi possível atualizar o status da ação.', 'PERSISTENCIA_ACAO_FALHOU');
     }
     return mapearAcao(data);
+}
+
+// Atalho com o nome pedido pela secao 29 do prompt FAIR-PA-01 - mesma
+// escrita de alterarStatusAcao(idAcao, 'CONCLUIDA', dataConclusao).
+export async function concluirAcao(idAcao, dataConclusao) {
+    return alterarStatusAcao(idAcao, 'CONCLUIDA', dataConclusao);
 }
 
 // =====================================================================

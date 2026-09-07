@@ -107,11 +107,13 @@
                                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                                     <h1 class="fs-5 fw-semibold mb-0">Plano de Ação</h1>
                                     <div class="d-flex gap-2">
-                                        <a href="#" id="link-voltar-resultado" class="btn btn-outline-secondary btn-sm">&larr; Voltar ao Resultado</a>
+                                        <a href="#" id="link-voltar-contexto" class="btn btn-outline-secondary btn-sm">&larr; Voltar</a>
                                         <a href="dashboard.html" class="btn btn-outline-secondary btn-sm">Ir para Dashboard</a>
                                     </div>
                                 </div>
-                                <div class="row g-3">
+
+                                <!-- Contexto: origem Avaliação Individual (secao 32) -->
+                                <div class="row g-3" id="bloco-contexto-individual">
                                     <div class="col-6 col-md-3">
                                         <div class="small text-uppercase text-muted">Colaborador</div>
                                         <div class="fw-semibold" id="texto-contexto-colaborador">-</div>
@@ -129,13 +131,47 @@
                                         <div class="fw-semibold" id="texto-contexto-classificacao">-</div>
                                     </div>
                                 </div>
+
+                                <!-- Contexto: origem Inventário de Riscos (secao 33) -->
+                                <div class="row g-3" id="bloco-contexto-inventario" hidden>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Inventário</div>
+                                        <div class="fw-semibold" id="texto-contexto-inventario-titulo">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Versão</div>
+                                        <div class="fw-semibold" id="texto-contexto-inventario-versao">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Status</div>
+                                        <div class="fw-semibold"><span class="badge" id="badge-contexto-inventario-status">-</span></div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Empresa</div>
+                                        <div class="fw-semibold" id="texto-contexto-inventario-empresa">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">GHEs abrangidos</div>
+                                        <div class="fw-semibold" id="texto-contexto-inventario-ghes">-</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-uppercase text-muted">Itens de risco</div>
+                                        <div class="fw-semibold" id="texto-contexto-inventario-itens">-</div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning mt-3 mb-0" id="aviso-plano-demonstrativo" hidden>
+                                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                                    Este plano contém ações relacionadas a resultados provenientes de metodologia
+                                    demonstrativa. Os critérios requerem validação técnica para uso profissional.
+                                </div>
                             </div>
                         </div>
 
                         <!-- Estado sem plano (secao 15) -->
                         <div class="card mb-3" id="area-sem-plano" hidden>
                             <div class="card-body text-center py-4">
-                                <p class="text-muted mb-3">Esta avaliação ainda não possui um plano de ação.</p>
+                                <p class="text-muted mb-3" id="texto-sem-plano">Ainda não existe um plano de ação para este contexto.</p>
                                 <button type="button" class="btn btn-primary" id="botao-criar-plano">Criar Plano de Ação</button>
                             </div>
                         </div>
@@ -201,6 +237,28 @@
                                             <div class="resumo-rotulo">Concluídas</div>
                                             <div class="resumo-valor" id="resumo-concluidas">0</div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Itens de risco do Inventario (secao 37-39, so origem INVENTARIO_RISCOS) -->
+                            <div class="card mb-3" id="area-itens-inventario" hidden>
+                                <div class="card-body">
+                                    <h2 class="fs-6 fw-semibold mb-3">Itens de Risco do Inventário</h2>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Perigo</th>
+                                                    <th>GHE</th>
+                                                    <th>Classificação</th>
+                                                    <th class="text-end">Expostos</th>
+                                                    <th class="text-end">Ações</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="corpo-tabela-itens-inventario"></tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -322,6 +380,18 @@
                 <form id="formulario-acao" novalidate>
                     <div class="modal-body">
                         <input type="hidden" id="campo-id-acao">
+                        <input type="hidden" id="campo-item-inventario-acao">
+
+                        <!-- Contexto do risco, somente leitura (secao 41/42 - o Plano de Ação
+                             nunca edita/recalcula o risco, so exibe o que ja foi consolidado). -->
+                        <div class="mb-3 p-2 rounded bg-light-subtle border" id="grupo-contexto-item-acao" hidden>
+                            <div class="row g-2 small">
+                                <div class="col-6"><span class="text-muted">GHE:</span> <strong id="texto-contexto-item-ghe">-</strong></div>
+                                <div class="col-6"><span class="text-muted">Perigo:</span> <strong id="texto-contexto-item-perigo">-</strong></div>
+                                <div class="col-6"><span class="text-muted">Classificação:</span> <strong id="texto-contexto-item-classificacao">-</strong></div>
+                                <div class="col-6"><span class="text-muted">Trabalhadores expostos:</span> <strong id="texto-contexto-item-expostos">-</strong></div>
+                            </div>
+                        </div>
 
                         <div class="mb-3">
                             <label for="campo-descricao-acao" class="form-label">Descrição da ação</label>
@@ -330,7 +400,7 @@
                             <div class="invalid-feedback" id="erro-descricao-acao"></div>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-3" id="grupo-recomendacao-acao">
                             <label for="campo-recomendacao-acao" class="form-label">Origem da ação <span class="text-muted fw-normal">(opcional)</span></label>
                             <select id="campo-recomendacao-acao" class="form-select">
                                 <option value="">Nenhuma (ação definida manualmente)</option>
